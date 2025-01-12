@@ -1,0 +1,16 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"github>rainstormy/presets-renovate",
+		"github>rainstormy/presets-renovate:automerge-build-patch",
+		"github>rainstormy/presets-renovate:automerge-runtime-patch",
+		"github>rainstormy/presets-renovate:automerge-tooling-patch",
+		"github>rainstormy/presets-renovate:skip-nodejs-major"
+	],
+	"schedule": [
+		"after 5pm every weekday",
+		"before 7am every weekday",
+		"every weekend"
+	],
+	"timezone": "Europe/Copenhagen"
+}

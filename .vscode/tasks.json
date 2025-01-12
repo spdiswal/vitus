@@ -1,0 +1,115 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build",
+			"command": "mise run build",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "check",
+			"command": "mise run check",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "check_fmt",
+			"command": "mise run check_fmt",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "check_ts",
+			"command": "mise run check_ts",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "dev",
+			"command": "mise run dev",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "fmt",
+			"command": "mise run fmt",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "install",
+			"command": "mise run install",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "preview",
+			"command": "mise run preview",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "test",
+			"command": "mise run test",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "yolo",
+			"command": "mise run yolo",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		}
+	]
+}

@@ -1,0 +1,66 @@
+{
+	"$schema": "https://json.schemastore.org/package.json",
+	"name": "vitus",
+	"version": "0.0.0",
+	"description": "Test suite explorer for Vitest.",
+	"keywords": ["tdd", "test", "testing", "vitest"],
+	"bugs": "https://github.com/spdiswal/vitus/issues",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/spdiswal/vitus.git"
+	},
+	"license": "MIT",
+	"author": "Steffen Diswal",
+	"type": "module",
+	"bin": {
+		"vitus": "dist/vitus-cli.js"
+	},
+	"files": ["dist/vitus-cli.js", "dist/explorer/"],
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@prefresh/vite": "2.4.6",
+		"@rainstormy/presets-biome": "1.0.0-alpha.3",
+		"@rainstormy/presets-typescript": "1.0.1",
+		"@tailwindcss/vite": "4.0.0-beta.9",
+		"@types/html-minifier-terser": "7.0.2",
+		"@types/node": "20.17.12",
+		"@types/polka": "0.5.7",
+		"html-minifier-terser": "7.2.0",
+		"lefthook": "1.10.3",
+		"polka": "0.5.2",
+		"preact": "10.25.4",
+		"preact-render-to-string": "6.5.12",
+		"sirv": "3.0.0",
+		"tailwindcss": "4.0.0-beta.9",
+		"tslib": "2.8.1",
+		"typescript": "5.7.3",
+		"vite": "6.0.7",
+		"vitest": "3.0.0-beta.4"
+	},
+	"// devDependencies": {
+		"@biomejs/biome": "Biome is an opinionated linter and code formatter.",
+		"@prefresh/vite": "This Vite plugin enables hot module replacement (HMR) for Preact components.",
+		"@rainstormy/presets-biome": "This library provides predefined, opinionated Biome configurations.",
+		"@rainstormy/presets-typescript": "This library provides predefined, opinionated TypeScript configurations.",
+		"@tailwindcss/vite": "This Vite plugin enables the Tailwind CSS compiler.",
+		"@types/node": "These type definitions cover Node.js modules.",
+		"@types/polka": "These type definitions cover Polka modules.",
+		"html-minifier-terser": "HTMLMinifier minifies `index.html`.",
+		"lefthook": "Lefthook is a Git hooks manager.",
+		"polka": "Polka is a lightweight Express-compatible web server.",
+		"preact": "Preact mounts JSX components onto the DOM.",
+		"preact-render-to-string": "This library generates HTML documents from JSX components.",
+		"sirv": "This Polka middleware serves static files.",
+		"tailwindcss": "Tailwind CSS is a utility-first CSS framework.",
+		"tslib": "This library optimises TypeScript applications when the `importHelpers` option is enabled in `tsconfig.json`.",
+		"typescript": "TypeScript is a statically typed programming language on top of JavaScript.",
+		"vite": "Vite is a development server and a bundler.",
+		"vitest": "Vitest is a unit testing framework."
+	},
+	"peerDependencies": {
+		"vitest": ">=3.0.0 <4.0.0"
+	},
+	"// peerDependencies": {
+		"vitest": "Vitus is made for Vitest and relies on the client to provide the Vitest engine."
+	}
+}

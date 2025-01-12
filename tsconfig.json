@@ -1,0 +1,20 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"extends": [
+		"@rainstormy/presets-typescript/base",
+		"@rainstormy/presets-typescript/es2023"
+	],
+	"compilerOptions": {
+		"incremental": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact",
+		"paths": {
+			"+explorer/*": ["./src/explorer/*"],
+			"+types/*": ["./src/types/*"]
+		},
+		"tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
+		"types": ["node", "polka", "vite/client"]
+	},
+	"include": ["**/*.ts", "**/*.tsx"],
+	"exclude": ["dist/", "node_modules/"]
+}

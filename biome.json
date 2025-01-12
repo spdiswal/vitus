@@ -1,0 +1,26 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"extends": [
+		"@rainstormy/presets-biome/base",
+		"@rainstormy/presets-biome/vitest"
+	],
+	"files": {
+		"ignore": ["dist/", "node_modules/"]
+	},
+	"overrides": [
+		{
+			"include": ["src/VitusCli.ts", "src/VitusDevServer.ts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noNodejsModules": "off"
+					},
+					"suspicious": {
+						"noConsoleLog": "off",
+						"noConsole": "off"
+					}
+				}
+			}
+		}
+	]
+}

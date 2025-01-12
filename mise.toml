@@ -1,0 +1,69 @@
+min_version = "2025.1.3"
+
+# Improve IntelliJ IDEA experience:
+# ln -s ~/.local/share/mise ~/.asdf
+# https://mise.jdx.dev/ide-integration.html#sdk-selection-using-asdf-layout
+
+[tools]
+node = "20.18.1"
+pnpm = "10.0.0"
+
+[tasks.build]
+alias = ["b"]
+run = [
+	"rm -rf dist/",
+	"MODULE='explorer' vite build",
+	"MODULE='cli' vite build",
+]
+
+[tasks.check]
+alias = ["c"]
+depends = ["check_fmt", "check_ts"]
+
+[tasks.check_fmt]
+alias = ["cf"]
+run = "biome check --error-on-warnings"
+
+[tasks.check_ts]
+alias = ["ct"]
+run = "tsc"
+
+[tasks.dev]
+alias = ["d"]
+run = [
+	"MODULE='dev-server' vite build",
+	'if [ -n "$AUTOOPEN_DEV_URL" ]; then (sleep 0.2 && open "$AUTOOPEN_DEV_URL") & fi',
+	"node dist/vitus-dev-server.js",
+]
+
+[tasks.fmt]
+alias = ["f"]
+run = "biome check --write"
+
+[tasks.install]
+alias = ["i"]
+run = ["pnpm install", "lefthook install"]
+
+[tasks.preview]
+alias = ["p"]
+depends = ["build_cli"]
+run = [
+	'if [ -n "$AUTOOPEN_PREVIEW_URL" ]; then (sleep 0.2 && open "$AUTOOPEN_PREVIEW_URL") & fi',
+	"node dist/vitus-cli.js",
+]
+
+[tasks.test]
+alias = ["t"]
+run = "CI=1 vitest run"
+
+[tasks.yolo]
+run = "lefthook uninstall"
+
+[env]
+# Load environment variables from the `.env` and `.env.local` files:
+# https://mise.jdx.dev/environments/#env-file
+_.file = [".env", ".env.local"]
+
+# Make CLI programs in `node_modules` available directly in the command line:
+# https://mise.jdx.dev/mise-cookbook/nodejs.html#add-node-modules-binaries-to-the-path
+_.path = ["node_modules/.bin"]
