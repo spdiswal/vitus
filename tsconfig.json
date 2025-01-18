@@ -10,6 +10,7 @@
 		"jsxImportSource": "preact",
 		"paths": {
 			"+explorer/*": ["./src/explorer/*"],
+			"+server/*": ["./src/server/*"],
 			"+types/*": ["./src/types/*"]
 		},
 		"tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",

@@ -1,0 +1,13 @@
+export type ServerEvent =
+	| "onWatcherRerun"
+	| "onPathsCollected"
+	| "onSpecsCollected"
+	| "onTestModuleQueued"
+	| "onCollected"
+	| "onTaskUpdate"
+	| "onFinished"
+	| "onWatcherStart"
+	| "onTestRemoved"
+	| "onServerRestart"
+	| "onUserConsoleLog"
+	| "onProcessTimeout"

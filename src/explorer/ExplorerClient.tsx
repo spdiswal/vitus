@@ -1,5 +1,5 @@
-import { App } from "+explorer/App"
+import { ExplorerApp } from "+explorer/ExplorerApp"
 import { hydrate } from "preact"
 import "+explorer/Explorer.css"
 
-hydrate(<App />, document.body)
+hydrate(<ExplorerApp />, document.body)

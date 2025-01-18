@@ -9,6 +9,16 @@
 	},
 	"overrides": [
 		{
+			"include": ["src/server/*.ts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noNodejsModules": "off"
+					}
+				}
+			}
+		},
+		{
 			"include": ["src/VitusCli.ts", "src/VitusDevServer.ts"],
 			"linter": {
 				"rules": {
