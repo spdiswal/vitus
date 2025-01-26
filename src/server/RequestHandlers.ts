@@ -1,6 +1,6 @@
 import { renderBodyHtml } from "+explorer/ExplorerServer"
 import type { EventStream } from "+server/EventStream"
-import type { ServerEvent } from "+server/ServerEvent"
+import type { Event } from "+server/events/Event"
 import type { Middleware as PolkaMiddleware } from "polka"
 
 type RequestHandler = (request: Request, response: Response) => Promise<void>
@@ -17,24 +17,24 @@ export function handleEventStreamRequests(
 			connection: "keep-alive",
 		})
 
-		function pushEvent(event: ServerEvent): void {
+		function handleEvent(event: Event): void {
 			// Messages in the event stream format must be terminated by a pair of newline characters.
 			// https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format
-			response.write(`data: ${event}\n\n`)
+			response.write(`data: ${JSON.stringify(event)}\n\n`)
 		}
 
-		function pushHeartbeat(): void {
+		function handleHeartbeat(): void {
 			// A neutral comment message to keep the client-server connection alive.
 			response.write(": ping\n\n")
 		}
 
 		const heartbeatIntervalMs = 15_000
-		const heartbeatTimer = setInterval(pushHeartbeat, heartbeatIntervalMs)
-		eventStream.on("message", pushEvent)
+		const heartbeatTimer = setInterval(handleHeartbeat, heartbeatIntervalMs)
+		eventStream.subscribe(handleEvent)
 
 		request.on("close", () => {
 			clearInterval(heartbeatTimer)
-			eventStream.removeListener("message", pushEvent)
+			eventStream.unsubscribe(handleEvent)
 			response.end()
 		})
 	}

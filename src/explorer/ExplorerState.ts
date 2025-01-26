@@ -1,9 +1,9 @@
-import type { ServerEvent } from "+server/ServerEvent"
+import type { Event } from "+server/events/Event"
 import { type Signal, useSignal, useSignalEffect } from "@preact/signals"
 
 export type ExplorerState = {
 	runnerStatus: "disconnected" | "idle" | "running"
-	events: Array<string>
+	events: Array<Event>
 }
 
 export const initialExplorerState: ExplorerState = {
@@ -17,8 +17,9 @@ export function useExplorerState(): Signal<ExplorerState> {
 	useSignalEffect(() => {
 		const eventSource = new EventSource("/api/events")
 
-		eventSource.addEventListener("message", (event) => {
-			signal.value = updateExplorerState(signal.value, event.data)
+		eventSource.addEventListener("message", (message) => {
+			const event: Event = JSON.parse(message.data)
+			signal.value = updateExplorerState(signal.value, event)
 		})
 		eventSource.addEventListener("error", () => {
 			signal.value = { ...signal.value, runnerStatus: "disconnected" }
@@ -34,16 +35,14 @@ export function useExplorerState(): Signal<ExplorerState> {
 
 export function updateExplorerState(
 	state: ExplorerState,
-	event: ServerEvent,
+	event: Event,
 ): ExplorerState {
 	const events = [...state.events, event]
 
-	switch (event) {
-		case "onWatcherRerun": {
-			return { ...state, runnerStatus: "running", events }
-		}
-		case "onWatcherStart": {
-			return { ...state, runnerStatus: "idle", events }
+	switch (event.scope) {
+		case "run": {
+			const runnerStatus = event.status === "started" ? "running" : "idle"
+			return { ...state, runnerStatus, events }
 		}
 		default: {
 			return { ...state, events }

@@ -11,7 +11,7 @@ export function ExplorerApp(): Renderable {
 			<ul>
 				{state.value.events.map((event, index) => (
 					// biome-ignore lint/suspicious/noArrayIndexKey: The index key is just a temporary solution until the event contains an id.
-					<li key={index}>{event}</li>
+					<li key={index}>{JSON.stringify(event)}</li>
 				))}
 			</ul>
 			<noscript>You need to enable JavaScript to run this app.</noscript>

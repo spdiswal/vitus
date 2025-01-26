@@ -56,6 +56,10 @@ run = [
 alias = ["t"]
 run = "CI=1 vitest run"
 
+[tasks.test_watch]
+alias = ["tw"]
+run = "CI=1 vitest watch"
+
 [tasks.yolo]
 run = "lefthook uninstall"
 

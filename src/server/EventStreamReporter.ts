@@ -1,50 +1,64 @@
 import type { EventStream } from "+server/EventStream"
+import { mapToDeletedFileEvent, mapToFileEvent } from "+server/events/FileEvent"
+import { mapToRunEvent } from "+server/events/RunEvent"
+import { mapToServerEvent } from "+server/events/ServerEvent"
+import { mapToSuiteEvent } from "+server/events/SuiteEvent"
+import { mapToTestEvent } from "+server/events/TestEvent"
 import type { Reporter } from "vitest/reporters"
 
-export function createEventStreamReporter(eventStream: EventStream): Reporter {
+export type EventStreamReporter = Pick<
+	Required<Reporter>,
+	| "onServerRestart"
+	| "onTestRunStart"
+	| "onTestModuleQueued"
+	| "onTestModuleStart"
+	| "onTestSuiteReady"
+	| "onTestCaseReady"
+	| "onTestCaseResult"
+	| "onTestSuiteResult"
+	| "onTestModuleEnd"
+	| "onTestRunEnd"
+	| "onTestRemoved"
+>
+
+export function createEventStreamReporter(
+	eventStream: EventStream,
+): EventStreamReporter {
 	return {
-		onWatcherRerun(): void {
-			eventStream.emit("message", "onWatcherRerun")
-		},
-		onPathsCollected(): void {
-			eventStream.emit("message", "onPathsCollected")
-		},
-		onSpecsCollected(): void {
-			eventStream.emit("message", "onSpecsCollected")
-		},
-		onTestModuleQueued(): void {
-			eventStream.emit("message", "onTestModuleQueued")
-		},
-		onCollected(): void {
-			eventStream.emit("message", "onCollected")
-		},
-		onTaskUpdate(): void {
-			eventStream.emit("message", "onTaskUpdate")
-		},
-		onFinished(): void {
-			eventStream.emit("message", "onFinished")
-		},
-		onWatcherStart(): void {
-			eventStream.emit("message", "onWatcherStart")
-		},
-		//
-		//
-		//
-		onTestRemoved(): void {
-			// TODO: Lifecycle to be clarified.
-			eventStream.emit("message", "onTestRemoved")
-		},
 		onServerRestart(): void {
-			// TODO: Lifecycle to be clarified.
-			eventStream.emit("message", "onServerRestart")
+			eventStream.send(mapToServerEvent("restarted"))
 		},
-		onUserConsoleLog(): void {
-			// TODO: Lifecycle to be clarified.
-			eventStream.emit("message", "onUserConsoleLog")
+		onTestRunStart(specifications): void {
+			eventStream.send(mapToRunEvent(specifications, "started"))
 		},
-		onProcessTimeout(): void {
-			// TODO: Lifecycle to be clarified.
-			eventStream.emit("message", "onProcessTimeout")
+		onTestModuleQueued(module): void {
+			eventStream.send(mapToFileEvent(module, "registered"))
+		},
+		onTestModuleStart(module): void {
+			eventStream.send(mapToFileEvent(module, "started"))
+		},
+		onTestSuiteReady(suite): void {
+			eventStream.send(mapToSuiteEvent(suite, "started"))
+		},
+		onTestCaseReady(test): void {
+			eventStream.send(mapToTestEvent(test, "started"))
+		},
+		onTestCaseResult(test): void {
+			eventStream.send(mapToTestEvent(test))
+		},
+		onTestSuiteResult(suite): void {
+			eventStream.send(mapToSuiteEvent(suite))
+		},
+		onTestModuleEnd(module): void {
+			eventStream.send(mapToFileEvent(module))
+		},
+		onTestRunEnd(modules): void {
+			eventStream.send(mapToRunEvent(modules, "completed"))
+		},
+		onTestRemoved(moduleId): void {
+			if (moduleId !== undefined) {
+				eventStream.send(mapToDeletedFileEvent(moduleId))
+			}
 		},
 	}
 }
