@@ -1,8 +1,8 @@
 import type { Event } from "+server/events/Event"
-import { useSignalEffect } from "@preact/signals"
+import { useEffect } from "preact/hooks"
 
 export function useEventStream(subscriber: (event: Event) => void): void {
-	useSignalEffect(() => {
+	useEffect(() => {
 		const eventSource = new EventSource("/api/events")
 
 		eventSource.addEventListener("message", (message) => {
@@ -17,5 +17,5 @@ export function useEventStream(subscriber: (event: Event) => void): void {
 		return function cleanUp(): void {
 			eventSource.close()
 		}
-	})
+	}, [subscriber])
 }
