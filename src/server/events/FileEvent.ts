@@ -15,27 +15,22 @@ export type FileEventStatus =
 	| "skipped"
 	| "started"
 
+const statusMap = {
+	failed: "failed",
+	passed: "passed",
+	pending: "started",
+	queued: "registered",
+	skipped: "skipped",
+} as const satisfies Record<TestModuleState, FileEventStatus>
+
 export function mapToFileEvent(
 	module: TestModule,
 	overrideStatus?: FileEventStatus,
 ): FileEvent {
 	return {
 		scope: "file",
-		status: overrideStatus ?? mapStatus(module.state()),
+		status: overrideStatus ?? statusMap[module.state()],
 		filePath: module.moduleId,
-	}
-}
-
-function mapStatus(status: TestModuleState): FileEventStatus {
-	switch (status) {
-		case "pending": {
-			return "started"
-		}
-		case "queued": {
-			return "registered"
-		}
-		default:
-			return status
 	}
 }
 

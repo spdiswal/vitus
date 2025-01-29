@@ -13,6 +13,13 @@ export type SuiteEvent = {
 
 export type SuiteEventStatus = "failed" | "passed" | "skipped" | "started"
 
+const statusMap = {
+	failed: "failed",
+	passed: "passed",
+	pending: "started",
+	skipped: "skipped",
+} as const satisfies Record<TestSuiteState, SuiteEventStatus>
+
 export function mapToSuiteEvent(
 	suite: TestSuite,
 	overrideStatus?: SuiteEventStatus,
@@ -21,20 +28,10 @@ export function mapToSuiteEvent(
 
 	return {
 		scope: "suite",
-		status: overrideStatus ?? mapStatus(suite.state()),
+		status: overrideStatus ?? statusMap[suite.state()],
 		filePath: suite.module.moduleId,
 		parentSuiteId: parent.type === "suite" ? parent.id : null,
 		suiteId: suite.id,
 		suiteName: suite.name,
-	}
-}
-
-function mapStatus(status: TestSuiteState): SuiteEventStatus {
-	switch (status) {
-		case "pending": {
-			return "started"
-		}
-		default:
-			return status
 	}
 }

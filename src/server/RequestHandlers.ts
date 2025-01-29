@@ -1,7 +1,14 @@
 import { renderBodyHtml } from "+explorer/ExplorerServer"
+import type { ExplorerState } from "+explorer/state/ExplorerState"
+import {
+	type FileTree,
+	mapModuleToFileTree,
+	mergeFileTrees,
+} from "+explorer/state/FileTree"
 import type { EventStream } from "+server/EventStream"
 import type { Event } from "+server/events/Event"
 import type { Middleware as PolkaMiddleware } from "polka"
+import type { Vitest } from "vitest/node"
 
 type RequestHandler = (request: Request, response: Response) => Promise<void>
 type Request = Parameters<PolkaMiddleware>[0]
@@ -42,6 +49,7 @@ export function handleEventStreamRequests(
 
 export function handleIndexHtmlRequests(
 	base: string,
+	vitest: Vitest,
 	getIndexHtmlHeader:
 		| Promise<string>
 		| ((requestUrl: string) => Promise<string>),
@@ -50,12 +58,14 @@ export function handleIndexHtmlRequests(
 	return async (request, response): Promise<void> => {
 		const requestUrl = request.originalUrl.replace(base, "")
 
+		const initialState = getInitialState(vitest)
+
 		try {
 			const [indexHtmlHeader, bodyHtml] = await Promise.all([
 				typeof getIndexHtmlHeader === "function"
 					? getIndexHtmlHeader(requestUrl)
 					: getIndexHtmlHeader,
-				renderBodyHtml(requestUrl),
+				renderBodyHtml(initialState, requestUrl),
 			])
 			const html = `${indexHtmlHeader}${bodyHtml}</body></html>`
 
@@ -69,4 +79,20 @@ export function handleIndexHtmlRequests(
 			}
 		}
 	}
+}
+
+function getInitialState(vitest: Vitest): ExplorerState {
+	const modules = vitest.state.getTestModules()
+
+	const moduleStates = new Set(modules.map((module) => module.state()))
+	const status =
+		moduleStates.has("pending") || moduleStates.has("queued")
+			? "started"
+			: "completed"
+
+	const fileTree = modules
+		.map(mapModuleToFileTree)
+		.reduce<FileTree>(mergeFileTrees, [])
+
+	return { status, fileTree }
 }

@@ -19,7 +19,7 @@ const vite = await createServer({
 })
 
 const eventStream = createEventStream()
-await startVitest("test", [], {
+const vitest = await startVitest("test", [], {
 	reporters: [createEventStreamReporter(eventStream)],
 })
 
@@ -30,6 +30,7 @@ polka()
 		"*",
 		handleIndexHtmlRequests(
 			base,
+			vitest,
 			(requestUrl) =>
 				// Always load the most recent version of `index.html` on every request.
 				loadIndexHtml("./src/index.html", (html) =>

@@ -14,6 +14,13 @@ export type TestEvent = {
 
 export type TestEventStatus = "failed" | "passed" | "skipped" | "started"
 
+const statusMap = {
+	failed: "failed",
+	passed: "passed",
+	pending: "started",
+	skipped: "skipped",
+} as const satisfies Record<TestState, TestEventStatus>
+
 export function mapToTestEvent(
 	test: TestCase,
 	overrideStatus?: TestEventStatus,
@@ -22,20 +29,10 @@ export function mapToTestEvent(
 
 	return {
 		scope: "test",
-		status: overrideStatus ?? mapStatus(test.result().state),
+		status: overrideStatus ?? statusMap[test.result().state],
 		filePath: test.module.moduleId,
 		parentSuiteId: parent.type === "suite" ? parent.id : null,
 		testId: test.id,
 		testName: test.name,
-	}
-}
-
-function mapStatus(status: TestState): TestEventStatus {
-	switch (status) {
-		case "pending": {
-			return "started"
-		}
-		default:
-			return status
 	}
 }

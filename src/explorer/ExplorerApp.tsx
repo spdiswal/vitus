@@ -3,8 +3,10 @@ import type { ExplorerState } from "+explorer/state/ExplorerState"
 import { useExplorerState } from "+explorer/state/UseExplorerState"
 import type { Renderable } from "+types/Renderable"
 
-export function ExplorerApp(): Renderable {
-	const state: ExplorerState = useExplorerState()
+export function ExplorerApp(props: {
+	initialState: ExplorerState
+}): Renderable {
+	const state: ExplorerState = useExplorerState(props.initialState)
 
 	return (
 		<div>

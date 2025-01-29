@@ -1,4 +1,5 @@
 import type { FilePath } from "+types/FilePath"
+import type { TestModule, TestModuleState } from "vitest/node"
 
 export type FileTree = Array<FileTreeEntry>
 
@@ -97,4 +98,16 @@ export function deletePathInFileTree(
 				: entry,
 		)
 		.filter((entry) => entry.type === "file" || entry.children.length > 0)
+}
+
+const statusMap = {
+	failed: "failed",
+	passed: "passed",
+	pending: "started",
+	queued: "registered",
+	skipped: "skipped",
+} as const satisfies Record<TestModuleState, FileTreeFileStatus>
+
+export function mapModuleToFileTree(module: TestModule): FileTree {
+	return createSingletonFileTree(module.moduleId, statusMap[module.state()])
 }

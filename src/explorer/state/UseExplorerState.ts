@@ -1,9 +1,6 @@
 import { logEvent } from "+explorer/events/LogEvent"
 import { useEventStream } from "+explorer/events/UseEventStream"
-import {
-	type ExplorerState,
-	initialExplorerState,
-} from "+explorer/state/ExplorerState"
+import type { ExplorerState } from "+explorer/state/ExplorerState"
 import {
 	createSingletonFileTree,
 	deletePathInFileTree,
@@ -17,8 +14,8 @@ import type { SuiteEvent } from "+server/events/SuiteEvent"
 import type { TestEvent } from "+server/events/TestEvent"
 import { useCallback, useState } from "preact/hooks"
 
-export function useExplorerState(): ExplorerState {
-	const [state, setState] = useState(initialExplorerState)
+export function useExplorerState(initialState: ExplorerState): ExplorerState {
+	const [state, setState] = useState(initialState)
 
 	const handleEvent = useCallback((event: Event) => {
 		setState((oldState) => applyEvent(oldState, event))

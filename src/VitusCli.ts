@@ -17,14 +17,14 @@ const base = "/"
 const cachedIndexHtml = loadIndexHtml("./dist/explorer/index.html")
 
 const eventStream = createEventStream()
-await startVitest("test", [], {
+const vitest = await startVitest("test", [], {
 	reporters: [createEventStreamReporter(eventStream)],
 })
 
 polka()
 	.use(base, sirv("./dist/explorer/", { extensions: [] }))
 	.get("/api/events", handleEventStreamRequests(eventStream))
-	.get("*", handleIndexHtmlRequests(base, cachedIndexHtml))
+	.get("*", handleIndexHtmlRequests(base, vitest, cachedIndexHtml))
 	.listen(port, (): void => {
 		console.log(`Vitus is running at http://localhost:${port}`)
 	})

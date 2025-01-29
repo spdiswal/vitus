@@ -2,4 +2,5 @@ import { ExplorerApp } from "+explorer/ExplorerApp"
 import { hydrate } from "preact"
 import "+explorer/Explorer.css"
 
-hydrate(<ExplorerApp />, document.body)
+const initialState = window.__VITUS_INITIAL_STATE__
+hydrate(<ExplorerApp initialState={initialState} />, document.body)
