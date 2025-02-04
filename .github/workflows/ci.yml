@@ -1,0 +1,70 @@
+# This workflow implements the continuous integration (CI) pipeline.
+# It verifies that pull requests meet certain standards in software quality and coding conventions.
+#
+# It is triggered by pull requests opened towards the `main` branch.
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+# Cancel all previous runs of this workflow that are still in progress on the same branch.
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  integrity:
+    name: Integrity
+    permissions:
+      contents: read # Allow the job to call the reusable `integrity.yml` workflow.
+    uses: ./.github/workflows/integrity.yml
+
+  commit-messages:
+    name: Commit messages
+    needs: integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    permissions:
+      pull-requests: read # Allow `rainstormy/github-action-validate-commit-messages` to read the commit messages in the pull request.
+    steps:
+      - name: Verify the commit messages
+        uses: rainstormy/github-action-validate-commit-messages@b0bd35856d42493ca0aebbf1aa53fb40bb01948d # v1.1.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          rules: |
+            acknowledged-author-email-addresses,
+            acknowledged-author-names,
+            acknowledged-committer-email-addresses,
+            acknowledged-committer-names,
+            capitalised-subject-lines,
+            empty-line-after-subject-lines,
+            imperative-subject-lines,
+            limit-length-of-body-lines,
+            limit-length-of-subject-lines,
+            multi-word-subject-lines,
+            no-co-authors,
+            no-merge-commits,
+            no-revert-revert-commits,
+            no-squash-commits,
+            no-trailing-punctuation-in-subject-lines,
+            no-unexpected-whitespace,
+            unique-subject-lines,
+
+          # The author and committer email address must be on one of these forms:
+          # - `id+username@users.noreply.github.com`
+          # - `noreply@github.com` (committer only, for automated version upgrades and for reverting pull requests directly from the GitHub web interface)
+          acknowledged-author-email-addresses--patterns: '\d+\+.+@users\.noreply\.github\.com'
+          acknowledged-committer-email-addresses--patterns: '\d+\+.+@users\.noreply\.github\.com noreply@github\.com'
+
+          # The author and committer name must be on one of these forms:
+          # - at least two words where the first word starts with a capital letter
+          # - `renovate[bot]` (for automated version upgrades)
+          # - `GitHub` (committer only, for automated version upgrades and for reverting pull requests directly from the GitHub web interface)
+          acknowledged-author-names--patterns: '\p{Lu}.*\s.+ renovate\[bot\]'
+          acknowledged-committer-names--patterns: '\p{Lu}.*\s.+ renovate\[bot\] GitHub'
