@@ -21,7 +21,7 @@ export default defineConfig(() => {
 			emptyOutDir: false,
 			minify: true,
 			rollupOptions: {
-				external: [...nodejsModules, "vite", "vitest"],
+				external: [...nodejsModules, "vite", "vitest", "vitest/node"],
 				output: { format: "esm" },
 			},
 			target: "node20",

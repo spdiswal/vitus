@@ -1,0 +1,51 @@
+# This workflow implements one of the final stages of the release pipeline.
+# It creates a draft GitHub release from a Git tag.
+#
+# It is triggered by pushing a Git tag with a `v` prefix, as done by the `publish-tag.yml` workflow.
+#
+# It can be triggered manually via the GitHub CLI:
+#   gh workflow run publish-github.yml --ref <tag-name>
+#   gh run watch
+#
+# It can also be triggered manually via the GitHub web interface:
+#   https://github.com/spdiswal/vitus/actions/workflows/publish-github.yml
+
+name: Publish / GitHub
+
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+
+# Cancel all previous runs of this workflow that are still in progress on the same branch.
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: publish-github-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  integrity:
+    name: Integrity
+    permissions:
+      contents: read # Allow the job to call the reusable `integrity.yml` workflow.
+    uses: ./.github/workflows/integrity.yml
+
+  github-release:
+    name: GitHub release
+    needs: integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    permissions:
+      contents: read # Allow the job to check out the repository.
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        #
+      - name: Create a draft GitHub release
+        uses: rainstormy/release/github@73fe3aae49ad74af650e529107d94f45002798fd # v1.1.0
+        with:
+          gh-auth-token: ${{ secrets.RELEASE_AUTHOR_GH_AUTH_TOKEN }}
+          version: ${{ github.ref_name }}

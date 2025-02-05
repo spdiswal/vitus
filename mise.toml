@@ -1,3 +1,6 @@
+# Manage devtools and tasks with mise-en-place.
+# https://mise.jdx.dev/configuration.html
+
 min_version = "2025.1.3"
 
 # Improve IntelliJ IDEA experience:
@@ -32,7 +35,7 @@ run = "tsc"
 alias = ["d"]
 run = [
 	"MODULE='dev-server' vite build",
-	'if [ -n "$AUTOOPEN_DEV_URL" ]; then (sleep 0.2 && open "$AUTOOPEN_DEV_URL") & fi',
+	'if [ -n "$AUTOOPEN_DEV_URL" ]; then (sleep 0.5 && open "$AUTOOPEN_DEV_URL") & fi',
 	"node dist/vitus-dev-server.js",
 ]
 
@@ -46,7 +49,7 @@ run = ["pnpm install", "lefthook install"]
 
 [tasks.preview]
 alias = ["p"]
-depends = ["build_cli"]
+depends = ["build"]
 run = [
 	'if [ -n "$AUTOOPEN_PREVIEW_URL" ]; then (sleep 0.2 && open "$AUTOOPEN_PREVIEW_URL") & fi',
 	"node dist/vitus-cli.js",
@@ -55,6 +58,10 @@ run = [
 [tasks.test]
 alias = ["t"]
 run = "CI=1 vitest run"
+
+[tasks.test_watch]
+alias = ["tw"]
+run = "CI=1 vitest watch"
 
 [tasks.yolo]
 run = "lefthook uninstall"

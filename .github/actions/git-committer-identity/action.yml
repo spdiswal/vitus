@@ -1,0 +1,47 @@
+name: Git committer identity
+description: Sets the user identity in Git.
+
+inputs:
+  email-address:
+    description: The committer's email address.
+    required: true
+  #
+  full-name:
+    description: The committer's full name.
+    required: true
+  #
+  ssh-public-key:
+    description: The public key of the committer's SSH key for signing commits and tags.
+    required: true
+  #
+  __ssh-private-key__:
+    description: The private key of the committer's SSH key for signing commits and tags. It is stored temporarily on the GitHub Actions runner in `~/.ssh/id_ed25519`.
+    required: true
+  #
+  ssh-key-fingerprints-github:
+    description: The SSH key fingerprints of GitHub. # https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Configure the user identity in Git
+      # language=sh
+      run: |
+        git config user.email "$EMAIL_ADDRESS"
+        git config user.name "$FULL_NAME"
+        git config user.signingkey "$SSH_PUBLIC_KEY"
+        git config gpg.format 'ssh'
+        git config commit.gpgsign 'true'
+        git config tag.gpgsign 'true'
+      env:
+        EMAIL_ADDRESS: ${{ inputs.email-address }}
+        FULL_NAME: ${{ inputs.full-name }}
+        SSH_PUBLIC_KEY: ${{ inputs.ssh-public-key }}
+      shell: bash
+      #
+    - name: Install the signing key
+      uses: rainstormy/ssh-key/install@cf4f4732bebebd7f0ee036c568232b5dc5616b07 # v1.0.0
+      with:
+        known-hosts: ${{ inputs.ssh-key-fingerprints-github }}
+        __private-key__: ${{ inputs.__ssh-private-key__ }}

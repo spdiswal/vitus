@@ -1,0 +1,25 @@
+name: Dependencies
+description: Installs Node.js, pnpm, and Node.js packages.
+
+runs:
+  using: composite
+  steps:
+    - name: Install Node.js and pnpm with mise-en-place
+      uses: jdx/mise-action@5083fe46898c414b2475087cc79da59e7da859e8 # v2.1.11
+      #
+    - name: Retrieve the path to the pnpm store
+      id: pnpm-store
+      # language=sh
+      run: echo "PNPM_STORE_PATH=$(pnpm store path)" >> "$GITHUB_ENV" # Use an environment variable, as step output is lost in nested composite actions: https://github.com/actions/runner/issues/2009
+      shell: bash
+      #
+    - name: Restore the pnpm store from the workflow cache
+      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      with:
+        key: pnpm:${{ hashFiles('mise.toml', 'pnpm-lock.yaml') }}
+        path: ${{ env.PNPM_STORE_PATH }}
+      #
+    - name: Install Node.js packages
+      # language=sh
+      run: pnpm install --frozen-lockfile
+      shell: bash

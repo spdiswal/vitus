@@ -1,0 +1,52 @@
+# This workflow implements the second stage of the release pipeline.
+# It creates a full semantic version tag in Git on the merge commit from the release branch.
+#
+# It is triggered by merging the pull request from the `release.yml` workflow.
+
+name: Publish / Tag
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - package.json
+    types:
+      - closed
+
+# Cancel all previous runs of this workflow that are still in progress on the same branch.
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: publish-tag-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  tag:
+    name: Tag
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    permissions: { }
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # Use a separate access token to allow the push tag event in this workflow to trigger the subsequent `publish-github.yml` and `publish-npm.yml` workflows.
+          # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+          token: ${{ secrets.RELEASE_AUTHOR_GH_AUTH_TOKEN }}
+        #
+      - name: Use the release author's identity in Git
+        uses: ./.github/actions/git-committer-identity
+        with:
+          email-address: ${{ secrets.RELEASE_AUTHOR_EMAIL_ADDRESS }}
+          full-name: ${{ secrets.RELEASE_AUTHOR_FULL_NAME }}
+          ssh-public-key: ${{ secrets.RELEASE_AUTHOR_SSH_PUBLIC_KEY }}
+          __ssh-private-key__: ${{ secrets.RELEASE_AUTHOR_SSH___THE___PRIVATE___KEY }}
+          ssh-key-fingerprints-github: ${{ secrets.SSH_KEY_FINGERPRINTS_GITHUB }}
+        #
+      - name: Create a full semantic version tag in Git
+        uses: rainstormy/release/tag@73fe3aae49ad74af650e529107d94f45002798fd # v1.1.0
+        with:
+          version: ${{ github.head_ref }}

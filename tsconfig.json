@@ -10,7 +10,10 @@
 		"jsxImportSource": "preact",
 		"paths": {
 			"+explorer/*": ["./src/explorer/*"],
-			"+types/*": ["./src/types/*"]
+			"+icons/*": ["./src/icons/*"],
+			"+server/*": ["./src/server/*"],
+			"+types/*": ["./src/types/*"],
+			"+utilities/*": ["./src/utilities/*"]
 		},
 		"tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
 		"types": ["node", "polka", "vite/client"]
