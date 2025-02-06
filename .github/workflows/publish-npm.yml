@@ -51,6 +51,11 @@ jobs:
       - name: Install dependencies
         uses: ./.github/actions/dependencies
         #
+      - name: Set the target npm registry and prepare an auth token
+        # language=sh
+        run: echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}\nregistry=https://registry.npmjs.org/' > .npmrc
+        shell: bash
+        #
       - name: Publish the package to npm
         uses: rainstormy/release/npm@73fe3aae49ad74af650e529107d94f45002798fd # v1.1.0
         with:
