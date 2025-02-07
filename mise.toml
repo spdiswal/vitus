@@ -34,9 +34,9 @@ run = "tsc"
 [tasks.dev]
 alias = ["d"]
 run = [
-	"MODULE='dev-server' vite build",
+	"MODULE='dev' vite build",
 	'if [ -n "$AUTOOPEN_DEV_URL" ]; then (sleep 0.5 && open "$AUTOOPEN_DEV_URL") & fi',
-	"node dist/vitus-dev-server.js",
+	"node dist/vitus-dev.js",
 ]
 
 [tasks.fmt]

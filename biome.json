@@ -19,7 +19,7 @@
 			}
 		},
 		{
-			"include": ["src/VitusCli.ts", "src/VitusDevServer.ts"],
+			"include": ["src/VitusCli.ts", "src/VitusDev.ts"],
 			"linter": {
 				"rules": {
 					"correctness": {
