@@ -2,7 +2,6 @@
 	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
 	"extends": [
 		"@rainstormy/presets-biome/base",
-		"@rainstormy/presets-biome/storybook",
 		"@rainstormy/presets-biome/vitest"
 	],
 	"files": {

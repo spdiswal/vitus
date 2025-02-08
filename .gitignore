@@ -29,7 +29,3 @@ lefthook-local.yml
 *~
 .DS_Store
 Thumbs.db
-
-# Storybook
-storybook-static/
-*storybook.log
