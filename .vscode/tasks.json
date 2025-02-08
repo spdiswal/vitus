@@ -90,6 +90,17 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "storybook",
+			"command": "mise run storybook",
+			"type": "shell",
+			"presentation": {
+				"clear": true,
+				"panel": "shared",
+				"reveal": "silent"
+			},
+			"problemMatcher": []
+		},
+		{
 			"label": "test",
 			"command": "mise run test",
 			"type": "shell",
