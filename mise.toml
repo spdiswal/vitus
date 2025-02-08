@@ -55,6 +55,10 @@ run = [
 	"node dist/vitus-cli.js",
 ]
 
+[tasks.storybook]
+alias = ["s"]
+run = "storybook dev --port 6006"
+
 [tasks.test]
 alias = ["t"]
 run = "CI=1 vitest run"
