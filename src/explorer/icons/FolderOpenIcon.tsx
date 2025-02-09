@@ -8,6 +8,7 @@ import { Svg } from "+utilities/Svg"
  */
 export function FolderOpenIcon(props: {
 	class: string
+	title?: string
 }): Renderable {
 	return (
 		<Svg
@@ -16,6 +17,7 @@ export function FolderOpenIcon(props: {
 			fill="none"
 			stroke="currentColor"
 			strokeWidth="1.5"
+			title={props.title}
 		>
 			<path
 				strokeLinecap="round"
