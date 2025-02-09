@@ -3,11 +3,11 @@ import type { Renderable } from "+types/Renderable"
 import { Svg } from "+utilities/Svg"
 
 /**
- * Heroicons: `folder` (outline variant)
+ * Heroicons: `sun` (outline variant)
  *
  * @see https://heroicons.com/outline
  */
-export function FolderIcon(props: {
+export function SunIcon(props: {
 	class: ClassString
 	title?: string
 }): Renderable {
@@ -21,9 +21,9 @@ export function FolderIcon(props: {
 			title={props.title}
 		>
 			<path
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
 			/>
 		</Svg>
 	)

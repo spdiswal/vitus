@@ -1,7 +1,8 @@
+import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
 export function Svg(props: {
-	class: string
+	class: ClassString
 	viewBox: `${number} ${number} ${number} ${number}`
 	fill?: string
 	stroke?: string
@@ -11,7 +12,7 @@ export function Svg(props: {
 }): Renderable {
 	return (
 		<svg
-			class={props.class}
+			class={cn(props.class)}
 			viewBox={props.viewBox}
 			fill={props.fill}
 			stroke={props.stroke}

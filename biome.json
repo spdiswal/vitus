@@ -9,6 +9,16 @@
 	},
 	"overrides": [
 		{
+			"include": ["src/explorer/**/Use*.tsx"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useComponentExportOnlyModules": "off"
+					}
+				}
+			}
+		},
+		{
 			"include": ["src/server/*.ts"],
 			"linter": {
 				"rules": {

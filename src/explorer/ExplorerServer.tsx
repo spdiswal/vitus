@@ -7,7 +7,7 @@ export async function renderBodyHtml(
 	_requestUrl: string,
 ): Promise<string> {
 	const deferredApp = renderToStringAsync(
-		<ExplorerApp initialState={initialState} />,
+		<ExplorerApp initialState={initialState} initialTheme={null} />,
 	)
 
 	return renderInitialStateProps(initialState) + (await deferredApp)
