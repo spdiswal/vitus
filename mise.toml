@@ -35,7 +35,7 @@ run = "tsc"
 alias = ["d"]
 run = [
 	"MODULE='dev' vite build",
-	'if [ -n "$AUTOOPEN_DEV_URL" ]; then (sleep 0.5 && open "$AUTOOPEN_DEV_URL") & fi',
+	'if [ -n "$AUTOOPEN_DEV_URL" ]; then (sleep "$AUTOOPEN_DEV_DELAY_SECONDS" && open "$AUTOOPEN_DEV_URL") & fi',
 	"node dist/vitus-dev.js",
 ]
 
@@ -51,7 +51,7 @@ run = ["pnpm install", "lefthook install"]
 alias = ["p"]
 depends = ["build"]
 run = [
-	'if [ -n "$AUTOOPEN_PREVIEW_URL" ]; then (sleep 0.2 && open "$AUTOOPEN_PREVIEW_URL") & fi',
+	'if [ -n "$AUTOOPEN_PREVIEW_URL" ]; then (sleep "$AUTOOPEN_PREVIEW_DELAY_SECONDS" && open "$AUTOOPEN_PREVIEW_URL") & fi',
 	"node dist/vitus-cli.js",
 ]
 
