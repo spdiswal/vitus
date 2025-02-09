@@ -3,4 +3,9 @@ import { hydrate } from "preact"
 import "+explorer/Explorer.css"
 
 const initialState = window.__VITUS_INITIAL_STATE__
-hydrate(<ExplorerApp initialState={initialState} />, document.body)
+const initialTheme = window.__VITUS_INITIAL_THEME__
+
+hydrate(
+	<ExplorerApp initialState={initialState} initialTheme={initialTheme} />,
+	document.body,
+)

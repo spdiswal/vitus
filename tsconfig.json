@@ -5,15 +5,15 @@
 		"@rainstormy/presets-typescript/es2023"
 	],
 	"compilerOptions": {
+		"baseUrl": "./",
 		"incremental": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact",
 		"paths": {
-			"+explorer/*": ["./src/explorer/*"],
-			"+icons/*": ["./src/icons/*"],
-			"+server/*": ["./src/server/*"],
-			"+types/*": ["./src/types/*"],
-			"+utilities/*": ["./src/utilities/*"]
+			"+explorer/*": ["src/explorer/*"],
+			"+server/*": ["src/server/*"],
+			"+types/*": ["src/types/*"],
+			"+utilities/*": ["src/utilities/*"]
 		},
 		"tsBuildInfoFile": "node_modules/.cache/typescript/.tsbuildinfo",
 		"types": ["node", "polka", "vite/client"]

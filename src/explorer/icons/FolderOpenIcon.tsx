@@ -1,3 +1,4 @@
+import type { ClassString } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { Svg } from "+utilities/Svg"
 
@@ -7,7 +8,8 @@ import { Svg } from "+utilities/Svg"
  * @see https://heroicons.com/outline
  */
 export function FolderOpenIcon(props: {
-	class: string
+	class: ClassString
+	title?: string
 }): Renderable {
 	return (
 		<Svg
@@ -16,6 +18,7 @@ export function FolderOpenIcon(props: {
 			fill="none"
 			stroke="currentColor"
 			strokeWidth="1.5"
+			title={props.title}
 		>
 			<path
 				strokeLinecap="round"

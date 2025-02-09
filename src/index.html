@@ -3,9 +3,22 @@
 <head>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+	<script type="text/javascript">
+		/**
+		 * @see https://tailwindcss.com/docs/dark-mode#with-system-theme-support
+		 */
+		const selectedTheme = localStorage.getItem("theme") ?? "match"
+		const prefersDark =
+			selectedTheme === "dark" ||
+			(selectedTheme === "match" &&
+			 window.matchMedia("(prefers-color-scheme: dark)").matches)
+
+		document.documentElement.classList.toggle("dark", prefersDark)
+		window.__VITUS_INITIAL_THEME__ = selectedTheme
+	</script>
 	<title>Vitest &ndash; Vitus</title>
 </head>
-<body class="bg-gray-50 text-gray-950 dark:bg-gray-950 dark:text-gray-50">
+<body class="bg-gray-50 text-gray-950 dark:bg-gray-950 dark:text-gray-50 text-base leading-none transition">
 	<script type="module" src="/explorer/ExplorerClient.tsx"></script>
 	<noscript>You need to enable JavaScript to run this app.</noscript>
 </body>

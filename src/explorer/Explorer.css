@@ -1,1 +1,5 @@
 @import "tailwindcss";
+@source "../index.html";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant hocus (&:focus-visible, &:hover);
