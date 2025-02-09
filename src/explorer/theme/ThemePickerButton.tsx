@@ -17,7 +17,7 @@ export function ThemePickerButton(props: {
 				"data-selected:bg-gray-100 data-selected:dark:bg-gray-800 data-selected:text-blue-500",
 				"not-data-selected:cursor-pointer not-data-selected:hocus:bg-gray-300/80 not-data-selected:dark:hocus:bg-gray-600/80",
 			)}
-			data-selected={selectedTheme === props.theme ? true : undefined}
+			data-selected={selectedTheme === props.theme || undefined}
 			title={props.title}
 			onClick={(): void => setSelectedTheme(props.theme)}
 		>
