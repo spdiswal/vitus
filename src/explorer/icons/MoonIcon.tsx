@@ -9,6 +9,7 @@ import { Svg } from "+utilities/Svg"
  */
 export function MoonIcon(props: {
 	class: ClassString
+	"stroke-width"?: string
 	title?: string
 }): Renderable {
 	return (
@@ -17,7 +18,7 @@ export function MoonIcon(props: {
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"
-			strokeWidth="1.5"
+			stroke-width={props["stroke-width"] ?? "1.5"}
 			title={props.title}
 		>
 			<path

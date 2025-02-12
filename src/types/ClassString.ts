@@ -5,7 +5,7 @@ export type ClassString = ClassStringBrand & ClassValue
 type ClassValue = string | false | null | undefined
 
 type NonClassValue<Class extends ClassValue> = Class extends ClassStringBrand
-	? never
+	? "Expected the `class` prop to be the last argument"
 	: NormalisedClassValue<Class>
 
 type NormalisedClassValue<Class extends ClassValue> = Class extends ""
@@ -29,9 +29,11 @@ type ClassStringBrand = TypeBrand<"ClassString">
  * To ensure consistency, `props.class` must be the last argument if provided.
  */
 export function cn<Class1 extends ClassValue>(
-	class1: Class1 extends ClassStringBrand | false | null | undefined
-		? Class1
-		: "Redundant call to the `cn()` function",
+	class1: [Class1] extends [string] // Disallow string literals unless combined with a conditional expression.
+		? string extends Class1
+			? Class1
+			: "Redundant call to the `cn()` function"
+		: Class1,
 ): string
 export function cn<Class1 extends ClassValue, Class2 extends ClassValue>(
 	class1: NonClassValue<Class1>,
@@ -219,4 +221,13 @@ export function cn<
 ): string
 export function cn(...classValues: Array<ClassValue>): string {
 	return clsx(...classValues)
+}
+
+/**
+ * Returns the class strings associated with the given key.
+ */
+export function cx<Key extends number | string | symbol>(
+	key: Key,
+): (classValuesByKey: Record<Key, ClassValue>) => ClassValue {
+	return (classValuesByKey): ClassValue => classValuesByKey[key]
 }

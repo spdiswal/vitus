@@ -1,9 +1,9 @@
 import { createEventStream } from "+server/EventStream"
 import { createEventStreamReporter } from "+server/EventStreamReporter"
-import { loadIndexHtml } from "+server/LoadIndexHtml"
 import {
 	handleEventStreamRequests,
 	handleIndexHtmlRequests,
+	loadIndexHtml,
 } from "+server/RequestHandlers"
 import polka from "polka"
 import { createServer } from "vite"
@@ -12,16 +12,24 @@ import { startVitest } from "vitest/node"
 const port = 8000
 const base = "/"
 
-const vite = await createServer({
+const deferredIndexHtml = loadIndexHtml("./src/index.html")
+
+const eventStream = createEventStream()
+const deferredVitest = startVitest("test", [], {
+	reporters: [createEventStreamReporter(eventStream)],
+})
+
+const deferredVite = createServer({
 	appType: "custom",
 	base,
 	server: { middlewareMode: true },
 })
 
-const eventStream = createEventStream()
-const vitest = await startVitest("test", [], {
-	reporters: [createEventStreamReporter(eventStream)],
-})
+const [indexHtml, , vite] = await Promise.all([
+	deferredIndexHtml,
+	deferredVitest,
+	deferredVite,
+])
 
 polka()
 	.use(vite.middlewares)
@@ -30,13 +38,9 @@ polka()
 		"*",
 		handleIndexHtmlRequests(
 			base,
-			vitest,
-			(requestUrl) =>
-				// Always load the most recent version of `index.html` on every request.
-				loadIndexHtml("./src/index.html", (html) =>
-					vite.transformIndexHtml(requestUrl, html),
-				),
-			(error) => vite.ssrFixStacktrace(error),
+			indexHtml,
+			async () => "", // Render everything client-side to prevent hydration errors that cause hot module replacement (HMR) to malfunction in Preact.
+			vite.ssrFixStacktrace,
 		),
 	)
 	.listen(port, (): void => {
