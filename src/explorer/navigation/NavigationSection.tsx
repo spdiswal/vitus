@@ -11,7 +11,7 @@ export function NavigationSection(props: {
 			<h2 class="pl-10 pb-1 border-b border-gray-400 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm uppercase tracking-wide transition">
 				{props.heading}
 			</h2>
-			<ul class="pl-10 flex flex-col list-disc">{props.children}</ul>
+			<ul class="pl-2 flex flex-col">{props.children}</ul>
 		</section>
 	)
 }
