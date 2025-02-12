@@ -1,9 +1,9 @@
-import { NavigationNode } from "+explorer/navigation/NavigationNode"
-import { NavigationSection } from "+explorer/navigation/NavigationSection"
+import { NavigationTreeNode } from "+explorer/navigation/components/NavigationTreeNode"
+import { NavigationTreeSection } from "+explorer/navigation/components/NavigationTreeSection"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
-export function Navigation(props: {
+export function NavigationTree(props: {
 	class?: ClassString
 }): Renderable {
 	return (
@@ -20,99 +20,102 @@ export function Navigation(props: {
 					placeholder="Search"
 				/>
 			</div>
-			<NavigationSection heading="Failed (10 tests in 3 files)">
-				<NavigationNode name="EventStreamReporter.tests.ts" status="passed">
-					<NavigationNode
+			<NavigationTreeSection heading="Failed (10 tests in 3 files)">
+				<NavigationTreeNode name="EventStreamReporter.tests.ts" status="passed">
+					<NavigationTreeNode
 						name="given a set of test files of $filePaths"
 						status="failed"
 					>
-						<NavigationNode name="when a test run has started" status="failed">
-							<NavigationNode
+						<NavigationTreeNode
+							name="when a test run has started"
+							status="failed"
+						>
+							<NavigationTreeNode
 								name="sends a 'run started' event"
 								status="failed"
 							/>
-						</NavigationNode>
-						<NavigationNode
+						</NavigationTreeNode>
+						<NavigationTreeNode
 							name="when a test run has completed"
 							status="passed"
 						>
-							<NavigationNode
+							<NavigationTreeNode
 								name="sends a 'run completed' event"
 								status="skipped"
 							/>
-						</NavigationNode>
-					</NavigationNode>
-					<NavigationNode
+						</NavigationTreeNode>
+					</NavigationTreeNode>
+					<NavigationTreeNode
 						name="given a test file of $filePath"
 						status="skipped"
 					>
-						<NavigationNode
+						<NavigationTreeNode
 							name="when the test file has been enqueued"
 							status="skipped"
 						>
-							<NavigationNode
+							<NavigationTreeNode
 								name="sends a 'file registered' event"
 								status="commenced"
 							/>
-						</NavigationNode>
-						<NavigationNode
+						</NavigationTreeNode>
+						<NavigationTreeNode
 							name="when the test file starts running"
 							status="commenced"
 						>
-							<NavigationNode
+							<NavigationTreeNode
 								name="sends a 'file started' event"
 								status="commenced"
 							/>
-						</NavigationNode>
-						<NavigationNode
+						</NavigationTreeNode>
+						<NavigationTreeNode
 							name="when the test file has failed"
 							status="commenced"
 						>
-							<NavigationNode
+							<NavigationTreeNode
 								name="sends a 'file failed' event"
 								status="passed"
 							/>
-						</NavigationNode>
-						<NavigationNode
+						</NavigationTreeNode>
+						<NavigationTreeNode
 							name="when the test file has passed"
 							status="passed"
 						>
-							<NavigationNode
+							<NavigationTreeNode
 								name="sends a 'file passed' event"
 								status="passed"
 							/>
-						</NavigationNode>
-						<NavigationNode
+						</NavigationTreeNode>
+						<NavigationTreeNode
 							name="when the test file has been skipped"
 							status="passed"
 						>
-							<NavigationNode
+							<NavigationTreeNode
 								name="sends a 'file skipped' event"
 								status="passed"
 							/>
-						</NavigationNode>
-						<NavigationNode
+						</NavigationTreeNode>
+						<NavigationTreeNode
 							name="when the test file has been deleted"
 							status="passed"
 						>
-							<NavigationNode
+							<NavigationTreeNode
 								name="sends a 'file deleted' event"
 								status="passed"
 							/>
-						</NavigationNode>
-					</NavigationNode>
-				</NavigationNode>
-				<NavigationNode name="ExplorerApp.tests.tsx" status="skipped" />
-				<NavigationNode name="FileTree.tests.ts" status="skipped" />
-			</NavigationSection>
-			<NavigationSection heading="Passed (1833 tests)">
-				<NavigationNode name="ExplorerApp.tests.tsx" status="skipped" />
-				<NavigationNode name="FileTree.tests.ts" status="skipped" />
-			</NavigationSection>
-			<NavigationSection heading="Skipped (2 tests)">
-				<NavigationNode name="ExplorerApp.tests.tsx" status="skipped" />
-				<NavigationNode name="FileTree.tests.ts" status="skipped" />
-			</NavigationSection>
+						</NavigationTreeNode>
+					</NavigationTreeNode>
+				</NavigationTreeNode>
+				<NavigationTreeNode name="ExplorerApp.tests.tsx" status="skipped" />
+				<NavigationTreeNode name="FileTree.tests.ts" status="skipped" />
+			</NavigationTreeSection>
+			<NavigationTreeSection heading="Passed (1833 tests)">
+				<NavigationTreeNode name="ExplorerApp.tests.tsx" status="skipped" />
+				<NavigationTreeNode name="FileTree.tests.ts" status="skipped" />
+			</NavigationTreeSection>
+			<NavigationTreeSection heading="Skipped (2 tests)">
+				<NavigationTreeNode name="ExplorerApp.tests.tsx" status="skipped" />
+				<NavigationTreeNode name="FileTree.tests.ts" status="skipped" />
+			</NavigationTreeSection>
 		</nav>
 	)
 }

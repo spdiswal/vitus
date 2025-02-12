@@ -1,7 +1,7 @@
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
-export function NavigationSection(props: {
+export function NavigationTreeSection(props: {
 	class?: ClassString
 	heading: string
 	children?: Renderable

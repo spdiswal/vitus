@@ -1,5 +1,5 @@
 import { ExplorerStatusLine } from "+explorer/ExplorerStatusLine"
-import { Navigation } from "+explorer/navigation/Navigation"
+import { NavigationTree } from "+explorer/navigation/components/NavigationTree"
 import { Breadcrumbs } from "+explorer/report/Breadcrumbs"
 import { Report } from "+explorer/report/Report"
 import type { ExplorerState } from "+explorer/state/ExplorerState"
@@ -16,7 +16,7 @@ export function ExplorerApp(props: {
 			<div class="relative min-h-screen grid grid-cols-[38.2%_1fr]">
 				<ExplorerStatusLine class="absolute z-10 top-0 inset-x-0" />
 				<ThemePicker class="absolute z-10 top-5 right-5" />
-				<Navigation />
+				<NavigationTree />
 				<div class="ml-10 flex flex-col">
 					<Breadcrumbs />
 					<Report />
