@@ -1,9 +1,11 @@
+import { renderInitialState } from "+explorer/ExplorerServer"
+import { getInitialState } from "+explorer/state/ExplorerState"
 import { createEventStream } from "+server/EventStream"
 import { createEventStreamReporter } from "+server/EventStreamReporter"
 import {
 	handleEventStreamRequests,
 	handleIndexHtmlRequests,
-	loadIndexHtml,
+	loadIndexHtmlParts,
 } from "+server/RequestHandlers"
 import polka from "polka"
 import { createServer } from "vite"
@@ -12,7 +14,7 @@ import { startVitest } from "vitest/node"
 const port = 8000
 const base = "/"
 
-const deferredIndexHtml = loadIndexHtml("./src/index.html")
+const deferredIndexHtmlParts = loadIndexHtmlParts("./src/index.html")
 
 const eventStream = createEventStream()
 const deferredVitest = startVitest("test", [], {
@@ -25,8 +27,8 @@ const deferredVite = createServer({
 	server: { middlewareMode: true },
 })
 
-const [indexHtml, , vite] = await Promise.all([
-	deferredIndexHtml,
+const [indexHtmlParts, vitest, vite] = await Promise.all([
+	deferredIndexHtmlParts,
 	deferredVitest,
 	deferredVite,
 ])
@@ -38,8 +40,11 @@ polka()
 		"*",
 		handleIndexHtmlRequests(
 			base,
-			indexHtml,
-			async () => "", // Render everything client-side to prevent hydration errors that cause hot module replacement (HMR) to malfunction in Preact.
+			indexHtmlParts,
+			async () => [
+				renderInitialState(getInitialState(vitest)),
+				"", // Render the Preact app fully client-side to prevent hydration errors that cause hot module replacement (HMR) to malfunction.
+			],
 			vite.ssrFixStacktrace,
 		),
 	)
