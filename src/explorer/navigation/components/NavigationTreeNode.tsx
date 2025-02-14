@@ -1,21 +1,15 @@
 import { ChevronRightIcon } from "+explorer/icons/ChevronRightIcon"
-import type { NavigationTreeNodeStatus } from "+explorer/navigation/components/NavigationTreeNodeStatus"
-import { type ClassString, cn, cx } from "+types/ClassString"
+import type { NavigationEntry } from "+explorer/navigation/NavigationEntry"
+import { NavigationTreeNodes } from "+explorer/navigation/components/NavigationTreeNodes"
+import { cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { useState } from "preact/hooks"
 
-export function NavigationTreeNode(props: {
-	class?: ClassString
-	name: string
-	status: NavigationTreeNodeStatus
-	expandedInitially?: boolean
-	selected?: boolean
-	children?: Renderable
-}): Renderable {
-	const [expanded, setExpanded] = useState(props.expandedInitially ?? true)
+export function NavigationTreeNode(props: NavigationEntry): Renderable {
+	const [expanded, setExpanded] = useState(false)
 
 	return (
-		<li class={cn("pt-1 flex flex-col", props.class)}>
+		<li class="pt-1 flex flex-col">
 			<button
 				type="button"
 				class={cn(
@@ -33,7 +27,7 @@ export function NavigationTreeNode(props: {
 				)}
 				onClick={(): void => setExpanded(!expanded)}
 			>
-				{props.children !== undefined ? (
+				{props.children.length > 0 ? (
 					<ChevronRightIcon
 						class={cn(
 							"shrink-0 size-4 transition",
@@ -50,21 +44,26 @@ export function NavigationTreeNode(props: {
 						)}
 					/>
 				)}
-				<span class="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
-					<span class="text-gray-950 dark:text-gray-50 transition">
-						{props.name}
-					</span>
-					<span class="text-xs text-gray-500 whitespace-nowrap">42 ms</span>
+				<span class="text-gray-950 dark:text-gray-50 transition">
+					{props.name}
+					{props.durationMs !== null ? (
+						<span class="ml-2 text-xs font-light text-gray-500 whitespace-nowrap">
+							in{" "}
+							{props.durationMs < 1
+								? "less than 1 ms"
+								: `${Math.ceil(props.durationMs)} ms`}
+						</span>
+					) : null}
 				</span>
 			</button>
-			{props.children !== undefined ? (
+			{props.children.length > 0 ? (
 				<ul
 					class={cn(
 						"flex flex-col ml-3.5 pl-2.5 border-l border-gray-400 dark:border-gray-700 transition",
 						!expanded && "hidden",
 					)}
 				>
-					{props.children}
+					<NavigationTreeNodes entries={props.children} />
 				</ul>
 			) : null}
 		</li>

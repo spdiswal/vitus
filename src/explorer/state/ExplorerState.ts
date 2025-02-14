@@ -1,27 +1,44 @@
 import {
-	type FileTree,
-	mapModuleToFileTree,
-	mergeFileTrees,
-} from "+explorer/state/FileTree"
+	type NavigationEntries,
+	isCommenced,
+	isFailed,
+	isPassed,
+	mapVitestStateToNavigationEntries,
+} from "+explorer/navigation/NavigationEntry"
 import type { Vitest } from "vitest/node"
 
 export type ExplorerState = {
-	status: "completed" | "disconnected" | "started"
-	fileTree: FileTree
+	navigationEntries: NavigationEntries
+	overallStatus: ExplorerOverallStatus
 }
 
+export type ExplorerOverallStatus =
+	| "commenced"
+	| "disconnected"
+	| "failed"
+	| "passed"
+	| "skipped"
+
 export function getInitialState(vitest: Vitest): ExplorerState {
-	const modules = vitest.state.getTestModules()
+	const navigationEntries = mapVitestStateToNavigationEntries(vitest)
 
-	const moduleStates = new Set(modules.map((module) => module.state()))
-	const status =
-		moduleStates.has("pending") || moduleStates.has("queued")
-			? "started"
-			: "completed"
+	return {
+		navigationEntries,
+		overallStatus: mapNavigationEntriesToOverallStatus(navigationEntries),
+	}
+}
 
-	const fileTree = modules
-		.map(mapModuleToFileTree)
-		.reduce<FileTree>(mergeFileTrees, [])
-
-	return { status, fileTree }
+export function mapNavigationEntriesToOverallStatus(
+	navigationEntries: NavigationEntries,
+): ExplorerOverallStatus {
+	if (navigationEntries.some(isCommenced)) {
+		return "commenced"
+	}
+	if (navigationEntries.some(isFailed)) {
+		return "failed"
+	}
+	if (navigationEntries.some(isPassed)) {
+		return "passed"
+	}
+	return "skipped"
 }

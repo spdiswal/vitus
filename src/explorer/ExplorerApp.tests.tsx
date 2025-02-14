@@ -4,7 +4,10 @@ import { describe, expect, it } from "vitest"
 
 describe("ExplorerApp", () => {
 	it("should be defined", async () => {
-		const initialState: ExplorerState = { status: "started", fileTree: [] }
+		const initialState: ExplorerState = {
+			overallStatus: "commenced",
+			navigationEntries: [],
+		}
 		expect(
 			<ExplorerApp initialState={initialState} initialTheme={null} />,
 		).toBeDefined()
