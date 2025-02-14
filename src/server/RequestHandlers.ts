@@ -1,15 +1,20 @@
 import { readFile } from "node:fs/promises"
 import type { EventStream } from "+server/EventStream"
 import type { Event } from "+server/events/Event"
+import type { Vector } from "+types/Vector"
 import type { Middleware as PolkaMiddleware } from "polka"
 
 type RequestHandler = (request: Request, response: Response) => Promise<void>
 type Request = Parameters<PolkaMiddleware>[0]
 type Response = Parameters<PolkaMiddleware>[1]
 
-export async function loadIndexHtml(path: string): Promise<string> {
+const indexHtmlPartitioner = /<!--head-->|<!--body-->/
+
+export async function loadIndexHtmlParts(
+	path: string,
+): Promise<Vector<string, 3>> {
 	const indexHtml = await readFile(path, "utf-8")
-	return indexHtml.slice(0, -"</body></html>".length)
+	return indexHtml.split(indexHtmlPartitioner) as Vector<string, 3>
 }
 
 export function handleEventStreamRequests(
@@ -47,16 +52,16 @@ export function handleEventStreamRequests(
 
 export function handleIndexHtmlRequests(
 	base: string,
-	indexHtml: string,
-	renderHtml: (requestUrl: string) => Promise<string>,
+	indexHtmlParts: Vector<string, 3>,
+	renderHtmlOutlets: (requestUrl: string) => Promise<Vector<string, 2>>,
 	onError?: (error: Error) => void,
 ): RequestHandler {
 	return async (request, response): Promise<void> => {
 		const requestUrl = request.originalUrl.replace(base, "")
 
 		try {
-			const bodyHtml = await renderHtml(requestUrl)
-			const html = `${indexHtml}${bodyHtml}</body></html>`
+			const [headHtml, bodyHtml] = await renderHtmlOutlets(requestUrl)
+			const html = `${indexHtmlParts[0]}${headHtml}${indexHtmlParts[1]}${bodyHtml}${indexHtmlParts[2]}`
 
 			response.writeHead(200, { "content-type": "text/html" }).end(html)
 		} catch (error) {

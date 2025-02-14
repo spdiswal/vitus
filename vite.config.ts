@@ -98,7 +98,7 @@ function minifyIndexHtmlPlugin(): VitePlugin {
 				collapseWhitespace: true,
 				minifyCSS: true,
 				minifyJS: { ecma: 2023, toplevel: true },
-				removeComments: true,
+				removeComments: false, // Preserve the outlet comments.
 				sortAttributes: true,
 				sortClassName: true,
 			}),
