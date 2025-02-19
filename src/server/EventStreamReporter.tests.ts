@@ -1,4 +1,8 @@
 import {
+	fakeVitestModule,
+	fakeVitestSpecification,
+} from "+models/File.fixtures"
+import {
 	type EventStreamSubscriber,
 	createEventStream,
 } from "+server/EventStream"
@@ -8,14 +12,13 @@ import type { RunEvent } from "+server/events/RunEvent"
 import type { ServerEvent } from "+server/events/ServerEvent"
 import type { SuiteEvent } from "+server/events/SuiteEvent"
 import type { TestEvent } from "+server/events/TestEvent"
-import type { FilePath } from "+types/FilePath"
+import type { Path } from "+types/Path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type {
 	TestCase,
 	TestModule,
 	TestModuleState,
 	TestResult,
-	TestSpecification,
 	TestState,
 	TestSuite,
 	TestSuiteState,
@@ -48,10 +51,10 @@ describe.each`
 	${["/Users/xyz/Workspace/src/bananas.tests.ts", "/Users/xyz/Workspace/tests/oranges.tests.ts", "/Users/xyz/Workspace/tests/peaches.tests.ts"]}
 `(
 	"given a set of test files of $filePaths",
-	(moduleProps: { filePaths: Array<FilePath> }) => {
+	(moduleProps: { filePaths: Array<Path> }) => {
 		describe("when a test run has started", () => {
 			const specifications = moduleProps.filePaths.map((filePath) =>
-				fakeSpecification({ filePath }),
+				fakeVitestSpecification({ filePath }),
 			)
 
 			beforeEach(() => {
@@ -69,7 +72,7 @@ describe.each`
 
 		describe("when a test run has completed", () => {
 			const modules = moduleProps.filePaths.map((filePath) =>
-				fakeModule({ filePath, status: "passed" }),
+				fakeVitestModule({ filePath, status: "passed" }),
 			)
 
 			beforeEach(() => {
@@ -93,9 +96,9 @@ describe.each`
 	${"-1730f876b4"} | ${"/Users/xyz/Workspace/tests/oranges.tests.ts"}
 `(
 	"given a test file of $filePath",
-	(moduleProps: { id: string; filePath: FilePath }) => {
+	(moduleProps: { id: string; filePath: Path }) => {
 		function module(status: TestModuleState): TestModule {
-			return fakeModule({ filePath: moduleProps.filePath, status })
+			return fakeVitestModule({ filePath: moduleProps.filePath, status })
 		}
 
 		describe("when the test file has been enqueued", () => {
@@ -628,21 +631,6 @@ describe("when an unknown test file has been deleted", () => {
 		expect(spy).not.toHaveBeenCalled()
 	})
 })
-
-function fakeSpecification(props: { filePath: FilePath }): TestSpecification {
-	return { moduleId: props.filePath } as TestSpecification
-}
-
-function fakeModule(props: {
-	filePath: FilePath
-	status: TestModuleState
-}): TestModule {
-	return {
-		type: "module",
-		moduleId: props.filePath,
-		state: () => props.status,
-	} as TestModule
-}
 
 function fakeSuite(props: {
 	parentModule: TestModule

@@ -1,4 +1,4 @@
-import type { FilePath } from "+types/FilePath"
+import type { Path } from "+types/Path"
 import type { TestModule, TestModuleState } from "vitest/node"
 
 export type FileTree = Array<FileTreeEntry>
@@ -7,13 +7,13 @@ export type FileTreeEntry = FileTreeDirectory | FileTreeFile
 
 export type FileTreeDirectory = {
 	type: "directory"
-	path: FilePath
+	path: Path
 	children: FileTree
 }
 
 export type FileTreeFile = {
 	type: "file"
-	path: FilePath
+	path: Path
 	status: FileTreeFileStatus
 }
 
@@ -25,7 +25,7 @@ export type FileTreeFileStatus =
 	| "started"
 
 export function createSingletonFileTree(
-	path: FilePath,
+	path: Path,
 	status: FileTreeFileStatus,
 ): FileTree {
 	let result: FileTreeEntry = { type: "file", path, status }
@@ -85,7 +85,7 @@ export function mergeFileTrees(original: FileTree, patch: FileTree): FileTree {
 
 export function deletePathInFileTree(
 	tree: FileTree,
-	pathToDelete: FilePath,
+	pathToDelete: Path,
 ): FileTree {
 	return tree
 		.filter((entry) => entry.path !== pathToDelete)

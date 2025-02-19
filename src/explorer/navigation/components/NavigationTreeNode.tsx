@@ -2,6 +2,7 @@ import { ChevronRightIcon } from "+explorer/icons/ChevronRightIcon"
 import type { NavigationEntry } from "+explorer/navigation/NavigationEntry"
 import { NavigationTreeNodes } from "+explorer/navigation/components/NavigationTreeNodes"
 import { cn, cx } from "+types/ClassString"
+import { formatDuration } from "+types/Duration"
 import type { Renderable } from "+types/Renderable"
 import { useState } from "preact/hooks"
 
@@ -48,10 +49,7 @@ export function NavigationTreeNode(props: NavigationEntry): Renderable {
 					{props.name}
 					{props.durationMs !== null ? (
 						<span class="ml-2 text-xs font-light text-gray-500 whitespace-nowrap">
-							in{" "}
-							{props.durationMs < 1
-								? "less than 1 ms"
-								: `${Math.ceil(props.durationMs)} ms`}
+							in {formatDuration(props.durationMs)}
 						</span>
 					) : null}
 				</span>

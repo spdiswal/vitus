@@ -10,7 +10,9 @@
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact",
 		"paths": {
+			"+events/*": ["src/events/*"],
 			"+explorer/*": ["src/explorer/*"],
+			"+models/*": ["src/models/*"],
 			"+server/*": ["src/server/*"],
 			"+types/*": ["src/types/*"],
 			"+utilities/*": ["src/utilities/*"]

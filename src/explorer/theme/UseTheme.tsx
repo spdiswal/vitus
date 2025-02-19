@@ -1,5 +1,5 @@
 import type { Renderable } from "+types/Renderable"
-import { assertContextValue } from "+utilities/AssertContextValue"
+import { assertContextValue } from "+utilities/Assertions"
 import { useMediaQuery } from "+utilities/UseMediaQuery"
 import { createContext } from "preact"
 import { useContext, useEffect, useMemo, useState } from "preact/hooks"

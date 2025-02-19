@@ -6,7 +6,7 @@ import {
 	deletePathInFileTree,
 	mergeFileTrees,
 } from "+explorer/state/FileTree"
-import type { FilePath } from "+types/FilePath"
+import type { Path } from "+types/Path"
 import { describe, expect, it } from "vitest"
 
 describe.each`
@@ -18,9 +18,9 @@ describe.each`
 `(
 	"when creating a singleton file tree from a 1-segment file path $filePath with a status of $status",
 	(props: {
-		filePath: FilePath
+		filePath: Path
 		status: FileTreeFileStatus
-		expectedPaths: [FilePath]
+		expectedPaths: [Path]
 	}) => {
 		const result = createSingletonFileTree(props.filePath, props.status)
 
@@ -44,9 +44,9 @@ describe.each`
 `(
 	"when creating a singleton file tree from a 2-segment file path $filePath with a status of $status",
 	(props: {
-		filePath: FilePath
+		filePath: Path
 		status: FileTreeFileStatus
-		expectedPaths: [FilePath, FilePath]
+		expectedPaths: [Path, Path]
 	}) => {
 		const result = createSingletonFileTree(props.filePath, props.status)
 
@@ -76,9 +76,9 @@ describe.each`
 `(
 	"when creating a singleton file tree from a 5-segment file path $filePath with a status of $status",
 	(props: {
-		filePath: FilePath
+		filePath: Path
 		status: FileTreeFileStatus
-		expectedPaths: [FilePath, FilePath, FilePath, FilePath, FilePath]
+		expectedPaths: [Path, Path, Path, Path, Path]
 	}) => {
 		const result = createSingletonFileTree(props.filePath, props.status)
 

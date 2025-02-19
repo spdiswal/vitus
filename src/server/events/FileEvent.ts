@@ -1,10 +1,10 @@
-import type { FilePath } from "+types/FilePath"
+import type { Path } from "+types/Path"
 import type { TestModule, TestModuleState } from "vitest/node"
 
 export type FileEvent = {
 	scope: "file"
 	status: FileEventStatus
-	filePath: FilePath
+	filePath: Path
 }
 
 export type FileEventStatus =

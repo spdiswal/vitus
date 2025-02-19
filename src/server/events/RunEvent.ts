@@ -1,10 +1,10 @@
-import type { FilePath } from "+types/FilePath"
+import type { Path } from "+types/Path"
 import type { TestModule, TestSpecification } from "vitest/node"
 
 export type RunEvent = {
 	scope: "run"
 	status: RunEventStatus
-	filePaths: Array<FilePath>
+	filePaths: Array<Path>
 }
 
 export type RunEventStatus = "completed" | "started"

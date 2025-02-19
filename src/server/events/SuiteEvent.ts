@@ -1,11 +1,11 @@
-import type { FilePath } from "+types/FilePath"
+import type { Path } from "+types/Path"
 import type { SuiteId } from "+types/SuiteId"
 import type { TestSuite, TestSuiteState } from "vitest/node"
 
 export type SuiteEvent = {
 	scope: "suite"
 	status: SuiteEventStatus
-	filePath: FilePath
+	filePath: Path
 	parentSuiteId: SuiteId | null
 	suiteId: SuiteId
 	suiteName: string

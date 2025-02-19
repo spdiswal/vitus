@@ -7,6 +7,13 @@
 	"files": {
 		"ignore": ["dist/", "node_modules/"]
 	},
+	"linter": {
+		"rules": {
+			"nursery": {
+				"noNestedTernary": "off"
+			}
+		}
+	},
 	"overrides": [
 		{
 			"include": ["src/explorer/**/Use*.tsx"],
