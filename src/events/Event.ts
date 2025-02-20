@@ -18,6 +18,14 @@ import {
 	type FileStartedEvent,
 	applyFileStartedEvent,
 } from "+events/file/FileStartedEvent"
+import {
+	type ServerDisconnectedEvent,
+	applyServerDisconnectedEvent,
+} from "+events/server/ServerDisconnectedEvent"
+import {
+	type ServerRestartedEvent,
+	applyServerRestartedEvent,
+} from "+events/server/ServerRestartedEvent"
 import type { Project } from "+models/Project"
 
 export type Event =
@@ -26,6 +34,8 @@ export type Event =
 	| FilePassedEvent
 	| FileSkippedEvent
 	| FileStartedEvent
+	| ServerDisconnectedEvent
+	| ServerRestartedEvent
 
 export function applyEvent(project: Project, event: Event): Project {
 	switch (event.type) {
@@ -43,6 +53,12 @@ export function applyEvent(project: Project, event: Event): Project {
 		}
 		case "file-started": {
 			return applyFileStartedEvent(project, event)
+		}
+		case "server-disconnected": {
+			return applyServerDisconnectedEvent(project)
+		}
+		case "server-restarted": {
+			return applyServerRestartedEvent(project)
 		}
 	}
 }
