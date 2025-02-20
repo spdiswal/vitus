@@ -19,6 +19,14 @@ import {
 	applyFileStartedEvent,
 } from "+events/file/FileStartedEvent"
 import {
+	type RunCompletedEvent,
+	applyRunCompletedEvent,
+} from "+events/run/RunCompletedEvent"
+import {
+	type RunStartedEvent,
+	applyRunStartedEvent,
+} from "+events/run/RunStartedEvent"
+import {
 	type ServerDisconnectedEvent,
 	applyServerDisconnectedEvent,
 } from "+events/server/ServerDisconnectedEvent"
@@ -34,6 +42,8 @@ export type Event =
 	| FilePassedEvent
 	| FileSkippedEvent
 	| FileStartedEvent
+	| RunCompletedEvent
+	| RunStartedEvent
 	| ServerDisconnectedEvent
 	| ServerRestartedEvent
 
@@ -53,6 +63,12 @@ export function applyEvent(project: Project, event: Event): Project {
 		}
 		case "file-started": {
 			return applyFileStartedEvent(project, event)
+		}
+		case "run-completed": {
+			return applyRunCompletedEvent(project)
+		}
+		case "run-started": {
+			return applyRunStartedEvent(project, event)
 		}
 		case "server-disconnected": {
 			return applyServerDisconnectedEvent(project)
