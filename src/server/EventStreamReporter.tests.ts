@@ -2,6 +2,7 @@ import {
 	fakeVitestModule,
 	fakeVitestSpecification,
 } from "+models/File.fixtures"
+import { fakeVitestTest } from "+models/Test.fixtures"
 import {
 	type EventStreamSubscriber,
 	createEventStream,
@@ -18,7 +19,6 @@ import type {
 	TestCase,
 	TestModule,
 	TestModuleState,
-	TestResult,
 	TestState,
 	TestSuite,
 	TestSuiteState,
@@ -278,7 +278,7 @@ describe.each`
 					"and given a nested test case named $name",
 					(testProps: { id: string; name: string }) => {
 						function test(status: TestState): TestCase {
-							return fakeTest({
+							return fakeVitestTest({
 								parentModule: module("pending"),
 								parentSuite: topSuite("pending"),
 								id: testProps.id,
@@ -450,7 +450,7 @@ describe.each`
 							"and given a nested test case named $name",
 							(testProps: { id: string; name: string }) => {
 								function test(status: TestState): TestCase {
-									return fakeTest({
+									return fakeVitestTest({
 										parentModule: module("pending"),
 										parentSuite: nestedSuite("pending"),
 										id: testProps.id,
@@ -541,7 +541,7 @@ describe.each`
 			"and given a top-level test case named $name",
 			(testProps: { id: string; name: string }) => {
 				function test(status: TestState): TestCase {
-					return fakeTest({
+					return fakeVitestTest({
 						parentModule: module("pending"),
 						parentSuite: null,
 						id: testProps.id,
@@ -647,21 +647,4 @@ function fakeSuite(props: {
 		name: props.name,
 		state: () => props.status,
 	} as TestSuite
-}
-
-function fakeTest(props: {
-	parentModule: TestModule
-	parentSuite: TestSuite | null
-	id: string
-	name: string
-	status: TestState
-}): TestCase {
-	return {
-		type: "test",
-		module: props.parentModule,
-		parent: props.parentSuite ?? props.parentModule,
-		id: props.id,
-		name: props.name,
-		result: () => ({ state: props.status }) as TestResult,
-	} as TestCase
 }

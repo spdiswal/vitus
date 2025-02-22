@@ -19,24 +19,28 @@ const dummyFiles = {
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Apples.tests.ts",
 		status: "passed",
+		tests: [],
 	}),
 	a3fdd8b6c3: newFile({
 		id: "a3fdd8b6c3",
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Bananas.tests.ts",
 		status: "passed",
+		tests: [],
 	}),
 	"-1730f876b4": newFile({
 		id: "-1730f876b4",
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Oranges.tests.ts",
 		status: "passed",
+		tests: [],
 	}),
 	"-e45b128829": newFile({
 		id: "-e45b128829",
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Peaches.tests.ts",
 		status: "passed",
+		tests: [],
 	}),
 } as const satisfies Record<FileId, File>
 

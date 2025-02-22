@@ -1,6 +1,6 @@
+import type { DeprecatedTestId } from "+types/DeprecatedTestId"
 import type { Path } from "+types/Path"
 import type { SuiteId } from "+types/SuiteId"
-import type { TestId } from "+types/TestId"
 import type { TestCase, TestState } from "vitest/node"
 
 export type TestEvent = {
@@ -8,7 +8,7 @@ export type TestEvent = {
 	status: TestEventStatus
 	filePath: Path
 	parentSuiteId: SuiteId | null
-	testId: TestId
+	testId: DeprecatedTestId
 	testName: string
 }
 

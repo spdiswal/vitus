@@ -1,5 +1,5 @@
 import { type FileId, newFile } from "+models/File"
-import { type Project, putFile } from "+models/Project"
+import { type Project, getFileById, putFile } from "+models/Project"
 import type { Path } from "+types/Path"
 
 export type FileStartedEvent = {
@@ -18,6 +18,8 @@ export function applyFileStartedEvent(
 	project: Project,
 	event: FileStartedEvent,
 ): Project {
+	const file = getFileById(project, event.id)
+
 	return putFile(
 		project,
 		newFile({
@@ -25,6 +27,7 @@ export function applyFileStartedEvent(
 			duration: 0,
 			path: event.path,
 			status: "running",
+			tests: file?.tests ?? [],
 		}),
 	)
 }

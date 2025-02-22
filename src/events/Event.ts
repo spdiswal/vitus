@@ -34,6 +34,22 @@ import {
 	type ServerRestartedEvent,
 	applyServerRestartedEvent,
 } from "+events/server/ServerRestartedEvent"
+import {
+	type TestFailedEvent,
+	applyTestFailedEvent,
+} from "+events/test/TestFailedEvent"
+import {
+	type TestPassedEvent,
+	applyTestPassedEvent,
+} from "+events/test/TestPassedEvent"
+import {
+	type TestSkippedEvent,
+	applyTestSkippedEvent,
+} from "+events/test/TestSkippedEvent"
+import {
+	type TestStartedEvent,
+	applyTestStartedEvent,
+} from "+events/test/TestStartedEvent"
 import type { Project } from "+models/Project"
 
 export type Event =
@@ -46,6 +62,10 @@ export type Event =
 	| RunStartedEvent
 	| ServerDisconnectedEvent
 	| ServerRestartedEvent
+	| TestFailedEvent
+	| TestPassedEvent
+	| TestSkippedEvent
+	| TestStartedEvent
 
 export function applyEvent(project: Project, event: Event): Project {
 	switch (event.type) {
@@ -75,6 +95,18 @@ export function applyEvent(project: Project, event: Event): Project {
 		}
 		case "server-restarted": {
 			return applyServerRestartedEvent(project)
+		}
+		case "test-failed": {
+			return applyTestFailedEvent(project, event)
+		}
+		case "test-passed": {
+			return applyTestPassedEvent(project, event)
+		}
+		case "test-skipped": {
+			return applyTestSkippedEvent(project, event)
+		}
+		case "test-started": {
+			return applyTestStartedEvent(project, event)
 		}
 	}
 }
