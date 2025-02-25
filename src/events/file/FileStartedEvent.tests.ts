@@ -4,6 +4,7 @@ import type { File, FileId, FileStatus } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
 import { type Project, type ProjectStatus, getFileById } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
+import { dummySuite } from "+models/Suite.fixtures"
 import { dummyTest } from "+models/Test.fixtures"
 import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
@@ -15,6 +16,7 @@ describe("given a project of 4 files where 3 files have status 'passed' and 1 fi
 			dummyFile("15b021ef72", {
 				duration: 10,
 				status: "passed",
+				suites: [dummySuite("15b021ef72_10", { status: "passed" })],
 				tests: [
 					dummyTest("15b021ef72_50", { status: "failed" }),
 					dummyTest("15b021ef72_51", { status: "failed" }),
@@ -23,6 +25,7 @@ describe("given a project of 4 files where 3 files have status 'passed' and 1 fi
 			dummyFile("a3fdd8b6c3", {
 				duration: 20,
 				status: "failed",
+				suites: [],
 				tests: [
 					dummyTest("a3fdd8b6c3_50", { status: "passed" }),
 					dummyTest("a3fdd8b6c3_51", { status: "passed" }),
@@ -32,11 +35,16 @@ describe("given a project of 4 files where 3 files have status 'passed' and 1 fi
 			dummyFile("-1730f876b4", {
 				duration: 40,
 				status: "passed",
+				suites: [dummySuite("-1730f876b4_10", { status: "passed" })],
 				tests: [dummyTest("-1730f876b4_50", { status: "passed" })],
 			}),
 			dummyFile("-e45b128829", {
 				duration: 80,
 				status: "passed",
+				suites: [
+					dummySuite("-e45b128829_10", { status: "failed" }),
+					dummySuite("-e45b128829_11", { status: "skipped" }),
+				],
 				tests: [
 					dummyTest("-e45b128829_50", { status: "passed" }),
 					dummyTest("-e45b128829_51", { status: "failed" }),
@@ -100,6 +108,10 @@ describe("given a project of 4 files where 3 files have status 'passed' and 1 fi
 				expect(actualFile.duration).toBe(0)
 			})
 
+			it("clears the suites in the file", () => {
+				expect(actualFile.suites).toHaveLength(0)
+			})
+
 			it("clears the tests in the file", () => {
 				expect(actualFile.tests).toHaveLength(0)
 			})
@@ -126,17 +138,18 @@ describe("given a project of 4 files where 3 files have status 'passed' and 1 fi
 	)
 
 	describe.each`
-		filename              | id               | expectedProjectDuration        | expectedTestCount
-		${"Apples.tests.ts"}  | ${"15b021ef72"}  | ${initialProjectDuration - 10} | ${2}
-		${"Bananas.tests.ts"} | ${"a3fdd8b6c3"}  | ${initialProjectDuration - 20} | ${3}
-		${"Oranges.tests.ts"} | ${"-1730f876b4"} | ${initialProjectDuration - 40} | ${1}
-		${"Peaches.tests.ts"} | ${"-e45b128829"} | ${initialProjectDuration - 80} | ${2}
+		filename              | id               | expectedProjectDuration        | expectedSuiteCount | expectedTestCount
+		${"Apples.tests.ts"}  | ${"15b021ef72"}  | ${initialProjectDuration - 10} | ${1}               | ${2}
+		${"Bananas.tests.ts"} | ${"a3fdd8b6c3"}  | ${initialProjectDuration - 20} | ${0}               | ${3}
+		${"Oranges.tests.ts"} | ${"-1730f876b4"} | ${initialProjectDuration - 40} | ${1}               | ${1}
+		${"Peaches.tests.ts"} | ${"-e45b128829"} | ${initialProjectDuration - 80} | ${2}               | ${2}
 	`(
 		"when an existing file named $filename with id $id has started running",
 		(props: {
 			filename: string
 			id: FileId
 			expectedProjectDuration: Duration
+			expectedSuiteCount: number
 			expectedTestCount: number
 		}) => {
 			let actualProject: Project
@@ -164,6 +177,10 @@ describe("given a project of 4 files where 3 files have status 'passed' and 1 fi
 
 			it("clears the file duration", () => {
 				expect(actualFile.duration).toBe(0)
+			})
+
+			it("preserves the suites in the file", () => {
+				expect(actualFile.suites).toHaveLength(props.expectedSuiteCount)
 			})
 
 			it("preserves the tests in the file", () => {

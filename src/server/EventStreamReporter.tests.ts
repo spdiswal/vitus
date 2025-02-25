@@ -2,6 +2,7 @@ import {
 	fakeVitestModule,
 	fakeVitestSpecification,
 } from "+models/File.fixtures"
+import { fakeVitestSuite } from "+models/Suite.fixtures"
 import { fakeVitestTest } from "+models/Test.fixtures"
 import {
 	type EventStreamSubscriber,
@@ -193,7 +194,7 @@ describe.each`
 			"and given a top-level test suite named $name",
 			(topSuiteProps: { id: string; name: string }) => {
 				function topSuite(status: TestSuiteState): TestSuite {
-					return fakeSuite({
+					return fakeVitestSuite({
 						parentModule: module("pending"),
 						parentSuite: null,
 						id: topSuiteProps.id,
@@ -365,7 +366,7 @@ describe.each`
 					"and given a nested test suite named $name",
 					(nestedSuiteProps: { id: string; name: string }) => {
 						function nestedSuite(status: TestSuiteState): TestSuite {
-							return fakeSuite({
+							return fakeVitestSuite({
 								parentModule: module("pending"),
 								parentSuite: topSuite("pending"),
 								id: nestedSuiteProps.id,
@@ -631,20 +632,3 @@ describe("when an unknown test file has been deleted", () => {
 		expect(spy).not.toHaveBeenCalled()
 	})
 })
-
-function fakeSuite(props: {
-	parentModule: TestModule
-	parentSuite: TestSuite | null
-	id: string
-	name: string
-	status: TestSuiteState
-}): TestSuite {
-	return {
-		type: "suite",
-		module: props.parentModule,
-		parent: props.parentSuite ?? props.parentModule,
-		id: props.id,
-		name: props.name,
-		state: () => props.status,
-	} as TestSuite
-}

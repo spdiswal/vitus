@@ -19,6 +19,7 @@ const dummyFiles = {
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Apples.tests.ts",
 		status: "passed",
+		suites: [],
 		tests: [],
 	}),
 	a3fdd8b6c3: newFile({
@@ -26,6 +27,7 @@ const dummyFiles = {
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Bananas.tests.ts",
 		status: "passed",
+		suites: [],
 		tests: [],
 	}),
 	"-1730f876b4": newFile({
@@ -33,6 +35,7 @@ const dummyFiles = {
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Oranges.tests.ts",
 		status: "passed",
+		suites: [],
 		tests: [],
 	}),
 	"-e45b128829": newFile({
@@ -40,6 +43,7 @@ const dummyFiles = {
 		duration: 0,
 		path: "/Users/sdi/repositories/plantation/src/basket/Peaches.tests.ts",
 		status: "passed",
+		suites: [],
 		tests: [],
 	}),
 } as const satisfies Record<FileId, File>

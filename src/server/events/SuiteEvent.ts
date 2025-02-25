@@ -1,13 +1,13 @@
+import type { DeprecatedSuiteId } from "+types/DeprecatedSuiteId"
 import type { Path } from "+types/Path"
-import type { SuiteId } from "+types/SuiteId"
 import type { TestSuite, TestSuiteState } from "vitest/node"
 
 export type SuiteEvent = {
 	scope: "suite"
 	status: SuiteEventStatus
 	filePath: Path
-	parentSuiteId: SuiteId | null
-	suiteId: SuiteId
+	parentSuiteId: DeprecatedSuiteId | null
+	suiteId: DeprecatedSuiteId
 	suiteName: string
 }
 

@@ -17,6 +17,7 @@ export function applyServerDisconnectedEvent(project: Project): Project {
 			.map((file) =>
 				newFile({
 					...file,
+					suites: file.suites.filter((suite) => suite.status !== "running"),
 					tests: file.tests.filter((test) => test.status !== "running"),
 				}),
 			),

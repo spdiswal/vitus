@@ -35,6 +35,22 @@ import {
 	applyServerRestartedEvent,
 } from "+events/server/ServerRestartedEvent"
 import {
+	type SuiteFailedEvent,
+	applySuiteFailedEvent,
+} from "+events/suite/SuiteFailedEvent"
+import {
+	type SuitePassedEvent,
+	applySuitePassedEvent,
+} from "+events/suite/SuitePassedEvent"
+import {
+	type SuiteSkippedEvent,
+	applySuiteSkippedEvent,
+} from "+events/suite/SuiteSkippedEvent"
+import {
+	type SuiteStartedEvent,
+	applySuiteStartedEvent,
+} from "+events/suite/SuiteStartedEvent"
+import {
 	type TestFailedEvent,
 	applyTestFailedEvent,
 } from "+events/test/TestFailedEvent"
@@ -62,6 +78,10 @@ export type Event =
 	| RunStartedEvent
 	| ServerDisconnectedEvent
 	| ServerRestartedEvent
+	| SuiteFailedEvent
+	| SuitePassedEvent
+	| SuiteSkippedEvent
+	| SuiteStartedEvent
 	| TestFailedEvent
 	| TestPassedEvent
 	| TestSkippedEvent
@@ -95,6 +115,18 @@ export function applyEvent(project: Project, event: Event): Project {
 		}
 		case "server-restarted": {
 			return applyServerRestartedEvent(project)
+		}
+		case "suite-failed": {
+			return applySuiteFailedEvent(project, event)
+		}
+		case "suite-passed": {
+			return applySuitePassedEvent(project, event)
+		}
+		case "suite-skipped": {
+			return applySuiteSkippedEvent(project, event)
+		}
+		case "suite-started": {
+			return applySuiteStartedEvent(project, event)
 		}
 		case "test-failed": {
 			return applyTestFailedEvent(project, event)

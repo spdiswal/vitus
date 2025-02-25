@@ -27,6 +27,7 @@ export function applyFileStartedEvent(
 			duration: 0,
 			path: event.path,
 			status: "running",
+			suites: file?.suites ?? [],
 			tests: file?.tests ?? [],
 		}),
 	)

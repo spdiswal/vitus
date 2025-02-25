@@ -4,6 +4,7 @@ import { type File, type FileStatus, getTopLevelTestById } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
 import { type Project, getFileById } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
+import { dummySuite } from "+models/Suite.fixtures"
 import type { Test, TestIds, TestPath, TestStatus } from "+models/Test"
 import { dummyTest } from "+models/Test.fixtures"
 import type { Duration } from "+types/Duration"
@@ -16,6 +17,7 @@ describe("given a project of 4 files with a mix of tests", () => {
 			dummyFile("15b021ef72", {
 				duration: 14,
 				status: "failed",
+				suites: [dummySuite("15b021ef72_10", { status: "skipped" })],
 				tests: [
 					dummyTest("15b021ef72_50", { status: "failed" }),
 					dummyTest("15b021ef72_51", { status: "skipped" }),
@@ -24,6 +26,10 @@ describe("given a project of 4 files with a mix of tests", () => {
 			dummyFile("a3fdd8b6c3", {
 				duration: 6,
 				status: "running",
+				suites: [
+					dummySuite("a3fdd8b6c3_11", { status: "passed" }),
+					dummySuite("a3fdd8b6c3_12", { status: "skipped" }),
+				],
 				tests: [
 					dummyTest("a3fdd8b6c3_51", { status: "passed" }),
 					dummyTest("a3fdd8b6c3_52", { status: "failed" }),
@@ -32,11 +38,17 @@ describe("given a project of 4 files with a mix of tests", () => {
 			dummyFile("-1730f876b4", {
 				duration: 9,
 				status: "passed",
+				suites: [],
 				tests: [dummyTest("-1730f876b4_51", { status: "failed" })],
 			}),
 			dummyFile("-e45b128829", {
 				duration: 11,
 				status: "skipped",
+				suites: [
+					dummySuite("-e45b128829_10", { status: "skipped" }),
+					dummySuite("-e45b128829_11", { status: "passed" }),
+					dummySuite("-e45b128829_12", { status: "failed" }),
+				],
 				tests: [dummyTest("-e45b128829_52", { status: "skipped" })],
 			}),
 		],
@@ -51,13 +63,13 @@ describe("given a project of 4 files with a mix of tests", () => {
 	})
 
 	describe.each`
-		path                                  | name                           | expectedFileDuration | expectedFileStatus | expectedTestCount | expectedTestIds
-		${["15b021ef72", "15b021ef72_57"]}    | ${"asks for directions"}       | ${14}                | ${"failed"}        | ${3}              | ${["15b021ef72_50", "15b021ef72_51", "15b021ef72_57"]}
-		${["a3fdd8b6c3", "a3fdd8b6c3_50"]}    | ${"jumps over the lazy dog"}   | ${6}                 | ${"running"}       | ${3}              | ${["a3fdd8b6c3_50", "a3fdd8b6c3_51", "a3fdd8b6c3_52"]}
-		${["-1730f876b4", "-1730f876b4_50"]}  | ${"empties the swimming pool"} | ${9}                 | ${"passed"}        | ${2}              | ${["-1730f876b4_50", "-1730f876b4_51"]}
-		${["-1730f876b4", "-1730f876b4_53"]}  | ${"makes a wish list"}         | ${9}                 | ${"passed"}        | ${2}              | ${["-1730f876b4_51", "-1730f876b4_53"]}
-		${["-e45b128829", "-e45b128829_49"]}  | ${"selects a winner"}          | ${11}                | ${"skipped"}       | ${2}              | ${["-e45b128829_49", "-e45b128829_52"]}
-		${["-e45b128829", "-e45b128829_510"]} | ${"completes the purchase"}    | ${11}                | ${"skipped"}       | ${2}              | ${["-e45b128829_52", "-e45b128829_510"]}
+		path                                  | name                           | expectedFileDuration | expectedFileStatus | expectedSuiteCount | expectedTestCount | expectedTestIds
+		${["15b021ef72", "15b021ef72_57"]}    | ${"asks for directions"}       | ${14}                | ${"failed"}        | ${1}               | ${3}              | ${["15b021ef72_50", "15b021ef72_51", "15b021ef72_57"]}
+		${["a3fdd8b6c3", "a3fdd8b6c3_50"]}    | ${"jumps over the lazy dog"}   | ${6}                 | ${"running"}       | ${2}               | ${3}              | ${["a3fdd8b6c3_50", "a3fdd8b6c3_51", "a3fdd8b6c3_52"]}
+		${["-1730f876b4", "-1730f876b4_50"]}  | ${"empties the swimming pool"} | ${9}                 | ${"passed"}        | ${0}               | ${2}              | ${["-1730f876b4_50", "-1730f876b4_51"]}
+		${["-1730f876b4", "-1730f876b4_53"]}  | ${"makes a wish list"}         | ${9}                 | ${"passed"}        | ${0}               | ${2}              | ${["-1730f876b4_51", "-1730f876b4_53"]}
+		${["-e45b128829", "-e45b128829_49"]}  | ${"selects a winner"}          | ${11}                | ${"skipped"}       | ${3}               | ${2}              | ${["-e45b128829_49", "-e45b128829_52"]}
+		${["-e45b128829", "-e45b128829_510"]} | ${"completes the purchase"}    | ${11}                | ${"skipped"}       | ${3}               | ${2}              | ${["-e45b128829_52", "-e45b128829_510"]}
 	`(
 		"when a new top-level test with id $path.1 has started running",
 		(props: {
@@ -65,6 +77,7 @@ describe("given a project of 4 files with a mix of tests", () => {
 			name: string
 			expectedFileDuration: Duration
 			expectedFileStatus: FileStatus
+			expectedSuiteCount: number
 			expectedTestCount: number
 			expectedTestIds: TestIds
 		}) => {
@@ -110,6 +123,10 @@ describe("given a project of 4 files with a mix of tests", () => {
 				)
 			})
 
+			it("does not affect the number of suites in the file", () => {
+				expect(actualFile.suites).toHaveLength(props.expectedSuiteCount)
+			})
+
 			it("does not affect the file duration", () => {
 				expect(actualFile.duration).toBe(props.expectedFileDuration)
 			})
@@ -121,13 +138,13 @@ describe("given a project of 4 files with a mix of tests", () => {
 	)
 
 	describe.each`
-		path                                 | name                                   | expectedFileDuration | expectedFileStatus | expectedTestCount
-		${["15b021ef72", "15b021ef72_50"]}   | ${"refills the basket with 0 apples"}  | ${14}                | ${"failed"}        | ${2}
-		${["15b021ef72", "15b021ef72_51"]}   | ${"refills the basket with 1 apple"}   | ${14}                | ${"failed"}        | ${2}
-		${["a3fdd8b6c3", "a3fdd8b6c3_51"]}   | ${"refills the basket with 1 banana"}  | ${6}                 | ${"running"}       | ${2}
-		${["a3fdd8b6c3", "a3fdd8b6c3_52"]}   | ${"refills the basket with 2 bananas"} | ${6}                 | ${"running"}       | ${2}
-		${["-1730f876b4", "-1730f876b4_51"]} | ${"refills the basket with 1 orange"}  | ${9}                 | ${"passed"}        | ${1}
-		${["-e45b128829", "-e45b128829_52"]} | ${"refills the basket with 2 peaches"} | ${11}                | ${"skipped"}       | ${1}
+		path                                 | name                                   | expectedFileDuration | expectedFileStatus | expectedSuiteCount | expectedTestCount
+		${["15b021ef72", "15b021ef72_50"]}   | ${"refills the basket with 0 apples"}  | ${14}                | ${"failed"}        | ${1}               | ${2}
+		${["15b021ef72", "15b021ef72_51"]}   | ${"refills the basket with 1 apple"}   | ${14}                | ${"failed"}        | ${1}               | ${2}
+		${["a3fdd8b6c3", "a3fdd8b6c3_51"]}   | ${"refills the basket with 1 banana"}  | ${6}                 | ${"running"}       | ${2}               | ${2}
+		${["a3fdd8b6c3", "a3fdd8b6c3_52"]}   | ${"refills the basket with 2 bananas"} | ${6}                 | ${"running"}       | ${2}               | ${2}
+		${["-1730f876b4", "-1730f876b4_51"]} | ${"refills the basket with 1 orange"}  | ${9}                 | ${"passed"}        | ${0}               | ${1}
+		${["-e45b128829", "-e45b128829_52"]} | ${"refills the basket with 2 peaches"} | ${11}                | ${"skipped"}       | ${3}               | ${1}
 	`(
 		"when an existing test with id $path.1 has started running",
 		(props: {
@@ -135,6 +152,7 @@ describe("given a project of 4 files with a mix of tests", () => {
 			name: string
 			expectedFileDuration: Duration
 			expectedFileStatus: FileStatus
+			expectedSuiteCount: number
 			expectedTestCount: number
 		}) => {
 			let actualProject: Project
@@ -167,6 +185,10 @@ describe("given a project of 4 files with a mix of tests", () => {
 
 			it("clears the test duration", () => {
 				expect(actualTest.duration).toBe(0)
+			})
+
+			it("preserves the suites in the file", () => {
+				expect(actualFile.suites).toHaveLength(props.expectedSuiteCount)
 			})
 
 			it("preserves the tests in the file", () => {

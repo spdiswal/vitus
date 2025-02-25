@@ -1,3 +1,4 @@
+import type { Suite, SuiteId, Suites } from "+models/Suite"
 import type { Test, TestId, Tests } from "+models/Test"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
@@ -10,6 +11,7 @@ export type File = {
 	filename: Computed<string>
 	path: Path
 	status: FileStatus
+	suites: Suites
 	tests: Tests
 }
 
@@ -19,17 +21,40 @@ export type FileId = string
 export type FileIds = Array<FileId>
 export type FileStatus = "failed" | "passed" | "running" | "skipped"
 
+const bySuiteId: Comparator<Suite> = (a, b) =>
+	a.id.localeCompare(b.id, undefined, { numeric: true })
+
 const byTestId: Comparator<Test> = (a, b) =>
 	a.id.localeCompare(b.id, undefined, { numeric: true })
 
 export function newFile(props: PickNonComputed<File>): File {
+	const suites = props.suites.toSorted(bySuiteId)
 	const tests = props.tests.toSorted(byTestId)
 
 	return {
 		...props,
+		suites,
 		tests,
 		filename: props.path.slice(props.path.lastIndexOf("/") + 1),
 	}
+}
+
+export function getTopLevelSuiteById(
+	file: File,
+	suiteId: SuiteId,
+): Suite | null {
+	return file.suites.find((suite) => suite.id === suiteId) ?? null
+}
+
+export function putTopLevelSuite(file: File, newSuite: Suite): File {
+	const targetIndex = file.suites.findIndex((suite) => suite.id === newSuite.id)
+
+	const suites: Suites =
+		targetIndex === -1
+			? [...file.suites, newSuite]
+			: file.suites.with(targetIndex, newSuite)
+
+	return newFile({ ...file, suites })
 }
 
 export function getTopLevelTestById(file: File, testId: TestId): Test | null {

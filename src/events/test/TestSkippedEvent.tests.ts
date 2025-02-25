@@ -4,6 +4,7 @@ import { type File, getTopLevelTestById } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
 import { type Project, getFileById } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
+import { dummySuite } from "+models/Suite.fixtures"
 import type { Test, TestPath, TestStatus } from "+models/Test"
 import { dummyTest } from "+models/Test.fixtures"
 import type { Duration } from "+types/Duration"
@@ -14,12 +15,18 @@ describe("given a project of 4 files with a mix of failed and passed tests", () 
 	const initialProject = dummyProject({
 		files: [
 			dummyFile("15b021ef72", {
+				suites: [dummySuite("15b021ef72_10", { status: "passed" })],
 				tests: [
 					dummyTest("15b021ef72_50", { status: "failed" }),
 					dummyTest("15b021ef72_51", { status: "failed" }),
 				],
 			}),
 			dummyFile("a3fdd8b6c3", {
+				suites: [
+					dummySuite("a3fdd8b6c3_10", { status: "failed" }),
+					dummySuite("a3fdd8b6c3_11", { status: "passed" }),
+					dummySuite("a3fdd8b6c3_12", { status: "passed" }),
+				],
 				tests: [
 					dummyTest("a3fdd8b6c3_50", { status: "passed" }),
 					dummyTest("a3fdd8b6c3_51", { status: "passed" }),
@@ -27,9 +34,14 @@ describe("given a project of 4 files with a mix of failed and passed tests", () 
 				],
 			}),
 			dummyFile("-1730f876b4", {
+				suites: [
+					dummySuite("-1730f876b4_10", { status: "failed" }),
+					dummySuite("-1730f876b4_11", { status: "passed" }),
+				],
 				tests: [dummyTest("-1730f876b4_50", { status: "passed" })],
 			}),
 			dummyFile("-e45b128829", {
+				suites: [],
 				tests: [
 					dummyTest("-e45b128829_50", { status: "passed" }),
 					dummyTest("-e45b128829_51", { status: "failed" }),
@@ -47,18 +59,19 @@ describe("given a project of 4 files with a mix of failed and passed tests", () 
 	})
 
 	describe.each`
-		path                                 | duration | expectedTestCount
-		${["15b021ef72", "15b021ef72_50"]}   | ${7}     | ${2}
-		${["15b021ef72", "15b021ef72_51"]}   | ${4}     | ${2}
-		${["a3fdd8b6c3", "a3fdd8b6c3_50"]}   | ${11}    | ${3}
-		${["a3fdd8b6c3", "a3fdd8b6c3_52"]}   | ${9}     | ${3}
-		${["-1730f876b4", "-1730f876b4_50"]} | ${16}    | ${1}
-		${["-e45b128829", "-e45b128829_51"]} | ${5}     | ${2}
+		path                                 | duration | expectedSuiteCount | expectedTestCount
+		${["15b021ef72", "15b021ef72_50"]}   | ${7}     | ${1}               | ${2}
+		${["15b021ef72", "15b021ef72_51"]}   | ${4}     | ${1}               | ${2}
+		${["a3fdd8b6c3", "a3fdd8b6c3_50"]}   | ${11}    | ${3}               | ${3}
+		${["a3fdd8b6c3", "a3fdd8b6c3_52"]}   | ${9}     | ${3}               | ${3}
+		${["-1730f876b4", "-1730f876b4_50"]} | ${16}    | ${2}               | ${1}
+		${["-e45b128829", "-e45b128829_51"]} | ${5}     | ${0}               | ${2}
 	`(
 		"when a top-level test with id $path.1 has been skipped",
 		(props: {
 			path: TestPath
 			duration: Duration
+			expectedSuiteCount: number
 			expectedTestCount: number
 		}) => {
 			let actualProject: Project
@@ -90,6 +103,10 @@ describe("given a project of 4 files with a mix of failed and passed tests", () 
 
 			it("updates the test duration", () => {
 				expect(actualTest.duration).toBe(props.duration)
+			})
+
+			it("does not affect the number of suites in the file", () => {
+				expect(actualFile.suites).toHaveLength(props.expectedSuiteCount)
 			})
 
 			it("does not affect the number of tests in the file", () => {
