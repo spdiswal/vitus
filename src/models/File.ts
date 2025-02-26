@@ -4,6 +4,7 @@ import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
 import type { Path } from "+types/Path"
+import { count } from "+utilities/Strings"
 
 export type File = {
 	id: FileId
@@ -70,4 +71,12 @@ export function putTopLevelTest(file: File, newTest: Test): File {
 			: file.tests.with(targetIndex, newTest)
 
 	return newFile({ ...file, tests })
+}
+
+export function assertFileChildCount(file: File, childCount: number): void {
+	if (file.suites.length + file.tests.length !== childCount) {
+		throw new Error(
+			`Expected the file to have ${count(childCount, "child", "children")}, but got ${count(file.suites.length + file.tests.length, "child", "children")}`,
+		)
+	}
 }
