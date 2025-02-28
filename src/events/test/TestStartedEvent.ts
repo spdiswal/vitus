@@ -1,4 +1,4 @@
-import { putTopLevelTest } from "+models/File"
+import { putTopLevelSuiteOrTest } from "+models/File"
 import { type Project, getFileById, putFile } from "+models/Project"
 import { type TestPath, newTest } from "+models/Test"
 
@@ -27,7 +27,7 @@ export function applyTestStartedEvent(
 
 	return putFile(
 		project,
-		putTopLevelTest(
+		putTopLevelSuiteOrTest(
 			file,
 			newTest({
 				duration: 0,

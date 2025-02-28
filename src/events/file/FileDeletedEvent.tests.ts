@@ -12,14 +12,12 @@ import { dummyProject } from "+models/Project.fixtures"
 import type { Duration } from "+types/Duration"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({
-	files: [
-		dummyFile("15b021ef72", { duration: 10, status: "passed" }),
-		dummyFile("a3fdd8b6c3", { duration: 20, status: "passed" }),
-		dummyFile("-1730f876b4", { duration: 40, status: "running" }),
-		dummyFile("-e45b128829", { duration: 80, status: "passed" }),
-	],
-})
+const initialProject = dummyProject({}, [
+	dummyFile("15b021ef72", { duration: 10, status: "passed" }),
+	dummyFile("a3fdd8b6c3", { duration: 20, status: "passed" }),
+	dummyFile("-1730f876b4", { duration: 40, status: "running" }),
+	dummyFile("-e45b128829", { duration: 80, status: "passed" }),
+])
 
 beforeAll(() => {
 	assertProjectDuration(initialProject, 10 + 20 + 40 + 80)
@@ -52,17 +50,17 @@ describe.each`
 		})
 
 		it("forgets about the deleted file", () => {
-			expect(actualProject.files).toHaveLength(3)
+			expect(actualProject.files).toHaveLength(initialProject.files.length - 1)
 			expect(actualProject.files.map((file) => file.filename)).not.toContain(
 				props.deletedFilename,
 			)
 		})
 
-		it("refreshes the project duration based on the remaining files", () => {
+		it("updates the project duration based on the latest fileset", () => {
 			expect(actualProject.duration).toBe(props.expectedProjectDuration)
 		})
 
-		it("refreshes the project status based on the remaining files", () => {
+		it("updates the project status based on the latest fileset", () => {
 			expect(actualProject.status).toBe(props.expectedProjectStatus)
 		})
 	},

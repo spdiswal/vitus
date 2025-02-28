@@ -2,8 +2,9 @@ import { applyEvent } from "+events/Event"
 import { suiteStartedEvent } from "+events/suite/SuiteStartedEvent"
 import {
 	type File,
-	type FileStatus,
 	assertFileChildCount,
+	countFileChildren,
+	getFileChildIds,
 	getTopLevelSuiteById,
 } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -15,89 +16,100 @@ import {
 import { dummyProject } from "+models/Project.fixtures"
 import type { Suite, SuitePath, SuiteStatus } from "+models/Suite"
 import { dummySuite } from "+models/Suite.fixtures"
-import type { TestIds } from "+models/Test"
 import { dummyTest } from "+models/Test.fixtures"
-import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({
-	files: [
-		dummyFile("15b021ef72", {
-			duration: 14,
-			status: "failed",
-			suites: [
-				dummySuite("15b021ef72_10", { status: "failed" }),
-				dummySuite("15b021ef72_11", { status: "skipped" }),
-			],
-			tests: [
-				dummyTest("15b021ef72_50", { status: "failed" }),
-				dummyTest("15b021ef72_51", { status: "passed" }),
-			],
-		}),
-		dummyFile("a3fdd8b6c3", {
-			duration: 6,
-			status: "running",
-			suites: [
-				dummySuite("a3fdd8b6c3_11", { status: "passed" }),
-				dummySuite("a3fdd8b6c3_12", { status: "failed" }),
-			],
-			tests: [dummyTest("a3fdd8b6c3_50", { status: "passed" })],
-		}),
-		dummyFile("-1730f876b4", {
-			duration: 9,
-			status: "passed",
-			suites: [dummySuite("-1730f876b4_11", { status: "failed" })],
-			tests: [
-				dummyTest("-1730f876b4_50", { status: "failed" }),
-				dummyTest("-1730f876b4_51", { status: "skipped" }),
-				dummyTest("-1730f876b4_52", { status: "skipped" }),
-			],
-		}),
-		dummyFile("-e45b128829", {
-			duration: 11,
-			status: "skipped",
-			suites: [dummySuite("-e45b128829_12", { status: "skipped" })],
-			tests: [
-				dummyTest("-e45b128829_50", { status: "passed" }),
-				dummyTest("-e45b128829_51", { status: "passed" }),
-			],
-		}),
-	],
-})
+const initialProject = dummyProject({}, [
+	dummyFile("15b021ef72", { duration: 14, status: "failed" }, [
+		dummySuite("15b021ef72_0", { status: "failed" }, [
+			dummyTest("15b021ef72_0_1", { status: "failed" }),
+		]),
+		dummyTest("15b021ef72_1", { status: "passed" }),
+		dummySuite("15b021ef72_2", { status: "passed" }, [
+			dummyTest("15b021ef72_2_3", { status: "skipped" }),
+			dummySuite("15b021ef72_2_6", { status: "passed" }, [
+				dummyTest("15b021ef72_2_6_7", { status: "passed" }),
+				dummyTest("15b021ef72_2_6_9", { status: "skipped" }),
+			]),
+		]),
+	]),
+	dummyFile("a3fdd8b6c3", { duration: 6, status: "running" }, [
+		dummySuite("a3fdd8b6c3_0", { status: "failed" }, [
+			dummyTest("a3fdd8b6c3_0_1", { status: "passed" }),
+			dummyTest("a3fdd8b6c3_0_3", { status: "failed" }),
+		]),
+		dummyTest("a3fdd8b6c3_1", { status: "skipped" }),
+		dummySuite("a3fdd8b6c3_2", { status: "skipped" }, [
+			dummyTest("a3fdd8b6c3_2_5", { status: "failed" }),
+			dummySuite("a3fdd8b6c3_2_6", { status: "failed" }, [
+				dummyTest("a3fdd8b6c3_2_6_7", { status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_6_9", { status: "passed" }),
+			]),
+			dummySuite("a3fdd8b6c3_2_8", { status: "passed" }, [
+				dummyTest("a3fdd8b6c3_2_8_1", { status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
+			]),
+		]),
+		dummyTest("a3fdd8b6c3_3", { status: "failed" }),
+		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
+			dummyTest("a3fdd8b6c3_4_5", { status: "skipped" }),
+		]),
+	]),
+	dummyFile("-1730f876b4", { duration: 9, status: "passed" }, [
+		dummySuite("-1730f876b4_0", { status: "passed" }, [
+			dummyTest("-1730f876b4_0_1", { status: "failed" }),
+			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
+			dummySuite("-1730f876b4_0_4", { status: "passed" }, [
+				dummyTest("-1730f876b4_0_4_5", { status: "skipped" }),
+			]),
+		]),
+		dummyTest("-1730f876b4_7", { status: "skipped" }),
+		dummyTest("-1730f876b4_9", { status: "failed" }),
+	]),
+	dummyFile("-e45b128829", { duration: 11, status: "skipped" }, [
+		dummySuite("-e45b128829_2", { status: "failed" }, [
+			dummyTest("-e45b128829_2_1", { status: "failed" }),
+		]),
+		dummySuite("-e45b128829_4", { status: "passed" }, [
+			dummySuite("-e45b128829_4_4", { status: "passed" }, [
+				dummyTest("-e45b128829_4_4_3", { status: "passed" }),
+			]),
+		]),
+	]),
+])
 
 beforeAll(() => {
 	assertProjectFileCount(initialProject, 4)
-	assertFileChildCount(initialProject.files[0], 4)
-	assertFileChildCount(initialProject.files[1], 3)
-	assertFileChildCount(initialProject.files[2], 4)
-	assertFileChildCount(initialProject.files[3], 3)
+	assertFileChildCount(initialProject.files[0], 8)
+	assertFileChildCount(initialProject.files[1], 15)
+	assertFileChildCount(initialProject.files[2], 7)
+	assertFileChildCount(initialProject.files[3], 5)
 })
 
 describe.each`
-	path                                  | name                                             | expectedFileDuration | expectedFileStatus | expectedSuiteCount | expectedSuiteIds                                       | expectedTestCount
-	${["15b021ef72", "15b021ef72_17"]}    | ${"when the computer needs charging"}            | ${14}                | ${"failed"}        | ${3}               | ${["15b021ef72_10", "15b021ef72_11", "15b021ef72_17"]} | ${2}
-	${["a3fdd8b6c3", "a3fdd8b6c3_10"]}    | ${"when the fridge is out of soft drinks"}       | ${6}                 | ${"running"}       | ${3}               | ${["a3fdd8b6c3_10", "a3fdd8b6c3_11", "a3fdd8b6c3_12"]} | ${1}
-	${["-1730f876b4", "-1730f876b4_10"]}  | ${"when travelling through time"}                | ${9}                 | ${"passed"}        | ${2}               | ${["-1730f876b4_10", "-1730f876b4_11"]}                | ${3}
-	${["-1730f876b4", "-1730f876b4_13"]}  | ${"when the keyboard backlight is on"}           | ${9}                 | ${"passed"}        | ${2}               | ${["-1730f876b4_11", "-1730f876b4_13"]}                | ${3}
-	${["-e45b128829", "-e45b128829_9"]}   | ${"when the bus is late"}                        | ${11}                | ${"skipped"}       | ${2}               | ${["-e45b128829_9", "-e45b128829_12"]}                 | ${2}
-	${["-e45b128829", "-e45b128829_110"]} | ${"when ordering a large meal with extra fries"} | ${11}                | ${"skipped"}       | ${2}               | ${["-e45b128829_12", "-e45b128829_110"]}               | ${2}
+	path                                 | name                                             | expectedChildIdOrder
+	${["15b021ef72", "15b021ef72_6"]}    | ${"when the computer needs charging"}            | ${["15b021ef72_0", "15b021ef72_0_1", "15b021ef72_1", "15b021ef72_2", "15b021ef72_2_3", "15b021ef72_2_6", "15b021ef72_2_6_7", "15b021ef72_2_6_9", "15b021ef72_6"]}
+	${["a3fdd8b6c3", "a3fdd8b6c3_8"]}    | ${"when the fridge is out of soft drinks"}       | ${["a3fdd8b6c3_0", "a3fdd8b6c3_0_1", "a3fdd8b6c3_0_3", "a3fdd8b6c3_1", "a3fdd8b6c3_2", "a3fdd8b6c3_2_5", "a3fdd8b6c3_2_6", "a3fdd8b6c3_2_6_7", "a3fdd8b6c3_2_6_9", "a3fdd8b6c3_2_8", "a3fdd8b6c3_2_8_1", "a3fdd8b6c3_2_8_3", "a3fdd8b6c3_3", "a3fdd8b6c3_4", "a3fdd8b6c3_4_5", "a3fdd8b6c3_8"]}
+	${["-1730f876b4", "-1730f876b4_4"]}  | ${"when staying at the hotel"}                   | ${["-1730f876b4_0", "-1730f876b4_0_1", "-1730f876b4_0_3", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_4", "-1730f876b4_7", "-1730f876b4_9"]}
+	${["-1730f876b4", "-1730f876b4_12"]} | ${"when the keyboard backlight is on"}           | ${["-1730f876b4_0", "-1730f876b4_0_1", "-1730f876b4_0_3", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_7", "-1730f876b4_9", "-1730f876b4_12"]}
+	${["-e45b128829", "-e45b128829_0"]}  | ${"when the bus is late"}                        | ${["-e45b128829_0", "-e45b128829_2", "-e45b128829_2_1", "-e45b128829_4", "-e45b128829_4_4", "-e45b128829_4_4_3"]}
+	${["-e45b128829", "-e45b128829_20"]} | ${"when ordering a large meal with extra fries"} | ${["-e45b128829_2", "-e45b128829_2_1", "-e45b128829_4", "-e45b128829_4_4", "-e45b128829_4_4_3", "-e45b128829_20"]}
 `(
 	"when a new top-level suite with id $path.1 has started running",
 	(props: {
 		path: SuitePath
 		name: string
-		expectedFileDuration: Duration
-		expectedFileStatus: FileStatus
-		expectedSuiteCount: number
-		expectedSuiteIds: TestIds
-		expectedTestCount: number
+		expectedChildIdOrder: Array<string>
 	}) => {
+		const [fileId, suiteId] = props.path
+
+		const initialFile = getFileById(initialProject, fileId)
+		assertNotNullish(initialFile)
+
 		let actualProject: Project
 		let actualFile: File
 		let actualSuite: Suite
-
-		const [fileId, suiteId] = props.path
 
 		beforeEach(() => {
 			actualProject = applyEvent(
@@ -121,53 +133,48 @@ describe.each`
 		})
 
 		it("adds the suite to the file", () => {
-			expect(actualFile.suites).toHaveLength(props.expectedSuiteCount)
-			expect(actualFile.suites).toContainEqual(actualSuite)
+			expect(actualFile.children).toHaveLength(initialFile.children.length + 1)
+			expect(actualFile.children).toContainEqual(actualSuite)
 		})
 
-		it("sorts the suites by their id", () => {
-			expect(actualFile.suites.map((suite) => suite.id)).toEqual(
-				props.expectedSuiteIds,
-			)
+		it("sorts the suites and tests by their id", () => {
+			expect(getFileChildIds(actualFile)).toEqual(props.expectedChildIdOrder)
 		})
 
-		it("does not affect the number of tests in the file", () => {
-			expect(actualFile.tests).toHaveLength(props.expectedTestCount)
-		})
+		// TODO: updates the suite duration based on its tests
 
 		it("does not affect the file duration", () => {
-			expect(actualFile.duration).toBe(props.expectedFileDuration)
+			expect(actualFile.duration).toBe(initialFile.duration)
 		})
 
 		it("does not affect the file status", () => {
-			expect(actualFile.status).toBe(props.expectedFileStatus)
+			expect(actualFile.status).toBe(initialFile.status)
 		})
 	},
 )
 
 describe.each`
-	path                                 | name                                     | expectedFileDuration | expectedFileStatus | expectedSuiteCount | expectedTestCount
-	${["15b021ef72", "15b021ef72_10"]}   | ${"when the fruit basket has no apples"} | ${14}                | ${"failed"}        | ${2}               | ${2}
-	${["15b021ef72", "15b021ef72_11"]}   | ${"when the spring break is over"}       | ${14}                | ${"failed"}        | ${2}               | ${2}
-	${["a3fdd8b6c3", "a3fdd8b6c3_11"]}   | ${"when the summer break is over"}       | ${6}                 | ${"running"}       | ${2}               | ${1}
-	${["a3fdd8b6c3", "a3fdd8b6c3_12"]}   | ${"when the music stops playing"}        | ${6}                 | ${"running"}       | ${2}               | ${1}
-	${["-1730f876b4", "-1730f876b4_11"]} | ${"when the autumn break is over"}       | ${9}                 | ${"passed"}        | ${1}               | ${3}
-	${["-e45b128829", "-e45b128829_12"]} | ${"when the movie stops playing"}        | ${11}                | ${"skipped"}       | ${1}               | ${2}
+	path                                | name
+	${["15b021ef72", "15b021ef72_0"]}   | ${"when the fruit basket has no apples"}
+	${["15b021ef72", "15b021ef72_2"]}   | ${"when the spring break is over"}
+	${["a3fdd8b6c3", "a3fdd8b6c3_2"]}   | ${"when the summer break is over"}
+	${["a3fdd8b6c3", "a3fdd8b6c3_4"]}   | ${"when the music stops playing"}
+	${["-1730f876b4", "-1730f876b4_0"]} | ${"when the fruit basket has no oranges"}
+	${["-e45b128829", "-e45b128829_4"]} | ${"when the movie stops playing"}
 `(
 	"when an existing suite with id $path.1 has started running",
 	(props: {
 		path: SuitePath
 		name: string
-		expectedFileDuration: Duration
-		expectedFileStatus: FileStatus
-		expectedSuiteCount: number
-		expectedTestCount: number
 	}) => {
+		const [fileId, suiteId] = props.path
+
+		const initialFile = getFileById(initialProject, fileId)
+		assertNotNullish(initialFile)
+
 		let actualProject: Project
 		let actualFile: File
 		let actualSuite: Suite
-
-		const [fileId, suiteId] = props.path
 
 		beforeEach(() => {
 			actualProject = applyEvent(
@@ -190,20 +197,20 @@ describe.each`
 			expect(actualSuite.status).toBe<SuiteStatus>("running")
 		})
 
-		it("preserves the suites in the file", () => {
-			expect(actualFile.suites).toHaveLength(props.expectedSuiteCount)
+		it("does not affect the number of suites and tests in the file", () => {
+			expect(countFileChildren(actualFile)).toBe(countFileChildren(initialFile))
 		})
 
-		it("preserves the tests in the file", () => {
-			expect(actualFile.tests).toHaveLength(props.expectedTestCount)
-		})
+		// TODO: does not affect the suite duration
 
 		it("does not affect the file duration", () => {
-			expect(actualFile.duration).toBe(props.expectedFileDuration)
+			expect(actualFile.duration).toBe(initialFile.duration)
 		})
 
 		it("does not affect the file status", () => {
-			expect(actualFile.status).toBe(props.expectedFileStatus)
+			expect(actualFile.status).toBe(initialFile.status)
 		})
 	},
 )
+
+// TODO: when a nested suite has started running

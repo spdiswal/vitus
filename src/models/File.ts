@@ -1,9 +1,17 @@
-import type { Suite, SuiteId, Suites } from "+models/Suite"
-import type { Test, TestId, Tests } from "+models/Test"
+import {
+	type Suite,
+	type SuiteId,
+	countSuiteChildren,
+	dropUnfinishedSuiteChildren,
+	getSuiteChildIds,
+	isSuite,
+} from "+models/Suite"
+import { type Test, type TestId, isTest } from "+models/Test"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
 import type { Path } from "+types/Path"
+import { toSum } from "+utilities/Arrays"
 import { count } from "+utilities/Strings"
 
 export type File = {
@@ -12,8 +20,7 @@ export type File = {
 	filename: Computed<string>
 	path: Path
 	status: FileStatus
-	suites: Suites
-	tests: Tests
+	children: Array<Suite | Test>
 }
 
 export type Files = Array<File>
@@ -22,61 +29,84 @@ export type FileId = string
 export type FileIds = Array<FileId>
 export type FileStatus = "failed" | "passed" | "running" | "skipped"
 
-const bySuiteId: Comparator<Suite> = (a, b) =>
-	a.id.localeCompare(b.id, undefined, { numeric: true })
-
-const byTestId: Comparator<Test> = (a, b) =>
+const byChildId: Comparator<Suite | Test> = (a, b) =>
 	a.id.localeCompare(b.id, undefined, { numeric: true })
 
 export function newFile(props: PickNonComputed<File>): File {
-	const suites = props.suites.toSorted(bySuiteId)
-	const tests = props.tests.toSorted(byTestId)
-
 	return {
 		...props,
-		suites,
-		tests,
+		children: props.children.toSorted(byChildId),
 		filename: props.path.slice(props.path.lastIndexOf("/") + 1),
 	}
+}
+
+export function countFileChildren(file: File): number {
+	return (
+		file.children.length +
+		file.children.filter(isSuite).map(countSuiteChildren).reduce(toSum, 0)
+	)
+}
+
+export function getFileChildIds(file: File): Array<string> {
+	return file.children.flatMap((child) =>
+		isSuite(child) ? [child.id, ...getSuiteChildIds(child)] : [child.id],
+	)
 }
 
 export function getTopLevelSuiteById(
 	file: File,
 	suiteId: SuiteId,
 ): Suite | null {
-	return file.suites.find((suite) => suite.id === suiteId) ?? null
+	return (
+		file.children.find(
+			(child): child is Suite => child.id === suiteId && isSuite(child),
+		) ?? null
+	)
 }
 
-export function putTopLevelSuite(file: File, newSuite: Suite): File {
-	const targetIndex = file.suites.findIndex((suite) => suite.id === newSuite.id)
+export function putTopLevelSuiteOrTest(
+	file: File,
+	newSuiteOrTest: Suite | Test,
+): File {
+	const targetIndex = file.children.findIndex(
+		(child) => child.id === newSuiteOrTest.id,
+	)
 
-	const suites: Suites =
+	const children: Array<Suite | Test> =
 		targetIndex === -1
-			? [...file.suites, newSuite]
-			: file.suites.with(targetIndex, newSuite)
+			? [...file.children, newSuiteOrTest]
+			: file.children.with(targetIndex, newSuiteOrTest)
 
-	return newFile({ ...file, suites })
+	return newFile({ ...file, children })
 }
 
 export function getTopLevelTestById(file: File, testId: TestId): Test | null {
-	return file.tests.find((test) => test.id === testId) ?? null
+	return (
+		file.children.find(
+			(child): child is Test => child.id === testId && isTest(child),
+		) ?? null
+	)
 }
 
-export function putTopLevelTest(file: File, newTest: Test): File {
-	const targetIndex = file.tests.findIndex((test) => test.id === newTest.id)
-
-	const tests: Tests =
-		targetIndex === -1
-			? [...file.tests, newTest]
-			: file.tests.with(targetIndex, newTest)
-
-	return newFile({ ...file, tests })
+export function dropUnfinishedFileChildren(file: File): File {
+	return newFile({
+		...file,
+		children: file.children
+			.filter((child) => child.status !== "running")
+			.map((child) =>
+				isSuite(child) ? dropUnfinishedSuiteChildren(child) : child,
+			),
+	})
 }
 
-export function assertFileChildCount(file: File, childCount: number): void {
-	if (file.suites.length + file.tests.length !== childCount) {
+export function assertFileChildCount(
+	file: File,
+	expectedChildCount: number,
+): void {
+	const actualChildCount = countFileChildren(file)
+	if (actualChildCount !== expectedChildCount) {
 		throw new Error(
-			`Expected the file to have ${count(childCount, "child", "children")}, but got ${count(file.suites.length + file.tests.length, "child", "children")}`,
+			`Expected the file to have ${count(expectedChildCount, "child", "children")}, but got ${count(actualChildCount, "child", "children")}: ${getFileChildIds(file).join(", ")}`,
 		)
 	}
 }

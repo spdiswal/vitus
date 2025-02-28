@@ -1,4 +1,4 @@
-import { newFile } from "+models/File"
+import { dropUnfinishedFileChildren } from "+models/File"
 import { type Project, newProject } from "+models/Project"
 
 export type ServerDisconnectedEvent = {
@@ -14,13 +14,7 @@ export function applyServerDisconnectedEvent(project: Project): Project {
 		...project,
 		files: project.files
 			.filter((file) => file.status !== "running")
-			.map((file) =>
-				newFile({
-					...file,
-					suites: file.suites.filter((suite) => suite.status !== "running"),
-					tests: file.tests.filter((test) => test.status !== "running"),
-				}),
-			),
+			.map(dropUnfinishedFileChildren),
 		isConnected: false,
 	})
 }

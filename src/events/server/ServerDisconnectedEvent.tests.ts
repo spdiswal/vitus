@@ -7,69 +7,71 @@ import {
 	assertProjectDuration,
 	assertProjectFileCount,
 	assertProjectStatus,
+	getProjectChildIds,
 } from "+models/Project"
-import { dummyProject } from "+models/Project.fixtures"
-import type { SuiteIds } from "+models/Suite"
+import { type DummyIds, dummyProject } from "+models/Project.fixtures"
 import { dummySuite } from "+models/Suite.fixtures"
-import type { TestIds } from "+models/Test"
 import { dummyTest } from "+models/Test.fixtures"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({
-	files: [
-		dummyFile("15b021ef72", {
-			duration: 10,
-			status: "running",
-			suites: [
-				dummySuite("15b021ef72_10", { status: "passed" }),
-				dummySuite("15b021ef72_11", { status: "skipped" }),
-				dummySuite("15b021ef72_12", { status: "running" }),
-			],
-			tests: [
-				dummyTest("15b021ef72_50", { status: "failed" }),
-				dummyTest("15b021ef72_51", { status: "running" }),
-			],
-		}),
-		dummyFile("a3fdd8b6c3", {
-			duration: 20,
-			status: "passed",
-			suites: [
-				dummySuite("a3fdd8b6c3_10", { status: "failed" }),
-				dummySuite("a3fdd8b6c3_11", { status: "passed" }),
-			],
-			tests: [
-				dummyTest("a3fdd8b6c3_50", { status: "passed" }),
-				dummyTest("a3fdd8b6c3_51", { status: "running" }),
-				dummyTest("a3fdd8b6c3_52", { status: "failed" }),
-			],
-		}),
-		dummyFile("-1730f876b4", {
-			duration: 40,
-			status: "passed",
-			suites: [
-				dummySuite("-1730f876b4_10", { status: "skipped" }),
-				dummySuite("-1730f876b4_11", { status: "running" }),
-			],
-			tests: [
-				dummyTest("-1730f876b4_50", { status: "running" }),
-				dummyTest("-1730f876b4_51", { status: "passed" }),
-				dummyTest("-1730f876b4_52", { status: "running" }),
-			],
-		}),
-		dummyFile("-e45b128829", {
-			duration: 80,
-			status: "running",
-			suites: [
-				dummySuite("-e45b128829_10", { status: "passed" }),
-				dummySuite("-e45b128829_11", { status: "running" }),
-			],
-			tests: [
-				dummyTest("-e45b128829_50", { status: "running" }),
-				dummyTest("-e45b128829_51", { status: "running" }),
-			],
-		}),
-	],
-})
+const initialProject = dummyProject({}, [
+	dummyFile("15b021ef72", { duration: 10, status: "running" }, [
+		dummySuite("15b021ef72_0", { status: "failed" }, [
+			dummyTest("15b021ef72_0_1", { status: "failed" }),
+		]),
+		dummyTest("15b021ef72_1", { status: "running" }),
+		dummySuite("15b021ef72_2", { status: "passed" }, [
+			dummyTest("15b021ef72_2_3", { status: "skipped" }),
+			dummySuite("15b021ef72_2_6", { status: "running" }, [
+				dummyTest("15b021ef72_2_6_7", { status: "passed" }),
+				dummyTest("15b021ef72_2_6_9", { status: "running" }),
+			]),
+		]),
+	]),
+	dummyFile("a3fdd8b6c3", { duration: 20, status: "passed" }, [
+		dummySuite("a3fdd8b6c3_0", { status: "running" }, [
+			dummyTest("a3fdd8b6c3_0_1", { status: "running" }),
+			dummyTest("a3fdd8b6c3_0_3", { status: "failed" }),
+		]),
+		dummyTest("a3fdd8b6c3_1", { status: "running" }),
+		dummySuite("a3fdd8b6c3_2", { status: "skipped" }, [
+			dummyTest("a3fdd8b6c3_2_5", { status: "failed" }),
+			dummySuite("a3fdd8b6c3_2_6", { status: "failed" }, [
+				dummyTest("a3fdd8b6c3_2_6_7", { status: "running" }),
+				dummyTest("a3fdd8b6c3_2_6_9", { status: "passed" }),
+			]),
+			dummySuite("a3fdd8b6c3_2_8", { status: "running" }, [
+				dummyTest("a3fdd8b6c3_2_8_1", { status: "running" }),
+				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
+			]),
+		]),
+		dummyTest("a3fdd8b6c3_3", { status: "failed" }),
+		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
+			dummyTest("a3fdd8b6c3_4_5", { status: "running" }),
+		]),
+	]),
+	dummyFile("-1730f876b4", { duration: 40, status: "passed" }, [
+		dummySuite("-1730f876b4_0", { status: "passed" }, [
+			dummyTest("-1730f876b4_0_1", { status: "running" }),
+			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
+			dummySuite("-1730f876b4_0_4", { status: "running" }, [
+				dummyTest("-1730f876b4_0_4_5", { status: "running" }),
+			]),
+		]),
+		dummyTest("-1730f876b4_7", { status: "skipped" }),
+		dummyTest("-1730f876b4_9", { status: "running" }),
+	]),
+	dummyFile("-e45b128829", { duration: 80, status: "running" }, [
+		dummySuite("-e45b128829_2", { status: "failed" }, [
+			dummyTest("-e45b128829_2_1", { status: "running" }),
+		]),
+		dummySuite("-e45b128829_4", { status: "passed" }, [
+			dummySuite("-e45b128829_4_4", { status: "running" }, [
+				dummyTest("-e45b128829_4_4_3", { status: "passed" }),
+			]),
+		]),
+	]),
+])
 
 beforeAll(() => {
 	assertProjectDuration(initialProject, 10 + 20 + 40 + 80)
@@ -92,44 +94,27 @@ describe("when the server has disconnected", () => {
 		expect(actualProject.rootPath).toBe(initialProject.rootPath)
 	})
 
-	it("discards unfinished files", () => {
-		const actualFilenames = actualProject.files.map((file) => file.filename)
-
-		expect(actualFilenames).toEqual<Array<string>>([
-			"Bananas.tests.ts",
-			"Oranges.tests.ts",
+	it("discards unfinished files, suites, and tests", () => {
+		expect(getProjectChildIds(actualProject)).toEqual<DummyIds>([
+			"a3fdd8b6c3",
+			"a3fdd8b6c3_2",
+			"a3fdd8b6c3_2_5",
+			"a3fdd8b6c3_2_6",
+			"a3fdd8b6c3_2_6_9",
+			"a3fdd8b6c3_3",
+			"a3fdd8b6c3_4",
+			"-1730f876b4",
+			"-1730f876b4_0",
+			"-1730f876b4_0_3",
+			"-1730f876b4_7",
 		])
 	})
 
-	it("discards unfinished suites", () => {
-		const actualSuiteIds = actualProject.files
-			.flatMap((file) => file.suites)
-			.map((suite) => suite.id)
-
-		expect(actualSuiteIds).toEqual<SuiteIds>([
-			"a3fdd8b6c3_10",
-			"a3fdd8b6c3_11",
-			"-1730f876b4_10",
-		])
-	})
-
-	it("discards unfinished tests", () => {
-		const actualTestIds = actualProject.files
-			.flatMap((file) => file.tests)
-			.map((test) => test.id)
-
-		expect(actualTestIds).toEqual<TestIds>([
-			"a3fdd8b6c3_50",
-			"a3fdd8b6c3_52",
-			"-1730f876b4_51",
-		])
-	})
-
-	it("refreshes the project duration based on the remaining files", () => {
+	it("updates the project duration based on the latest fileset", () => {
 		expect(actualProject.duration).toBe(20 + 40)
 	})
 
-	it("refreshes the project status based on the remaining files", () => {
+	it("updates the project status based on the latest fileset", () => {
 		expect(actualProject.status).toBe<ProjectStatus>("passed")
 	})
 })

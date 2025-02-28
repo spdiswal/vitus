@@ -1,4 +1,9 @@
-import type { File, FileId, Files } from "+models/File"
+import {
+	type File,
+	type FileId,
+	type Files,
+	getFileChildIds,
+} from "+models/File"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
@@ -38,6 +43,14 @@ export function getFileById(project: Project, id: FileId): File | null {
 	return project.files.find((file) => file.id === id) ?? null
 }
 
+export function getOtherFiles(project: Project, excludedId: FileId): Files {
+	return project.files.filter((file) => file.id !== excludedId)
+}
+
+export function getProjectChildIds(project: Project): Array<string> {
+	return project.files.flatMap((file) => [file.id, ...getFileChildIds(file)])
+}
+
 export function putFile(project: Project, updatedFile: File): Project {
 	const targetIndex = project.files.findIndex(
 		(file) => file.id === updatedFile.id,
@@ -53,33 +66,36 @@ export function putFile(project: Project, updatedFile: File): Project {
 
 export function assertProjectDuration(
 	project: Project,
-	duration: Duration,
+	expectedDuration: Duration,
 ): void {
-	if (project.duration !== duration) {
+	const actualDuration = project.duration
+	if (actualDuration !== expectedDuration) {
 		throw new Error(
-			`Expected the project to have a duration of ${duration} ms, but was ${project.duration} ms`,
+			`Expected the project to have a duration of ${expectedDuration} ms, but was ${actualDuration} ms`,
 		)
 	}
 }
 
 export function assertProjectFileCount(
 	project: Project,
-	fileCount: number,
+	expectedFileCount: number,
 ): void {
-	if (project.files.length !== fileCount) {
+	const actualFileCount = project.files.length
+	if (actualFileCount !== expectedFileCount) {
 		throw new Error(
-			`Expected the project to have ${count(fileCount, "file", "files")}, but got ${count(project.files, "file", "files")}`,
+			`Expected the project to have ${count(expectedFileCount, "file", "files")}, but got ${count(actualFileCount, "file", "files")}`,
 		)
 	}
 }
 
 export function assertProjectStatus(
 	project: Project,
-	status: ProjectStatus,
+	expectedStatus: ProjectStatus,
 ): void {
-	if (project.status !== status) {
+	const actualStatus = project.status
+	if (actualStatus !== expectedStatus) {
 		throw new Error(
-			`Expected the project to have status '${status}', but was '${project.status}'`,
+			`Expected the project to have status '${expectedStatus}', but was '${actualStatus}'`,
 		)
 	}
 }

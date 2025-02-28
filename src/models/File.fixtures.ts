@@ -1,4 +1,6 @@
-import { type File, type FileId, newFile } from "+models/File"
+import { type File, newFile } from "+models/File"
+import type { Suite } from "+models/Suite"
+import type { Test } from "+models/Test"
 import type { Path } from "+types/Path"
 import type {
 	TestModule,
@@ -6,47 +8,33 @@ import type {
 	TestSpecification,
 } from "vitest/node"
 
-export function dummyFile(
-	id: keyof typeof dummyFiles,
-	overrides?: Partial<File>,
-): File {
-	return newFile({ ...dummyFiles[id], ...overrides })
+export type DummyFileId =
+	| "15b021ef72"
+	| "a3fdd8b6c3"
+	| "-1730f876b4"
+	| "-e45b128829"
+
+const dummyFilenamesById: Record<DummyFileId, string> = {
+	"15b021ef72": "Apples.tests.ts",
+	a3fdd8b6c3: "Bananas.tests.ts",
+	"-1730f876b4": "Oranges.tests.ts",
+	"-e45b128829": "Peaches.tests.ts",
 }
 
-const dummyFiles = {
-	"15b021ef72": newFile({
-		id: "15b021ef72",
+export function dummyFile(
+	fileId: DummyFileId,
+	overrides?: Partial<File>,
+	children?: Array<Suite | Test>,
+): File {
+	return newFile({
+		id: fileId,
 		duration: 0,
-		path: "/Users/sdi/repositories/plantation/src/basket/Apples.tests.ts",
+		path: `/Users/sdi/repositories/plantation/src/basket/${dummyFilenamesById[fileId]}`,
 		status: "passed",
-		suites: [],
-		tests: [],
-	}),
-	a3fdd8b6c3: newFile({
-		id: "a3fdd8b6c3",
-		duration: 0,
-		path: "/Users/sdi/repositories/plantation/src/basket/Bananas.tests.ts",
-		status: "passed",
-		suites: [],
-		tests: [],
-	}),
-	"-1730f876b4": newFile({
-		id: "-1730f876b4",
-		duration: 0,
-		path: "/Users/sdi/repositories/plantation/src/basket/Oranges.tests.ts",
-		status: "passed",
-		suites: [],
-		tests: [],
-	}),
-	"-e45b128829": newFile({
-		id: "-e45b128829",
-		duration: 0,
-		path: "/Users/sdi/repositories/plantation/src/basket/Peaches.tests.ts",
-		status: "passed",
-		suites: [],
-		tests: [],
-	}),
-} as const satisfies Record<FileId, File>
+		children: children ?? [],
+		...overrides,
+	})
+}
 
 export function fakeVitestSpecification(props: {
 	filePath: Path

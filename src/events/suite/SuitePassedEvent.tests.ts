@@ -3,6 +3,7 @@ import { suitePassedEvent } from "+events/suite/SuitePassedEvent"
 import {
 	type File,
 	assertFileChildCount,
+	countFileChildren,
 	getTopLevelSuiteById,
 } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -10,6 +11,7 @@ import {
 	type Project,
 	assertProjectFileCount,
 	getFileById,
+	getOtherFiles,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import type { Suite, SuiteStatus } from "+models/Suite"
@@ -19,71 +21,92 @@ import { dummyTest } from "+models/Test.fixtures"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({
-	files: [
-		dummyFile("15b021ef72", {
-			suites: [
-				dummySuite("15b021ef72_10", { status: "failed" }),
-				dummySuite("15b021ef72_11", { status: "failed" }),
-			],
-			tests: [dummyTest("15b021ef72_50", { status: "failed" })],
-		}),
-		dummyFile("a3fdd8b6c3", {
-			suites: [
-				dummySuite("a3fdd8b6c3_10", { status: "skipped" }),
-				dummySuite("a3fdd8b6c3_11", { status: "failed" }),
-				dummySuite("a3fdd8b6c3_12", { status: "skipped" }),
-			],
-			tests: [
-				dummyTest("a3fdd8b6c3_50", { status: "skipped" }),
-				dummyTest("a3fdd8b6c3_51", { status: "failed" }),
-			],
-		}),
-		dummyFile("-1730f876b4", {
-			suites: [dummySuite("-1730f876b4_10", { status: "skipped" })],
-			tests: [
-				dummyTest("-1730f876b4_50", { status: "failed" }),
-				dummyTest("-1730f876b4_51", { status: "failed" }),
-			],
-		}),
-		dummyFile("-e45b128829", {
-			suites: [
-				dummySuite("-e45b128829_10", { status: "failed" }),
-				dummySuite("-e45b128829_11", { status: "skipped" }),
-			],
-			tests: [dummyTest("-e45b128829_50", { status: "skipped" })],
-		}),
-	],
-})
+const initialProject = dummyProject({}, [
+	dummyFile("15b021ef72", {}, [
+		dummySuite("15b021ef72_0", { status: "failed" }, [
+			dummyTest("15b021ef72_0_1", { status: "failed" }),
+		]),
+		dummyTest("15b021ef72_1", { status: "skipped" }),
+		dummySuite("15b021ef72_2", { status: "skipped" }, [
+			dummyTest("15b021ef72_2_3", { status: "failed" }),
+			dummySuite("15b021ef72_2_6", { status: "failed" }, [
+				dummyTest("15b021ef72_2_6_7", { status: "failed" }),
+				dummyTest("15b021ef72_2_6_9", { status: "skipped" }),
+			]),
+		]),
+	]),
+	dummyFile("a3fdd8b6c3", {}, [
+		dummySuite("a3fdd8b6c3_0", { status: "failed" }, [
+			dummyTest("a3fdd8b6c3_0_1", { status: "skipped" }),
+			dummyTest("a3fdd8b6c3_0_3", { status: "failed" }),
+		]),
+		dummyTest("a3fdd8b6c3_1", { status: "failed" }),
+		dummySuite("a3fdd8b6c3_2", { status: "failed" }, [
+			dummyTest("a3fdd8b6c3_2_5", { status: "failed" }),
+			dummySuite("a3fdd8b6c3_2_6", { status: "skipped" }, [
+				dummyTest("a3fdd8b6c3_2_6_7", { status: "skipped" }),
+				dummyTest("a3fdd8b6c3_2_6_9", { status: "skipped" }),
+			]),
+			dummySuite("a3fdd8b6c3_2_8", { status: "failed" }, [
+				dummyTest("a3fdd8b6c3_2_8_1", { status: "failed" }),
+				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
+			]),
+		]),
+		dummyTest("a3fdd8b6c3_3", { status: "skipped" }),
+		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
+			dummyTest("a3fdd8b6c3_4_5", { status: "skipped" }),
+		]),
+	]),
+	dummyFile("-1730f876b4", {}, [
+		dummySuite("-1730f876b4_0", { status: "failed" }, [
+			dummyTest("-1730f876b4_0_1", { status: "failed" }),
+			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
+			dummySuite("-1730f876b4_0_4", { status: "skipped" }, [
+				dummyTest("-1730f876b4_0_4_5", { status: "failed" }),
+			]),
+		]),
+		dummyTest("-1730f876b4_7", { status: "failed" }),
+		dummyTest("-1730f876b4_9", { status: "failed" }),
+	]),
+	dummyFile("-e45b128829", {}, [
+		dummySuite("-e45b128829_2", { status: "failed" }, [
+			dummyTest("-e45b128829_2_1", { status: "failed" }),
+		]),
+		dummySuite("-e45b128829_4", { status: "skipped" }, [
+			dummySuite("-e45b128829_4_4", { status: "failed" }, [
+				dummyTest("-e45b128829_4_4_3", { status: "skipped" }),
+			]),
+		]),
+	]),
+])
 
 beforeAll(() => {
 	assertProjectFileCount(initialProject, 4)
-	assertFileChildCount(initialProject.files[0], 3)
-	assertFileChildCount(initialProject.files[1], 5)
-	assertFileChildCount(initialProject.files[2], 3)
-	assertFileChildCount(initialProject.files[3], 3)
+	assertFileChildCount(initialProject.files[0], 8)
+	assertFileChildCount(initialProject.files[1], 15)
+	assertFileChildCount(initialProject.files[2], 7)
+	assertFileChildCount(initialProject.files[3], 5)
 })
 
 describe.each`
-	path                                 | expectedSuiteCount | expectedTestCount
-	${["15b021ef72", "15b021ef72_10"]}   | ${2}               | ${1}
-	${["15b021ef72", "15b021ef72_11"]}   | ${2}               | ${1}
-	${["a3fdd8b6c3", "a3fdd8b6c3_10"]}   | ${3}               | ${2}
-	${["a3fdd8b6c3", "a3fdd8b6c3_12"]}   | ${3}               | ${2}
-	${["-1730f876b4", "-1730f876b4_10"]} | ${1}               | ${2}
-	${["-e45b128829", "-e45b128829_11"]} | ${2}               | ${1}
+	path
+	${["15b021ef72", "15b021ef72_0"]}
+	${["15b021ef72", "15b021ef72_2"]}
+	${["a3fdd8b6c3", "a3fdd8b6c3_0"]}
+	${["a3fdd8b6c3", "a3fdd8b6c3_4"]}
+	${["-1730f876b4", "-1730f876b4_0"]}
+	${["-e45b128829", "-e45b128829_2"]}
 `(
 	"when a top-level suite with id $path.1 has passed",
-	(props: {
-		path: TestPath
-		expectedSuiteCount: number
-		expectedTestCount: number
-	}) => {
+	(props: { path: TestPath }) => {
+		const [fileId, suiteId] = props.path
+
+		const initialFile = getFileById(initialProject, fileId)
+		assertNotNullish(initialFile)
+
 		let actualProject: Project
 		let actualFile: File
 		let actualSuite: Suite
-
-		const [fileId, suiteId] = props.path
 
 		beforeEach(() => {
 			actualProject = applyEvent(
@@ -106,28 +129,21 @@ describe.each`
 			expect(actualSuite.status).toBe<SuiteStatus>("passed")
 		})
 
-		it("does not affect the number of suites in the file", () => {
-			expect(actualFile.suites).toHaveLength(props.expectedSuiteCount)
+		it("does not affect the number of suites and tests in the file", () => {
+			expect(countFileChildren(actualFile)).toBe(countFileChildren(initialFile))
 		})
 
-		it("does not affect the number of tests in the file", () => {
-			expect(actualFile.tests).toHaveLength(props.expectedTestCount)
-		})
+		// TODO: does not affect the suite duration
 
 		it("does not affect the other files in the project", () => {
-			const initialOtherFiles = initialProject.files.filter(
-				(file) => file.id !== fileId,
+			expect(getOtherFiles(actualProject, fileId)).toEqual(
+				getOtherFiles(initialProject, fileId),
 			)
-			const actualOtherFiles = actualProject.files.filter(
-				(file) => file.id !== fileId,
-			)
-
-			expect(actualOtherFiles).toEqual(initialOtherFiles)
 		})
 	},
 )
 
-describe("when a non-existing suite has passed", () => {
+describe("when a non-existing top-level suite has passed", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
@@ -142,7 +158,7 @@ describe("when a non-existing suite has passed", () => {
 	})
 })
 
-describe("when a suite in a non-existing file has passed", () => {
+describe("when a top-level suite in a non-existing file has passed", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
@@ -156,3 +172,5 @@ describe("when a suite in a non-existing file has passed", () => {
 		expect(actualProject).toEqual(initialProject)
 	})
 })
+
+// TODO: when a nested suite has passed

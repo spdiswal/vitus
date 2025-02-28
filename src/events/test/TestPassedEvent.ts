@@ -1,4 +1,4 @@
-import { getTopLevelTestById, putTopLevelTest } from "+models/File"
+import { getTopLevelTestById, putTopLevelSuiteOrTest } from "+models/File"
 import { type Project, getFileById, putFile } from "+models/Project"
 import type { TestPath } from "+models/Test"
 import type { Duration } from "+types/Duration"
@@ -34,7 +34,7 @@ export function applyTestPassedEvent(
 
 	return putFile(
 		project,
-		putTopLevelTest(file, {
+		putTopLevelSuiteOrTest(file, {
 			...test,
 			duration: event.duration,
 			status: "passed",

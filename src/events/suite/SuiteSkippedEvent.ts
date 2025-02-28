@@ -1,4 +1,4 @@
-import { getTopLevelSuiteById, putTopLevelSuite } from "+models/File"
+import { getTopLevelSuiteById, putTopLevelSuiteOrTest } from "+models/File"
 import { type Project, getFileById, putFile } from "+models/Project"
 import type { SuitePath } from "+models/Suite"
 
@@ -32,6 +32,6 @@ export function applySuiteSkippedEvent(
 
 	return putFile(
 		project,
-		putTopLevelSuite(file, { ...suite, status: "skipped" }),
+		putTopLevelSuiteOrTest(file, { ...suite, status: "skipped" }),
 	)
 }

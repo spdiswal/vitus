@@ -9,20 +9,19 @@ import {
 	assertProjectFileCount,
 	assertProjectStatus,
 	getFileById,
+	getOtherFiles,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({
-	files: [
-		dummyFile("15b021ef72", { duration: 1, status: "passed" }),
-		dummyFile("a3fdd8b6c3", { duration: 3, status: "running" }),
-		dummyFile("-1730f876b4", { duration: 5, status: "passed" }),
-		dummyFile("-e45b128829", { duration: 7, status: "passed" }),
-	],
-})
+const initialProject = dummyProject({}, [
+	dummyFile("15b021ef72", { duration: 1, status: "passed" }),
+	dummyFile("a3fdd8b6c3", { duration: 3, status: "running" }),
+	dummyFile("-1730f876b4", { duration: 5, status: "passed" }),
+	dummyFile("-e45b128829", { duration: 7, status: "passed" }),
+])
 
 beforeAll(() => {
 	assertProjectDuration(initialProject, 1 + 3 + 5 + 7)
@@ -67,15 +66,21 @@ describe.each`
 			expect(actualFile.duration).toBe(props.duration)
 		})
 
-		it("does not affect the number of files", () => {
-			expect(actualProject.files).toHaveLength(4)
+		it("does not affect the number of files in the project", () => {
+			expect(actualProject.files).toHaveLength(initialProject.files.length)
 		})
 
-		it("refreshes the project duration based on the updated files", () => {
+		it("does not affect the other files in the project", () => {
+			expect(getOtherFiles(actualProject, props.id)).toEqual(
+				getOtherFiles(initialProject, props.id),
+			)
+		})
+
+		it("updates the project duration based on the latest fileset", () => {
 			expect(actualProject.duration).toBe(props.expectedProjectDuration)
 		})
 
-		it("refreshes the project status based on the updated files", () => {
+		it("updates the project status based on the latest fileset", () => {
 			expect(actualProject.status).toBe(props.expectedProjectStatus)
 		})
 	},
