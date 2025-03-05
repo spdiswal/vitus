@@ -16,9 +16,9 @@ export type TestId = string
 export type TestPath = [FileId, ...SuiteIds, TestId]
 export type TestStatus = "failed" | "passed" | "running" | "skipped"
 
-export function newTest(test: PickNonComputed<Test>): Test {
-	const testId = test.path.at(-1) as LastItemOf<TestPath>
-	return { ...test, id: testId }
+export function newTest(props: PickNonComputed<Test>): Test {
+	const testId = props.path.at(-1) as LastItemOf<TestPath>
+	return { ...props, id: testId }
 }
 
 export function isTest(suiteOrTest: Suite | Test): suiteOrTest is Test {

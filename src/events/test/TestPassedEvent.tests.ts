@@ -4,7 +4,6 @@ import {
 	type File,
 	assertFileChildCount,
 	countFileChildren,
-	getTopLevelTestById,
 } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
 import {
@@ -12,11 +11,16 @@ import {
 	assertProjectFileCount,
 	getFileById,
 	getOtherFiles,
+	getTestByPath,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import { dummySuite } from "+models/Suite.fixtures"
-import type { Test, TestPath, TestStatus } from "+models/Test"
-import { dummyTest } from "+models/Test.fixtures"
+import type { Test, TestStatus } from "+models/Test"
+import {
+	type DummyTestId,
+	dummyTest,
+	getPathFromDummyTestId,
+} from "+models/Test.fixtures"
 import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
@@ -50,6 +54,9 @@ const initialProject = dummyProject({}, [
 			dummySuite("a3fdd8b6c3_2_8", { status: "failed" }, [
 				dummyTest("a3fdd8b6c3_2_8_1", { status: "failed" }),
 				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
+				dummySuite("a3fdd8b6c3_2_8_4", { status: "failed" }, [
+					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "passed" }),
+				]),
 			]),
 		]),
 		dummyTest("a3fdd8b6c3_3", { status: "skipped" }),
@@ -75,6 +82,9 @@ const initialProject = dummyProject({}, [
 		dummySuite("-e45b128829_4", { status: "skipped" }, [
 			dummySuite("-e45b128829_4_4", { status: "failed" }, [
 				dummyTest("-e45b128829_4_4_3", { status: "skipped" }),
+				dummySuite("-e45b128829_4_4_6", { status: "skipped" }, [
+					dummyTest("-e45b128829_4_4_6_5", { status: "skipped" }),
+				]),
 			]),
 		]),
 	]),
@@ -83,25 +93,36 @@ const initialProject = dummyProject({}, [
 beforeAll(() => {
 	assertProjectFileCount(initialProject, 4)
 	assertFileChildCount(initialProject.files[0], 8)
-	assertFileChildCount(initialProject.files[1], 15)
+	assertFileChildCount(initialProject.files[1], 17)
 	assertFileChildCount(initialProject.files[2], 7)
-	assertFileChildCount(initialProject.files[3], 5)
+	assertFileChildCount(initialProject.files[3], 7)
 })
 
 describe.each`
-	path                                | duration
-	${["15b021ef72", "15b021ef72_1"]}   | ${7}
-	${["a3fdd8b6c3", "a3fdd8b6c3_1"]}   | ${11}
-	${["a3fdd8b6c3", "a3fdd8b6c3_3"]}   | ${9}
-	${["-1730f876b4", "-1730f876b4_7"]} | ${16}
-	${["-1730f876b4", "-1730f876b4_9"]} | ${5}
+	testId                   | duration
+	${"15b021ef72_1"}        | ${7}
+	${"15b021ef72_0_1"}      | ${9}
+	${"15b021ef72_2_6_9"}    | ${13}
+	${"a3fdd8b6c3_1"}        | ${11}
+	${"a3fdd8b6c3_3"}        | ${6}
+	${"a3fdd8b6c3_0_3"}      | ${15}
+	${"a3fdd8b6c3_2_6_7"}    | ${8}
+	${"a3fdd8b6c3_2_8_4_1"}  | ${1}
+	${"-1730f876b4_7"}       | ${14}
+	${"-1730f876b4_9"}       | ${5}
+	${"-1730f876b4_0_1"}     | ${12}
+	${"-1730f876b4_0_4_5"}   | ${3}
+	${"-e45b128829_2_1"}     | ${4}
+	${"-e45b128829_4_4_3"}   | ${10}
+	${"-e45b128829_4_4_6_5"} | ${2}
 `(
-	"when a top-level test with id $path.1 has passed",
+	"when a test with id $testId has passed",
 	(props: {
-		path: TestPath
+		testId: DummyTestId
 		duration: Duration
 	}) => {
-		const [fileId, testId] = props.path
+		const path = getPathFromDummyTestId(props.testId)
+		const [fileId] = path
 
 		const initialFile = getFileById(initialProject, fileId)
 		assertNotNullish(initialFile)
@@ -113,17 +134,15 @@ describe.each`
 		beforeEach(() => {
 			actualProject = applyEvent(
 				initialProject,
-				testPassedEvent({ path: props.path, duration: props.duration }),
+				testPassedEvent({ path, duration: props.duration }),
 			)
 
 			const file = getFileById(actualProject, fileId)
 			assertNotNullish(file)
-
 			actualFile = file
 
-			const test = getTopLevelTestById(file, testId)
+			const test = getTestByPath(actualProject, path)
 			assertNotNullish(test)
-
 			actualTest = test
 		})
 
@@ -149,34 +168,31 @@ describe.each`
 	},
 )
 
-describe("when a non-existing top-level test has passed", () => {
-	let actualProject: Project
+describe.each`
+	testId                 | duration
+	${"-1730f876b4_0_5"}   | ${2}
+	${"-1730f876b4_0_4_9"} | ${11}
+	${"f9bb9e8bc0_1"}      | ${6}
+	${"f9bb9e8bc0_0_1"}    | ${5}
+`(
+	"when a non-existing test with id $testId has passed",
+	(props: {
+		testId: DummyTestId
+		duration: Duration
+	}) => {
+		const path = getPathFromDummyTestId(props.testId)
 
-	beforeEach(() => {
-		actualProject = applyEvent(
-			initialProject,
-			testPassedEvent({ path: ["15b021ef72", "15b021ef72_8"], duration: 2 }),
-		)
-	})
+		let actualProject: Project
 
-	it("does not affect the project", () => {
-		expect(actualProject).toEqual(initialProject)
-	})
-})
+		beforeEach(() => {
+			actualProject = applyEvent(
+				initialProject,
+				testPassedEvent({ path, duration: props.duration }),
+			)
+		})
 
-describe("when a top-level test in a non-existing file has passed", () => {
-	let actualProject: Project
-
-	beforeEach(() => {
-		actualProject = applyEvent(
-			initialProject,
-			testPassedEvent({ path: ["f9bb9e8bc0", "f9bb9e8bc0_0"], duration: 2 }),
-		)
-	})
-
-	it("does not affect the project", () => {
-		expect(actualProject).toEqual(initialProject)
-	})
-})
-
-// TODO: when a nested test has passed
+		it("does not affect the project", () => {
+			expect(actualProject).toEqual(initialProject)
+		})
+	},
+)

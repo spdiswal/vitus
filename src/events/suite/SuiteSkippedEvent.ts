@@ -1,6 +1,5 @@
-import { getTopLevelSuiteById, putTopLevelSuiteOrTest } from "+models/File"
-import { type Project, getFileById, putFile } from "+models/Project"
-import type { SuitePath } from "+models/Suite"
+import { type Project, getSuiteByPath, putSuite } from "+models/Project"
+import { type SuitePath, newSuite } from "+models/Suite"
 
 export type SuiteSkippedEvent = {
 	type: "suite-skipped"
@@ -17,21 +16,12 @@ export function applySuiteSkippedEvent(
 	project: Project,
 	event: SuiteSkippedEvent,
 ): Project {
-	const [fileId, suiteId] = event.path
-	const file = getFileById(project, fileId)
+	const existingSuite = getSuiteByPath(project, event.path)
 
-	if (file === null) {
+	if (existingSuite === null) {
 		return project
 	}
 
-	const suite = getTopLevelSuiteById(file, suiteId)
-
-	if (suite === null) {
-		return project
-	}
-
-	return putFile(
-		project,
-		putTopLevelSuiteOrTest(file, { ...suite, status: "skipped" }),
-	)
+	const updatedSuite = newSuite({ ...existingSuite, status: "skipped" })
+	return putSuite(project, updatedSuite)
 }

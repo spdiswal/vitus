@@ -54,7 +54,6 @@ describe.each`
 
 			const file = getFileById(actualProject, props.id)
 			assertNotNullish(file)
-
 			actualFile = file
 		})
 

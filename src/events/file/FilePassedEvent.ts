@@ -18,18 +18,17 @@ export function applyFilePassedEvent(
 	project: Project,
 	event: FilePassedEvent,
 ): Project {
-	const file = getFileById(project, event.id)
+	const existingFile = getFileById(project, event.id)
 
-	if (file === null) {
+	if (existingFile === null) {
 		return project
 	}
 
-	return putFile(
-		project,
-		newFile({
-			...file,
-			duration: event.duration,
-			status: "passed",
-		}),
-	)
+	const updatedFile = newFile({
+		...existingFile,
+		duration: event.duration,
+		status: "passed",
+	})
+
+	return putFile(project, updatedFile)
 }

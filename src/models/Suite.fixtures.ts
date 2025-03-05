@@ -7,7 +7,8 @@ type EvenDigit = 0 | 2 | 4 | 6 | 8
 
 export type DummySuiteId =
 	| `${DummyFileId}_${EvenDigit}` // Top-level suite.
-	| `${DummyFileId}_${EvenDigit}_${EvenDigit}` // Nested suite.
+	| `${DummyFileId}_${EvenDigit}_${EvenDigit}` // Nested suite (level 1).
+	| `${DummyFileId}_${EvenDigit}_${EvenDigit}_${EvenDigit}` // Nested suite (level 2).
 
 const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
 	"15b021ef72": {
@@ -41,18 +42,13 @@ const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
 }
 
 export function dummySuite(
-	suiteId: DummySuiteId,
+	id: DummySuiteId,
 	overrides?: Partial<Suite>,
 	children?: Array<Suite | Test>,
 ): Suite {
-	const path = suiteId
-		.split("_")
-		.map(
-			(_, index, segments) => `${segments.slice(0, index + 1).join("_")}`,
-		) as SuitePath
-
+	const path = getPathFromDummySuiteId(id)
 	const fileId = path[0] as DummyFileId
-	const lastDigit = Number.parseInt(suiteId.slice(-1)) as EvenDigit
+	const lastDigit = Number.parseInt(id.slice(-1)) as EvenDigit
 
 	return newSuite({
 		name: `${path.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`,
@@ -61,6 +57,13 @@ export function dummySuite(
 		children: children ?? [],
 		...overrides,
 	})
+}
+
+export function getPathFromDummySuiteId(id: DummySuiteId): SuitePath {
+	const segments = id.split("_")
+	return segments.map(
+		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
+	) as SuitePath
 }
 
 export function fakeVitestSuite(props: {

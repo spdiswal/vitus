@@ -54,38 +54,41 @@ export function getFileChildIds(file: File): Array<string> {
 }
 
 export function getTopLevelSuiteById(
-	file: File,
-	suiteId: SuiteId,
+	parentFile: File,
+	childSuiteId: SuiteId,
 ): Suite | null {
 	return (
-		file.children.find(
-			(child): child is Suite => child.id === suiteId && isSuite(child),
+		parentFile.children.find(
+			(child): child is Suite => child.id === childSuiteId && isSuite(child),
+		) ?? null
+	)
+}
+
+export function getTopLevelTestById(
+	parentFile: File,
+	childTestId: TestId,
+): Test | null {
+	return (
+		parentFile.children.find(
+			(child): child is Test => child.id === childTestId && isTest(child),
 		) ?? null
 	)
 }
 
 export function putTopLevelSuiteOrTest(
-	file: File,
-	newSuiteOrTest: Suite | Test,
+	parentFile: File,
+	suiteOrTestToInsert: Suite | Test,
 ): File {
-	const targetIndex = file.children.findIndex(
-		(child) => child.id === newSuiteOrTest.id,
+	const existingSuiteOrTestIndex = parentFile.children.findIndex(
+		(child) => child.id === suiteOrTestToInsert.id,
 	)
 
 	const children: Array<Suite | Test> =
-		targetIndex === -1
-			? [...file.children, newSuiteOrTest]
-			: file.children.with(targetIndex, newSuiteOrTest)
+		existingSuiteOrTestIndex === -1
+			? [...parentFile.children, suiteOrTestToInsert]
+			: parentFile.children.with(existingSuiteOrTestIndex, suiteOrTestToInsert)
 
-	return newFile({ ...file, children })
-}
-
-export function getTopLevelTestById(file: File, testId: TestId): Test | null {
-	return (
-		file.children.find(
-			(child): child is Test => child.id === testId && isTest(child),
-		) ?? null
-	)
+	return newFile({ ...parentFile, children })
 }
 
 export function dropUnfinishedFileChildren(file: File): File {

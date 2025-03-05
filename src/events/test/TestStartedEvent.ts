@@ -1,5 +1,4 @@
-import { putTopLevelSuiteOrTest } from "+models/File"
-import { type Project, getFileById, putFile } from "+models/Project"
+import { type Project, putTest } from "+models/Project"
 import { type TestPath, newTest } from "+models/Test"
 
 export type TestStartedEvent = {
@@ -18,23 +17,12 @@ export function applyTestStartedEvent(
 	project: Project,
 	event: TestStartedEvent,
 ): Project {
-	const [fileId] = event.path
-	const file = getFileById(project, fileId)
+	const updatedTest = newTest({
+		duration: 0,
+		name: event.name,
+		path: event.path,
+		status: "running",
+	})
 
-	if (file === null) {
-		return project
-	}
-
-	return putFile(
-		project,
-		putTopLevelSuiteOrTest(
-			file,
-			newTest({
-				duration: 0,
-				name: event.name,
-				path: event.path,
-				status: "running",
-			}),
-		),
-	)
+	return putTest(project, updatedTest)
 }

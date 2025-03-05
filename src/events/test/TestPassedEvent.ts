@@ -1,6 +1,5 @@
-import { getTopLevelTestById, putTopLevelSuiteOrTest } from "+models/File"
-import { type Project, getFileById, putFile } from "+models/Project"
-import type { TestPath } from "+models/Test"
+import { type Project, getTestByPath, putTest } from "+models/Project"
+import { type TestPath, newTest } from "+models/Test"
 import type { Duration } from "+types/Duration"
 
 export type TestPassedEvent = {
@@ -19,25 +18,17 @@ export function applyTestPassedEvent(
 	project: Project,
 	event: TestPassedEvent,
 ): Project {
-	const [fileId, testId] = event.path
-	const file = getFileById(project, fileId)
+	const existingTest = getTestByPath(project, event.path)
 
-	if (file === null) {
+	if (existingTest === null) {
 		return project
 	}
 
-	const test = getTopLevelTestById(file, testId)
+	const updatedTest = newTest({
+		...existingTest,
+		duration: event.duration,
+		status: "passed",
+	})
 
-	if (test === null) {
-		return project
-	}
-
-	return putFile(
-		project,
-		putTopLevelSuiteOrTest(file, {
-			...test,
-			duration: event.duration,
-			status: "passed",
-		}),
-	)
+	return putTest(project, updatedTest)
 }

@@ -18,16 +18,15 @@ export function applyFileStartedEvent(
 	project: Project,
 	event: FileStartedEvent,
 ): Project {
-	const file = getFileById(project, event.id)
+	const existingFile = getFileById(project, event.id)
 
-	return putFile(
-		project,
-		newFile({
-			id: event.id,
-			duration: 0,
-			path: event.path,
-			status: "running",
-			children: file?.children ?? [],
-		}),
-	)
+	const updatedFile = newFile({
+		id: event.id,
+		duration: 0,
+		path: event.path,
+		status: "running",
+		children: existingFile?.children ?? [],
+	})
+
+	return putFile(project, updatedFile)
 }

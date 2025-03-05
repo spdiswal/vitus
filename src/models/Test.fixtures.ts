@@ -46,18 +46,10 @@ const dummyNamesById: Record<DummyFileId, Record<OddDigit, string>> = {
 	},
 }
 
-export function dummyTest(
-	testId: DummyTestId,
-	overrides?: Partial<Test>,
-): Test {
-	const path = testId
-		.split("_")
-		.map(
-			(_, index, segments) => `${segments.slice(0, index + 1).join("_")}`,
-		) as TestPath
-
+export function dummyTest(id: DummyTestId, overrides?: Partial<Test>): Test {
+	const path = getPathFromDummyTestId(id)
 	const fileId = path[0] as DummyFileId
-	const lastDigit = Number.parseInt(testId.slice(-1)) as OddDigit
+	const lastDigit = Number.parseInt(id.slice(-1)) as OddDigit
 
 	return newTest({
 		duration: 0,
@@ -66,6 +58,13 @@ export function dummyTest(
 		status: "passed",
 		...overrides,
 	})
+}
+
+export function getPathFromDummyTestId(id: DummyTestId): TestPath {
+	const segments = id.split("_")
+	return segments.map(
+		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
+	) as TestPath
 }
 
 export function fakeVitestTest(props: {

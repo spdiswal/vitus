@@ -4,7 +4,6 @@ import {
 	type File,
 	assertFileChildCount,
 	countFileChildren,
-	getTopLevelSuiteById,
 } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
 import {
@@ -12,11 +11,15 @@ import {
 	assertProjectFileCount,
 	getFileById,
 	getOtherFiles,
+	getSuiteByPath,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import type { Suite, SuiteStatus } from "+models/Suite"
-import { dummySuite } from "+models/Suite.fixtures"
-import type { TestPath } from "+models/Test"
+import {
+	type DummySuiteId,
+	dummySuite,
+	getPathFromDummySuiteId,
+} from "+models/Suite.fixtures"
 import { dummyTest } from "+models/Test.fixtures"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
@@ -50,6 +53,9 @@ const initialProject = dummyProject({}, [
 			dummySuite("a3fdd8b6c3_2_8", { status: "failed" }, [
 				dummyTest("a3fdd8b6c3_2_8_1", { status: "passed" }),
 				dummyTest("a3fdd8b6c3_2_8_3", { status: "failed" }),
+				dummySuite("a3fdd8b6c3_2_8_4", { status: "passed" }, [
+					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "passed" }),
+				]),
 			]),
 		]),
 		dummyTest("a3fdd8b6c3_3", { status: "failed" }),
@@ -75,6 +81,9 @@ const initialProject = dummyProject({}, [
 		dummySuite("-e45b128829_4", { status: "passed" }, [
 			dummySuite("-e45b128829_4_4", { status: "failed" }, [
 				dummyTest("-e45b128829_4_4_3", { status: "failed" }),
+				dummySuite("-e45b128829_4_4_6", { status: "passed" }, [
+					dummyTest("-e45b128829_4_4_6_5", { status: "passed" }),
+				]),
 			]),
 		]),
 	]),
@@ -83,23 +92,31 @@ const initialProject = dummyProject({}, [
 beforeAll(() => {
 	assertProjectFileCount(initialProject, 4)
 	assertFileChildCount(initialProject.files[0], 8)
-	assertFileChildCount(initialProject.files[1], 15)
+	assertFileChildCount(initialProject.files[1], 17)
 	assertFileChildCount(initialProject.files[2], 7)
-	assertFileChildCount(initialProject.files[3], 5)
+	assertFileChildCount(initialProject.files[3], 7)
 })
 
 describe.each`
-	path
-	${["15b021ef72", "15b021ef72_0"]}
-	${["15b021ef72", "15b021ef72_2"]}
-	${["a3fdd8b6c3", "a3fdd8b6c3_0"]}
-	${["a3fdd8b6c3", "a3fdd8b6c3_4"]}
-	${["-1730f876b4", "-1730f876b4_0"]}
-	${["-e45b128829", "-e45b128829_2"]}
+	suiteId
+	${"15b021ef72_0"}
+	${"15b021ef72_2"}
+	${"15b021ef72_2_6"}
+	${"a3fdd8b6c3_0"}
+	${"a3fdd8b6c3_4"}
+	${"a3fdd8b6c3_2_6"}
+	${"a3fdd8b6c3_2_8"}
+	${"a3fdd8b6c3_2_8_4"}
+	${"-1730f876b4_0"}
+	${"-1730f876b4_0_4"}
+	${"-e45b128829_2"}
+	${"-e45b128829_4_4"}
+	${"-e45b128829_4_4_6"}
 `(
-	"when a top-level suite with id $path.1 has been skipped",
-	(props: { path: TestPath }) => {
-		const [fileId, suiteId] = props.path
+	"when a suite with id $suiteId has been skipped",
+	(props: { suiteId: DummySuiteId }) => {
+		const path = getPathFromDummySuiteId(props.suiteId)
+		const [fileId] = path
 
 		const initialFile = getFileById(initialProject, fileId)
 		assertNotNullish(initialFile)
@@ -109,19 +126,14 @@ describe.each`
 		let actualSuite: Suite
 
 		beforeEach(() => {
-			actualProject = applyEvent(
-				initialProject,
-				suiteSkippedEvent({ path: props.path }),
-			)
+			actualProject = applyEvent(initialProject, suiteSkippedEvent({ path }))
 
 			const file = getFileById(actualProject, fileId)
 			assertNotNullish(file)
-
 			actualFile = file
 
-			const suite = getTopLevelSuiteById(file, suiteId)
+			const suite = getSuiteByPath(actualProject, path)
 			assertNotNullish(suite)
-
 			actualSuite = suite
 		})
 
@@ -143,34 +155,25 @@ describe.each`
 	},
 )
 
-describe("when a non-existing top-level suite has been skipped", () => {
-	let actualProject: Project
+describe.each`
+	suiteId
+	${"15b021ef72_8"}
+	${"15b021ef72_8_4"}
+	${"f9bb9e8bc0_0"}
+	${"f9bb9e8bc0_0_0"}
+`(
+	"when a non-existing suite with id $suiteId has been skipped",
+	(props: { suiteId: DummySuiteId }) => {
+		const path = getPathFromDummySuiteId(props.suiteId)
 
-	beforeEach(() => {
-		actualProject = applyEvent(
-			initialProject,
-			suiteSkippedEvent({ path: ["15b021ef72", "15b021ef72_8"] }),
-		)
-	})
+		let actualProject: Project
 
-	it("does not affect the project", () => {
-		expect(actualProject).toEqual(initialProject)
-	})
-})
+		beforeEach(() => {
+			actualProject = applyEvent(initialProject, suiteSkippedEvent({ path }))
+		})
 
-describe("when a top-level suite in a non-existing file has been skipped", () => {
-	let actualProject: Project
-
-	beforeEach(() => {
-		actualProject = applyEvent(
-			initialProject,
-			suiteSkippedEvent({ path: ["f9bb9e8bc0", "f9bb9e8bc0_0"] }),
-		)
-	})
-
-	it("does not affect the project", () => {
-		expect(actualProject).toEqual(initialProject)
-	})
-})
-
-// TODO: when a nested suite has been skipped
+		it("does not affect the project", () => {
+			expect(actualProject).toEqual(initialProject)
+		})
+	},
+)

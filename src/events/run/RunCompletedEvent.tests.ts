@@ -43,6 +43,9 @@ const initialProject = dummyProject({}, [
 			dummySuite("a3fdd8b6c3_2_8", { status: "running" }, [
 				dummyTest("a3fdd8b6c3_2_8_1", { status: "running" }),
 				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
+				dummySuite("a3fdd8b6c3_2_8_4", { status: "passed" }, [
+					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "running" }),
+				]),
 			]),
 		]),
 		dummyTest("a3fdd8b6c3_3", { status: "failed" }),
@@ -68,6 +71,9 @@ const initialProject = dummyProject({}, [
 		dummySuite("-e45b128829_4", { status: "passed" }, [
 			dummySuite("-e45b128829_4_4", { status: "running" }, [
 				dummyTest("-e45b128829_4_4_3", { status: "passed" }),
+				dummySuite("-e45b128829_4_4_6", { status: "running" }, [
+					dummyTest("-e45b128829_4_4_6_5", { status: "skipped" }),
+				]),
 			]),
 		]),
 	]),

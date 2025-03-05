@@ -18,18 +18,17 @@ export function applyFileSkippedEvent(
 	project: Project,
 	event: FileSkippedEvent,
 ): Project {
-	const file = getFileById(project, event.id)
+	const existingFile = getFileById(project, event.id)
 
-	if (file === null) {
+	if (existingFile === null) {
 		return project
 	}
 
-	return putFile(
-		project,
-		newFile({
-			...file,
-			duration: event.duration,
-			status: "skipped",
-		}),
-	)
+	const updatedFile = newFile({
+		...existingFile,
+		duration: event.duration,
+		status: "skipped",
+	})
+
+	return putFile(project, updatedFile)
 }

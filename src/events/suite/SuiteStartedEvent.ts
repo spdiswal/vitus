@@ -1,5 +1,4 @@
-import { getTopLevelSuiteById, putTopLevelSuiteOrTest } from "+models/File"
-import { type Project, getFileById, putFile } from "+models/Project"
+import { type Project, getSuiteByPath, putSuite } from "+models/Project"
 import { type SuitePath, newSuite } from "+models/Suite"
 
 export type SuiteStartedEvent = {
@@ -18,25 +17,14 @@ export function applySuiteStartedEvent(
 	project: Project,
 	event: SuiteStartedEvent,
 ): Project {
-	const [fileId, suiteId] = event.path
-	const file = getFileById(project, fileId)
+	const existingSuite = getSuiteByPath(project, event.path)
 
-	if (file === null) {
-		return project
-	}
+	const updatedSuite = newSuite({
+		name: event.name,
+		path: event.path,
+		status: "running",
+		children: existingSuite?.children ?? [],
+	})
 
-	const suite = getTopLevelSuiteById(file, suiteId)
-
-	return putFile(
-		project,
-		putTopLevelSuiteOrTest(
-			file,
-			newSuite({
-				name: event.name,
-				path: event.path,
-				status: "running",
-				children: suite?.children ?? [],
-			}),
-		),
-	)
+	return putSuite(project, updatedSuite)
 }
