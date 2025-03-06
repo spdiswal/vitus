@@ -4,16 +4,14 @@ import {
 	type File,
 	type FileId,
 	type FileStatus,
-	assertFileChildCount,
 	countFileChildren,
 } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
 import {
 	type Project,
 	type ProjectStatus,
-	assertProjectDuration,
-	assertProjectFileCount,
-	assertProjectStatus,
+	assertDummyFiles,
+	assertDummyProject,
 	getFileById,
 	getOtherFiles,
 } from "+models/Project"
@@ -59,13 +57,13 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertProjectDuration(initialProject, 10 + 20 + 40 + 80)
-	assertProjectStatus(initialProject, "failed")
-	assertProjectFileCount(initialProject, 4)
-	assertFileChildCount(initialProject.files[0], 4)
-	assertFileChildCount(initialProject.files[1], 3)
-	assertFileChildCount(initialProject.files[2], 5)
-	assertFileChildCount(initialProject.files[3], 7)
+	assertDummyProject(initialProject, { duration: 150, status: "failed" })
+	assertDummyFiles(initialProject, {
+		"15b021ef72": { totalChildCount: 4 },
+		a3fdd8b6c3: { totalChildCount: 3 },
+		"-1730f876b4": { totalChildCount: 5 },
+		"-e45b128829": { totalChildCount: 7 },
+	})
 })
 
 describe.each`

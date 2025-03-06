@@ -1,21 +1,20 @@
 import { applyEvent } from "+events/Event"
 import { testFailedEvent } from "+events/test/TestFailedEvent"
-import {
-	type File,
-	assertFileChildCount,
-	countFileChildren,
-} from "+models/File"
+import { type File, countFileChildren } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
 import {
 	type Project,
-	assertProjectFileCount,
+	assertDummyFiles,
+	assertDummyProject,
+	assertDummySuites,
 	getFileById,
 	getOtherFiles,
+	getSuiteByPath,
 	getTestByPath,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import { dummySuite } from "+models/Suite.fixtures"
-import type { Test, TestStatus } from "+models/Test"
+import { type Test, type TestStatus, getParentSuitePath } from "+models/Test"
 import {
 	type DummyTestId,
 	dummyTest,
@@ -26,64 +25,64 @@ import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyFile("15b021ef72", {}, [
+	dummyFile("15b021ef72", { duration: 14, status: "passed" }, [
 		dummySuite("15b021ef72_0", { status: "passed" }, [
-			dummyTest("15b021ef72_0_1", { status: "passed" }),
+			dummyTest("15b021ef72_0_1", { duration: 1, status: "passed" }),
 		]),
-		dummyTest("15b021ef72_1", { status: "passed" }),
+		dummyTest("15b021ef72_1", { duration: 2, status: "passed" }),
 		dummySuite("15b021ef72_2", { status: "skipped" }, [
-			dummyTest("15b021ef72_2_3", { status: "passed" }),
+			dummyTest("15b021ef72_2_3", { duration: 3, status: "passed" }),
 			dummySuite("15b021ef72_2_6", { status: "skipped" }, [
-				dummyTest("15b021ef72_2_6_7", { status: "passed" }),
-				dummyTest("15b021ef72_2_6_9", { status: "passed" }),
+				dummyTest("15b021ef72_2_6_7", { duration: 2, status: "passed" }),
+				dummyTest("15b021ef72_2_6_9", { duration: 4, status: "passed" }),
 			]),
 		]),
 	]),
-	dummyFile("a3fdd8b6c3", {}, [
+	dummyFile("a3fdd8b6c3", { duration: 6, status: "passed" }, [
 		dummySuite("a3fdd8b6c3_0", { status: "passed" }, [
-			dummyTest("a3fdd8b6c3_0_1", { status: "passed" }),
-			dummyTest("a3fdd8b6c3_0_3", { status: "passed" }),
+			dummyTest("a3fdd8b6c3_0_1", { duration: 1, status: "passed" }),
+			dummyTest("a3fdd8b6c3_0_3", { duration: 7, status: "passed" }),
 		]),
-		dummyTest("a3fdd8b6c3_1", { status: "passed" }),
+		dummyTest("a3fdd8b6c3_1", { duration: 6, status: "passed" }),
 		dummySuite("a3fdd8b6c3_2", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_2_5", { status: "passed" }),
+			dummyTest("a3fdd8b6c3_2_5", { duration: 8, status: "passed" }),
 			dummySuite("a3fdd8b6c3_2_6", { status: "skipped" }, [
-				dummyTest("a3fdd8b6c3_2_6_7", { status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_6_9", { status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_6_7", { duration: 5, status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_6_9", { duration: 7, status: "passed" }),
 			]),
 			dummySuite("a3fdd8b6c3_2_8", { status: "skipped" }, [
-				dummyTest("a3fdd8b6c3_2_8_1", { status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_8_3", { status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_8_1", { duration: 10, status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_8_3", { duration: 2, status: "passed" }),
 				dummySuite("a3fdd8b6c3_2_8_4", { status: "passed" }, [
-					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "skipped" }),
+					dummyTest("a3fdd8b6c3_2_8_4_1", { duration: 3, status: "skipped" }),
 				]),
 			]),
 		]),
-		dummyTest("a3fdd8b6c3_3", { status: "skipped" }),
+		dummyTest("a3fdd8b6c3_3", { duration: 4, status: "skipped" }),
 		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_4_5", { status: "skipped" }),
+			dummyTest("a3fdd8b6c3_4_5", { duration: 8, status: "skipped" }),
 		]),
 	]),
-	dummyFile("-1730f876b4", {}, [
+	dummyFile("-1730f876b4", { duration: 9, status: "passed" }, [
 		dummySuite("-1730f876b4_0", { status: "passed" }, [
-			dummyTest("-1730f876b4_0_1", { status: "skipped" }),
-			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
+			dummyTest("-1730f876b4_0_1", { duration: 29, status: "skipped" }),
+			dummyTest("-1730f876b4_0_3", { duration: 11, status: "skipped" }),
 			dummySuite("-1730f876b4_0_4", { status: "passed" }, [
-				dummyTest("-1730f876b4_0_4_5", { status: "skipped" }),
+				dummyTest("-1730f876b4_0_4_5", { duration: 18, status: "skipped" }),
 			]),
 		]),
-		dummyTest("-1730f876b4_7", { status: "skipped" }),
-		dummyTest("-1730f876b4_9", { status: "skipped" }),
+		dummyTest("-1730f876b4_7", { duration: 14, status: "skipped" }),
+		dummyTest("-1730f876b4_9", { duration: 19, status: "skipped" }),
 	]),
-	dummyFile("-e45b128829", {}, [
+	dummyFile("-e45b128829", { duration: 11, status: "passed" }, [
 		dummySuite("-e45b128829_2", { status: "passed" }, [
-			dummyTest("-e45b128829_2_1", { status: "skipped" }),
+			dummyTest("-e45b128829_2_1", { duration: 9, status: "skipped" }),
 		]),
 		dummySuite("-e45b128829_4", { status: "passed" }, [
 			dummySuite("-e45b128829_4_4", { status: "passed" }, [
-				dummyTest("-e45b128829_4_4_3", { status: "skipped" }),
+				dummyTest("-e45b128829_4_4_3", { duration: 15, status: "skipped" }),
 				dummySuite("-e45b128829_4_4_6", { status: "passed" }, [
-					dummyTest("-e45b128829_4_4_6_5", { status: "passed" }),
+					dummyTest("-e45b128829_4_4_6_5", { duration: 6, status: "passed" }),
 				]),
 			]),
 		]),
@@ -91,38 +90,60 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertProjectFileCount(initialProject, 4)
-	assertFileChildCount(initialProject.files[0], 8)
-	assertFileChildCount(initialProject.files[1], 17)
-	assertFileChildCount(initialProject.files[2], 7)
-	assertFileChildCount(initialProject.files[3], 7)
+	assertDummyProject(initialProject, { duration: 40, status: "passed" })
+	assertDummyFiles(initialProject, {
+		"15b021ef72": { totalChildCount: 8 },
+		a3fdd8b6c3: { totalChildCount: 17 },
+		"-1730f876b4": { totalChildCount: 7 },
+		"-e45b128829": { totalChildCount: 7 },
+	})
+	assertDummySuites(initialProject, {
+		"15b021ef72_0": { duration: 1 },
+		"15b021ef72_2": { duration: 9 },
+		"15b021ef72_2_6": { duration: 6 },
+		a3fdd8b6c3_0: { duration: 8 },
+		a3fdd8b6c3_2: { duration: 35 },
+		a3fdd8b6c3_2_6: { duration: 12 },
+		a3fdd8b6c3_2_8: { duration: 15 },
+		a3fdd8b6c3_2_8_4: { duration: 3 },
+		a3fdd8b6c3_4: { duration: 8 },
+		"-1730f876b4_0": { duration: 58 },
+		"-1730f876b4_0_4": { duration: 18 },
+		"-e45b128829_2": { duration: 9 },
+		"-e45b128829_4": { duration: 21 },
+		"-e45b128829_4_4": { duration: 21 },
+		"-e45b128829_4_4_6": { duration: 6 },
+	})
 })
 
 describe.each`
-	testId                   | duration
-	${"15b021ef72_1"}        | ${7}
-	${"15b021ef72_0_1"}      | ${9}
-	${"15b021ef72_2_6_9"}    | ${13}
-	${"a3fdd8b6c3_1"}        | ${11}
-	${"a3fdd8b6c3_3"}        | ${6}
-	${"a3fdd8b6c3_0_3"}      | ${15}
-	${"a3fdd8b6c3_2_6_7"}    | ${8}
-	${"a3fdd8b6c3_2_8_4_1"}  | ${1}
-	${"-1730f876b4_7"}       | ${14}
-	${"-1730f876b4_9"}       | ${5}
-	${"-1730f876b4_0_1"}     | ${12}
-	${"-1730f876b4_0_4_5"}   | ${3}
-	${"-e45b128829_2_1"}     | ${4}
-	${"-e45b128829_4_4_3"}   | ${10}
-	${"-e45b128829_4_4_6_5"} | ${2}
+	testId                   | duration | expectedSuiteDuration
+	${"15b021ef72_1"}        | ${7}     | ${null}
+	${"15b021ef72_0_1"}      | ${9}     | ${9}
+	${"15b021ef72_2_6_9"}    | ${13}    | ${15}
+	${"a3fdd8b6c3_1"}        | ${11}    | ${null}
+	${"a3fdd8b6c3_3"}        | ${6}     | ${null}
+	${"a3fdd8b6c3_0_3"}      | ${15}    | ${16}
+	${"a3fdd8b6c3_2_6_7"}    | ${8}     | ${15}
+	${"a3fdd8b6c3_2_8_4_1"}  | ${1}     | ${1}
+	${"-1730f876b4_7"}       | ${14}    | ${null}
+	${"-1730f876b4_9"}       | ${5}     | ${null}
+	${"-1730f876b4_0_1"}     | ${12}    | ${41}
+	${"-1730f876b4_0_4_5"}   | ${3}     | ${3}
+	${"-e45b128829_2_1"}     | ${4}     | ${4}
+	${"-e45b128829_4_4_3"}   | ${10}    | ${16}
+	${"-e45b128829_4_4_6_5"} | ${2}     | ${2}
 `(
 	"when a test with id $testId has failed",
 	(props: {
 		testId: DummyTestId
 		duration: Duration
+		expectedSuiteDuration: Duration | null
 	}) => {
 		const path = getPathFromDummyTestId(props.testId)
 		const [fileId] = path
+
+		const suitePath = getParentSuitePath(path)
 
 		const initialFile = getFileById(initialProject, fileId)
 		assertNotNullish(initialFile)
@@ -158,7 +179,14 @@ describe.each`
 			expect(countFileChildren(actualFile)).toBe(countFileChildren(initialFile))
 		})
 
-		// TODO: updates the suite duration based on its tests
+		if (suitePath !== null) {
+			it("updates the parent suite duration", () => {
+				const actualParentSuite = getSuiteByPath(actualProject, suitePath)
+				assertNotNullish(actualParentSuite)
+
+				expect(actualParentSuite.duration).toBe(props.expectedSuiteDuration)
+			})
+		}
 
 		it("does not affect the other files in the project", () => {
 			expect(getOtherFiles(actualProject, fileId)).toEqual(

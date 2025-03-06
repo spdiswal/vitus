@@ -2,11 +2,13 @@ import {
 	type File,
 	type FileId,
 	type Files,
+	countFileChildren,
 	getFileChildIds,
 	getTopLevelSuiteById,
 	getTopLevelTestById,
 	putTopLevelSuiteOrTest,
 } from "+models/File"
+import type { DummyFileId } from "+models/File.fixtures"
 import {
 	type Suite,
 	type SuiteIds,
@@ -17,12 +19,17 @@ import {
 	putDeeplyNestedSuiteOrTest,
 	putNestedSuiteOrTest,
 } from "+models/Suite"
+import {
+	type DummySuiteId,
+	getPathFromDummySuiteId,
+} from "+models/Suite.fixtures"
 import type { Test, TestId, TestPath } from "+models/Test"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
 import type { Path } from "+types/Path"
 import { toSum } from "+utilities/Arrays"
+import { assertNotNullish } from "+utilities/Assertions"
 import { count } from "+utilities/Strings"
 
 export type Project = {
@@ -188,38 +195,67 @@ export function putTest(project: Project, testToInsert: Test): Project {
 	return putFile(project, updatedFile)
 }
 
-export function assertProjectDuration(
+export function assertDummyProject(
 	project: Project,
-	expectedDuration: Duration,
+	expectations: {
+		duration: Duration
+		status: ProjectStatus
+	},
 ): void {
 	const actualDuration = project.duration
+	const expectedDuration = expectations.duration
+
 	if (actualDuration !== expectedDuration) {
 		throw new Error(
 			`Expected the project to have a duration of ${expectedDuration} ms, but was ${actualDuration} ms`,
 		)
 	}
-}
 
-export function assertProjectFileCount(
-	project: Project,
-	expectedFileCount: number,
-): void {
-	const actualFileCount = project.files.length
-	if (actualFileCount !== expectedFileCount) {
-		throw new Error(
-			`Expected the project to have ${count(expectedFileCount, "file", "files")}, but got ${count(actualFileCount, "file", "files")}`,
-		)
-	}
-}
-
-export function assertProjectStatus(
-	project: Project,
-	expectedStatus: ProjectStatus,
-): void {
 	const actualStatus = project.status
+	const expectedStatus = expectations.status
+
 	if (actualStatus !== expectedStatus) {
 		throw new Error(
 			`Expected the project to have status '${expectedStatus}', but was '${actualStatus}'`,
 		)
+	}
+}
+
+export function assertDummyFiles(
+	project: Project,
+	expectations: Partial<Record<DummyFileId, { totalChildCount: number }>>,
+): void {
+	for (const [fileId, fileExpectations] of Object.entries(expectations)) {
+		const file = getFileById(project, fileId as DummyFileId)
+		assertNotNullish(file)
+
+		const actualChildCount = countFileChildren(file)
+		const expectedChildCount = fileExpectations.totalChildCount
+
+		if (actualChildCount !== expectedChildCount) {
+			throw new Error(
+				`Expected the file '${fileId}' to have ${count(expectedChildCount, "child", "children")}, but got ${count(actualChildCount, "child", "children")}: ${getFileChildIds(file).join(", ")}`,
+			)
+		}
+	}
+}
+
+export function assertDummySuites(
+	project: Project,
+	expectations: Partial<Record<DummySuiteId, { duration: Duration }>>,
+): void {
+	for (const [suiteId, suiteExpectations] of Object.entries(expectations)) {
+		const path = getPathFromDummySuiteId(suiteId as DummySuiteId)
+		const suite = getSuiteByPath(project, path)
+		assertNotNullish(suite)
+
+		const actualDuration = suite.duration
+		const expectedDuration = suiteExpectations.duration
+
+		if (actualDuration !== expectedDuration) {
+			throw new Error(
+				`Expected the suite '${suiteId}' to have a duration of ${expectedDuration} ms, but was ${actualDuration} ms`,
+			)
+		}
 	}
 }

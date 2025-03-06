@@ -12,7 +12,6 @@ import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
 import type { Path } from "+types/Path"
 import { toSum } from "+utilities/Arrays"
-import { count } from "+utilities/Strings"
 
 export type File = {
 	id: FileId
@@ -100,16 +99,4 @@ export function dropUnfinishedFileChildren(file: File): File {
 				isSuite(child) ? dropUnfinishedSuiteChildren(child) : child,
 			),
 	})
-}
-
-export function assertFileChildCount(
-	file: File,
-	expectedChildCount: number,
-): void {
-	const actualChildCount = countFileChildren(file)
-	if (actualChildCount !== expectedChildCount) {
-		throw new Error(
-			`Expected the file to have ${count(expectedChildCount, "child", "children")}, but got ${count(actualChildCount, "child", "children")}: ${getFileChildIds(file).join(", ")}`,
-		)
-	}
 }

@@ -5,9 +5,7 @@ import { dummyFile } from "+models/File.fixtures"
 import {
 	type Project,
 	type ProjectStatus,
-	assertProjectDuration,
-	assertProjectFileCount,
-	assertProjectStatus,
+	assertDummyProject,
 	getFileById,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
@@ -24,9 +22,7 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertProjectDuration(initialProject, 10 + 20 + 40 + 80)
-	assertProjectFileCount(initialProject, 4)
-	assertProjectStatus(initialProject, "failed")
+	assertDummyProject(initialProject, { duration: 150, status: "failed" })
 })
 
 describe.each`

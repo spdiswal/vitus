@@ -27,7 +27,7 @@ export function newSuite(props: PickNonComputed<Suite>): Suite {
 	return {
 		...props,
 		children: props.children.toSorted(byChildId),
-		duration: 0, // TODO: Compute duration from children.
+		duration: props.children.map((child) => child.duration).reduce(toSum, 0),
 		id: suiteId,
 	}
 }

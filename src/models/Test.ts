@@ -1,5 +1,5 @@
 import type { FileId } from "+models/File"
-import type { Suite, SuiteIds, isSuite } from "+models/Suite"
+import type { Suite, SuiteId, SuiteIds, SuitePath, isSuite } from "+models/Suite"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
 import type { LastItemOf } from "+utilities/Arrays"
@@ -23,4 +23,14 @@ export function newTest(props: PickNonComputed<Test>): Test {
 
 export function isTest(suiteOrTest: Suite | Test): suiteOrTest is Test {
 	return !isSuite(suiteOrTest)
+}
+
+export function getParentSuitePath(testPath: TestPath): SuitePath | null {
+	return hasParentSuite(testPath) ? (testPath.slice(0, -1) as SuitePath) : null
+}
+
+export function hasParentSuite(
+	testPath: TestPath,
+): testPath is [FileId, ...SuiteIds, SuiteId, TestId] {
+	return testPath.length > 2
 }

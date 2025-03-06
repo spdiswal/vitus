@@ -4,9 +4,8 @@ import { dummyFile } from "+models/File.fixtures"
 import {
 	type Project,
 	type ProjectStatus,
-	assertProjectDuration,
-	assertProjectFileCount,
-	assertProjectStatus,
+	assertDummyFiles,
+	assertDummyProject,
 	getProjectChildIds,
 } from "+models/Project"
 import { type DummyIds, dummyProject } from "+models/Project.fixtures"
@@ -80,9 +79,13 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertProjectDuration(initialProject, 10 + 20 + 40 + 80)
-	assertProjectFileCount(initialProject, 4)
-	assertProjectStatus(initialProject, "running")
+	assertDummyProject(initialProject, { duration: 150, status: "running" })
+	assertDummyFiles(initialProject, {
+		"15b021ef72": { totalChildCount: 8 },
+		a3fdd8b6c3: { totalChildCount: 17 },
+		"-1730f876b4": { totalChildCount: 7 },
+		"-e45b128829": { totalChildCount: 7 },
+	})
 })
 
 describe("when the server has disconnected", () => {
