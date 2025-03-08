@@ -1,19 +1,19 @@
-import type { NavigationEntries } from "+explorer/navigation/NavigationEntry"
-import { NavigationTreeNodes } from "+explorer/navigation/components/NavigationTreeNodes"
+import { NavigationTreeNode } from "+explorer/navigation/NavigationTreeNode"
+import type { Files } from "+models/File"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { count } from "+utilities/Strings"
 
 export function NavigationTreeSection(props: {
 	class?: ClassString
-	entries: NavigationEntries
+	files: Files
 	children: Renderable
 }): Renderable {
 	return (
 		<section
 			class={cn(
 				"flex flex-col gap-y-2",
-				props.entries.length === 0 && "hidden",
+				props.files.length === 0 && "hidden",
 				props.class,
 			)}
 		>
@@ -21,11 +21,19 @@ export function NavigationTreeSection(props: {
 				<span class="uppercase tracking-wide">{props.children}</span>{" "}
 				<span>
 					{count(42 /* TODO: Count tests */, "test", "tests")} in{" "}
-					{count(props.entries, "file", "files")}
+					{count(props.files, "file", "files")}
 				</span>
 			</h2>
 			<ul class="pl-2 flex flex-col">
-				<NavigationTreeNodes entries={props.entries} />
+				{props.files.map((file) => (
+					<NavigationTreeNode
+						key={file.id}
+						duration={file.duration}
+						name={file.filename}
+						status={file.status}
+						suitesAndTests={file.suitesAndTests}
+					/>
+				))}
 			</ul>
 		</section>
 	)

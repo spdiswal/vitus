@@ -1,5 +1,6 @@
 import { type FileIds, newFile } from "+models/File"
 import { type Project, newProject } from "+models/Project"
+import { logDebug } from "+utilities/Logging"
 
 export type RunStartedEvent = {
 	type: "run-started"
@@ -24,4 +25,20 @@ export function applyRunStartedEvent(
 				: file,
 		),
 	})
+}
+
+export function logRunStartedEvent(
+	project: Project,
+	event: RunStartedEvent,
+): void {
+	const { files, ...loggableProject } = project
+
+	logDebug(
+		{
+			label: "Run started",
+			labelColour: "#1d4ed8",
+			message: `Project ${project.status}`,
+		},
+		{ event, project: loggableProject },
+	)
 }

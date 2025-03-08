@@ -1,8 +1,8 @@
-import type { FileId } from "+models/File"
-import type { Suite, SuiteId, SuiteIds, SuitePath, isSuite } from "+models/Suite"
+import { type Suite, isSuite, mapVitestToSuitePath } from "+models/Suite"
+import { type TestPath, getTestIdFromTestPath } from "+models/TestPath"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
-import type { LastItemOf } from "+utilities/Arrays"
+import type { TestCase, TestState } from "vitest/node"
 
 export type Test = {
 	id: Computed<TestId>
@@ -13,24 +13,34 @@ export type Test = {
 }
 
 export type TestId = string
-export type TestPath = [FileId, ...SuiteIds, TestId]
 export type TestStatus = "failed" | "passed" | "running" | "skipped"
 
 export function newTest(props: PickNonComputed<Test>): Test {
-	const testId = props.path.at(-1) as LastItemOf<TestPath>
-	return { ...props, id: testId }
+	return { ...props, id: getTestIdFromTestPath(props.path) }
 }
 
 export function isTest(suiteOrTest: Suite | Test): suiteOrTest is Test {
 	return !isSuite(suiteOrTest)
 }
 
-export function getParentSuitePath(testPath: TestPath): SuitePath | null {
-	return hasParentSuite(testPath) ? (testPath.slice(0, -1) as SuitePath) : null
+const statusMap: Record<TestState, TestStatus> = {
+	failed: "failed",
+	passed: "passed",
+	pending: "running",
+	skipped: "skipped",
 }
 
-export function hasParentSuite(
-	testPath: TestPath,
-): testPath is [FileId, ...SuiteIds, SuiteId, TestId] {
-	return testPath.length > 2
+export function mapVitestToTest(test: TestCase): Test {
+	return newTest({
+		duration: test.diagnostic()?.duration ?? 0,
+		name: test.name,
+		path: mapVitestToTestPath(test),
+		status: statusMap[test.result().state],
+	})
+}
+
+export function mapVitestToTestPath(test: TestCase): TestPath {
+	return test.parent.type === "module"
+		? [test.parent.id, test.id]
+		: [...mapVitestToSuitePath(test.parent), test.id]
 }

@@ -1,9 +1,16 @@
-import type { FileId } from "+models/File"
-import { type Test, type TestId, isTest } from "+models/Test"
+import { type SuitePath, getSuiteIdFromSuitePath } from "+models/SuitePath"
+import {
+	type Test,
+	type TestId,
+	type TestStatus,
+	isTest,
+	mapVitestToTest,
+} from "+models/Test"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
-import { type LastItemOf, toSum } from "+utilities/Arrays"
+import { toSum } from "+utilities/Arrays"
+import type { TestCase, TestSuite, TestSuiteState } from "vitest/node"
 
 export type Suite = {
 	id: Computed<SuiteId>
@@ -11,29 +18,29 @@ export type Suite = {
 	name: string
 	path: SuitePath
 	status: SuiteStatus
-	children: Array<Suite | Test>
+	suitesAndTests: Array<Suite | Test>
 }
 
 export type SuiteId = string
 export type SuiteIds = Array<SuiteId>
-export type SuitePath = [FileId, ...SuiteIds, SuiteId]
 export type SuiteStatus = "failed" | "passed" | "running" | "skipped"
 
-const byChildId: Comparator<Suite | Test> = (a, b) =>
+const bySuiteOrTestId: Comparator<Suite | Test> = (a, b) =>
 	a.id.localeCompare(b.id, undefined, { numeric: true })
 
 export function newSuite(props: PickNonComputed<Suite>): Suite {
-	const suiteId = props.path.at(-1) as LastItemOf<SuitePath>
 	return {
 		...props,
-		children: props.children.toSorted(byChildId),
-		duration: props.children.map((child) => child.duration).reduce(toSum, 0),
-		id: suiteId,
+		duration: props.suitesAndTests
+			.map((suiteOrTest) => suiteOrTest.duration)
+			.reduce(toSum, 0),
+		id: getSuiteIdFromSuitePath(props.path),
+		suitesAndTests: props.suitesAndTests.toSorted(bySuiteOrTestId),
 	}
 }
 
 export function isSuite(suiteOrTest: Suite | Test): suiteOrTest is Suite {
-	return "children" in suiteOrTest
+	return "suitesAndTests" in suiteOrTest
 }
 
 export function hasNestedSuites(
@@ -42,16 +49,27 @@ export function hasNestedSuites(
 	return suiteIds.length > 0
 }
 
+export function hasNotSuiteOrTestStatus(
+	status: SuiteStatus | TestStatus,
+): (suiteOrTest: Suite | Test) => boolean {
+	return (suiteOrTest): boolean => suiteOrTest.status !== status
+}
+
 export function countSuiteChildren(suite: Suite): number {
 	return (
-		suite.children.length +
-		suite.children.filter(isSuite).map(countSuiteChildren).reduce(toSum, 0)
+		suite.suitesAndTests.length +
+		suite.suitesAndTests
+			.filter(isSuite)
+			.map(countSuiteChildren)
+			.reduce(toSum, 0)
 	)
 }
 
 export function getSuiteChildIds(suite: Suite): Array<string> {
-	return suite.children.flatMap((child) =>
-		isSuite(child) ? [child.id, ...getSuiteChildIds(child)] : [child.id],
+	return suite.suitesAndTests.flatMap((suiteOrTest) =>
+		isSuite(suiteOrTest)
+			? [suiteOrTest.id, ...getSuiteChildIds(suiteOrTest)]
+			: [suiteOrTest.id],
 	)
 }
 
@@ -69,22 +87,24 @@ export function getDeeplyNestedSuiteByPath(
 
 export function getNestedSuiteById(
 	parentSuite: Suite,
-	childSuiteId: SuiteId,
+	suiteId: SuiteId,
 ): Suite | null {
 	return (
-		parentSuite.children.find(
-			(child): child is Suite => child.id === childSuiteId && isSuite(child),
+		parentSuite.suitesAndTests.find(
+			(suiteOrTest): suiteOrTest is Suite =>
+				suiteOrTest.id === suiteId && isSuite(suiteOrTest),
 		) ?? null
 	)
 }
 
 export function getNestedTestById(
 	parentSuite: Suite,
-	childTestId: TestId,
+	testId: TestId,
 ): Test | null {
 	return (
-		parentSuite.children.find(
-			(child): child is Test => child.id === childTestId && isTest(child),
+		parentSuite.suitesAndTests.find(
+			(suiteOrTest): suiteOrTest is Test =>
+				suiteOrTest.id === testId && isTest(suiteOrTest),
 		) ?? null
 	)
 }
@@ -117,25 +137,60 @@ export function putNestedSuiteOrTest(
 	parentSuite: Suite,
 	suiteOrTestToInsert: Suite | Test,
 ): Suite {
-	const existingSuiteOrTestIndex = parentSuite.children.findIndex(
-		(child) => child.id === suiteOrTestToInsert.id,
+	const existingSuiteOrTestIndex = parentSuite.suitesAndTests.findIndex(
+		(suiteOrTest) => suiteOrTest.id === suiteOrTestToInsert.id,
 	)
 
-	const children: Array<Suite | Test> =
+	const suitesAndTests: Array<Suite | Test> =
 		existingSuiteOrTestIndex === -1
-			? [...parentSuite.children, suiteOrTestToInsert]
-			: parentSuite.children.with(existingSuiteOrTestIndex, suiteOrTestToInsert)
+			? [...parentSuite.suitesAndTests, suiteOrTestToInsert]
+			: parentSuite.suitesAndTests.with(
+					existingSuiteOrTestIndex,
+					suiteOrTestToInsert,
+				)
 
-	return newSuite({ ...parentSuite, children })
+	return newSuite({ ...parentSuite, suitesAndTests })
 }
 
 export function dropUnfinishedSuiteChildren(suite: Suite): Suite {
 	return newSuite({
 		...suite,
-		children: suite.children
-			.filter((child) => child.status !== "running")
-			.map((child) =>
-				isSuite(child) ? dropUnfinishedSuiteChildren(child) : child,
+		suitesAndTests: suite.suitesAndTests
+			.filter(hasNotSuiteOrTestStatus("running"))
+			.map((suiteOrTest) =>
+				isSuite(suiteOrTest)
+					? dropUnfinishedSuiteChildren(suiteOrTest)
+					: suiteOrTest,
 			),
 	})
+}
+
+const statusMap: Record<TestSuiteState, SuiteStatus> = {
+	failed: "failed",
+	passed: "passed",
+	pending: "running",
+	skipped: "skipped",
+}
+
+export function mapVitestToSuite(suite: TestSuite): Suite {
+	return newSuite({
+		name: suite.name,
+		path: mapVitestToSuitePath(suite),
+		status: statusMap[suite.state()],
+		suitesAndTests: suite.children.array().map(mapVitestToSuiteOrTest),
+	})
+}
+
+export function mapVitestToSuiteOrTest(
+	suiteOrTest: TestSuite | TestCase,
+): Suite | Test {
+	return suiteOrTest.type === "suite"
+		? mapVitestToSuite(suiteOrTest)
+		: mapVitestToTest(suiteOrTest)
+}
+
+export function mapVitestToSuitePath(suite: TestSuite): SuitePath {
+	return suite.parent.type === "module"
+		? [suite.parent.id, suite.id]
+		: [...mapVitestToSuitePath(suite.parent), suite.id]
 }

@@ -1,18 +1,11 @@
-import {
-	type NavigationEntries,
-	isCommenced,
-	isFailed,
-	isPassed,
-	isSkipped,
-	withoutPath,
-} from "+explorer/navigation/NavigationEntry"
-import { NavigationTreeSection } from "+explorer/navigation/components/NavigationTreeSection"
+import { NavigationTreeSection } from "+explorer/navigation/NavigationTreeSection"
+import { type Files, hasFileStatus } from "+models/File"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
 export function NavigationTree(props: {
 	class?: ClassString
-	entries: NavigationEntries
+	files: Files
 }): Renderable {
 	return (
 		<nav
@@ -29,22 +22,22 @@ export function NavigationTree(props: {
 				/>
 			</div>
 			<NavigationTreeSection
-				entries={props.entries.map(withoutPath).filter(isCommenced)}
+				files={props.files.filter(hasFileStatus("running"))}
 			>
 				Running
 			</NavigationTreeSection>
 			<NavigationTreeSection
-				entries={props.entries.map(withoutPath).filter(isFailed)}
+				files={props.files.filter(hasFileStatus("failed"))}
 			>
 				Failed
 			</NavigationTreeSection>
 			<NavigationTreeSection
-				entries={props.entries.map(withoutPath).filter(isPassed)}
+				files={props.files.filter(hasFileStatus("passed"))}
 			>
 				Passed
 			</NavigationTreeSection>
 			<NavigationTreeSection
-				entries={props.entries.map(withoutPath).filter(isSkipped)}
+				files={props.files.filter(hasFileStatus("skipped"))}
 			>
 				Skipped
 			</NavigationTreeSection>

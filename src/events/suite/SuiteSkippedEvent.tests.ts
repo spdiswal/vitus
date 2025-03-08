@@ -16,7 +16,7 @@ import type { Suite, SuiteStatus } from "+models/Suite"
 import {
 	type DummySuiteId,
 	dummySuite,
-	getPathFromDummySuiteId,
+	getDummySuitePath,
 } from "+models/Suite.fixtures"
 import { dummyTest } from "+models/Test.fixtures"
 import { assertNotNullish } from "+utilities/Assertions"
@@ -132,7 +132,7 @@ describe.each`
 `(
 	"when a suite with id $suiteId has been skipped",
 	(props: { suiteId: DummySuiteId }) => {
-		const path = getPathFromDummySuiteId(props.suiteId)
+		const path = getDummySuitePath(props.suiteId)
 		const [fileId] = path
 
 		const initialFile = getFileById(initialProject, fileId)
@@ -186,7 +186,7 @@ describe.each`
 `(
 	"when a non-existing suite with id $suiteId has been skipped",
 	(props: { suiteId: DummySuiteId }) => {
-		const path = getPathFromDummySuiteId(props.suiteId)
+		const path = getDummySuitePath(props.suiteId)
 
 		let actualProject: Project
 

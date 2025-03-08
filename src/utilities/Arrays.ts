@@ -2,5 +2,11 @@ export function toSum(a: number, b: number): number {
 	return a + b
 }
 
-export type LastItemOf<Items extends [unknown, ...Array<unknown>]> =
-	Items extends [...infer _, infer LastItem] ? LastItem : never
+/**
+ * A type-narrowing predicate for `Array.filter()` that discards null and undefined elements.
+ */
+export function notNullish<Element>(
+	element: Element | null | undefined,
+): element is Element {
+	return element !== null && element !== undefined
+}

@@ -13,12 +13,13 @@ import {
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import { dummySuite } from "+models/Suite.fixtures"
-import { type Test, type TestStatus, getParentSuitePath } from "+models/Test"
+import type { Test, TestStatus } from "+models/Test"
 import {
 	type DummyTestId,
 	dummyTest,
-	getPathFromDummyTestId,
+	getDummyTestPath,
 } from "+models/Test.fixtures"
+import { getParentSuitePath } from "+models/TestPath"
 import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
@@ -141,7 +142,7 @@ describe.each`
 		name: string
 		expectedChildIdOrder: Array<string>
 	}) => {
-		const path = getPathFromDummyTestId(props.testId)
+		const path = getDummyTestPath(props.testId)
 		const [fileId] = path
 
 		const suitePath = getParentSuitePath(path)
@@ -226,7 +227,7 @@ describe.each`
 		name: string
 		expectedSuiteDuration: Duration | null
 	}) => {
-		const path = getPathFromDummyTestId(props.testId)
+		const path = getDummyTestPath(props.testId)
 		const [fileId] = path
 
 		const suitePath = getParentSuitePath(path)
@@ -296,7 +297,7 @@ describe.each`
 		testId: DummyTestId
 		name: string
 	}) => {
-		const path = getPathFromDummyTestId(props.testId)
+		const path = getDummyTestPath(props.testId)
 
 		let actualProject: Project
 

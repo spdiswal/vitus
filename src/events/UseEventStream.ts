@@ -1,4 +1,5 @@
-import type { Event } from "+server/events/Event"
+import type { Event } from "+events/Event"
+import { serverDisconnectedEvent } from "+events/server/ServerDisconnectedEvent"
 import { useEffect } from "preact/hooks"
 
 export function useEventStream(subscriber: (event: Event) => void): void {
@@ -6,12 +7,10 @@ export function useEventStream(subscriber: (event: Event) => void): void {
 		const eventSource = new EventSource("/api/events")
 
 		eventSource.addEventListener("message", (message) => {
-			const event: Event = JSON.parse(message.data)
-			subscriber(event)
+			subscriber(JSON.parse(message.data))
 		})
 		eventSource.addEventListener("error", () => {
-			const event: Event = { scope: "server", status: "disconnected" }
-			subscriber(event)
+			subscriber(serverDisconnectedEvent())
 		})
 
 		return function cleanUp(): void {

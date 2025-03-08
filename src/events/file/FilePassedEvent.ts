@@ -1,6 +1,8 @@
 import { type FileId, newFile } from "+models/File"
 import { type Project, getFileById, putFile } from "+models/Project"
 import type { Duration } from "+types/Duration"
+import { assertNotNullish } from "+utilities/Assertions"
+import { logDebug } from "+utilities/Logging"
 
 export type FilePassedEvent = {
 	type: "file-passed"
@@ -31,4 +33,25 @@ export function applyFilePassedEvent(
 	})
 
 	return putFile(project, updatedFile)
+}
+
+export function logFilePassedEvent(
+	project: Project,
+	event: FilePassedEvent,
+): void {
+	const { files, ...loggableProject } = project
+
+	const file = getFileById(project, event.id)
+	assertNotNullish(file)
+
+	const { suitesAndTests, ...loggableFile } = file
+
+	logDebug(
+		{
+			label: "File passed",
+			labelColour: "#15803d",
+			message: file.filename,
+		},
+		{ event, file: loggableFile, project: loggableProject },
+	)
 }

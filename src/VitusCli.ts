@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { renderBodyHtml, renderInitialState } from "+explorer/ExplorerServer"
-import { getInitialState } from "+explorer/state/ExplorerState"
-import { createEventStream } from "+server/EventStream"
+import { createEventStream } from "+events/EventStream"
+import { renderBodyHtml, renderInitialProject } from "+explorer/ExplorerServer"
+import { mapVitestToProject } from "+models/Project"
 import { createEventStreamReporter } from "+server/EventStreamReporter"
 import {
 	handleEventStreamRequests,
@@ -34,11 +34,11 @@ polka()
 	.get(
 		"*",
 		handleIndexHtmlRequests(base, indexHtmlParts, (requestUrl) => {
-			const initialState = getInitialState(vitest)
+			const initialProject = mapVitestToProject(vitest)
 
 			return Promise.all([
-				renderInitialState(initialState),
-				renderBodyHtml(initialState, requestUrl),
+				renderInitialProject(initialProject),
+				renderBodyHtml(initialProject, requestUrl),
 			])
 		}),
 	)

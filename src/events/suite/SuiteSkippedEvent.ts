@@ -1,5 +1,13 @@
-import { type Project, getSuiteByPath, putSuite } from "+models/Project"
-import { type SuitePath, newSuite } from "+models/Suite"
+import {
+	type Project,
+	getFileById,
+	getSuiteByPath,
+	putSuite,
+} from "+models/Project"
+import { newSuite } from "+models/Suite"
+import type { SuitePath } from "+models/SuitePath"
+import { assertNotNullish } from "+utilities/Assertions"
+import { logDebug } from "+utilities/Logging"
 
 export type SuiteSkippedEvent = {
 	type: "suite-skipped"
@@ -24,4 +32,34 @@ export function applySuiteSkippedEvent(
 
 	const updatedSuite = newSuite({ ...existingSuite, status: "skipped" })
 	return putSuite(project, updatedSuite)
+}
+
+export function logSuiteSkippedEvent(
+	project: Project,
+	event: SuiteSkippedEvent,
+): void {
+	const { files, ...loggableProject } = project
+
+	const file = getFileById(project, event.path[0])
+	assertNotNullish(file)
+
+	const suite = getSuiteByPath(project, event.path)
+	assertNotNullish(suite)
+
+	const { suitesAndTests, ...loggableFile } = file
+	const { suitesAndTests: _suitesAndTests, ...loggableSuite } = suite
+
+	logDebug(
+		{
+			label: "Suite skipped",
+			labelColour: "#374151",
+			message: `${file.filename} > ${event.path.length > 2 ? "... > " : ""}${suite.name}`,
+		},
+		{
+			event,
+			suite: loggableSuite,
+			file: loggableFile,
+			project: loggableProject,
+		},
+	)
 }

@@ -1,8 +1,8 @@
 import EventEmitter from "node:events"
-import type { Event } from "+server/events/Event"
+import type { Event } from "+events/Event"
 
 export type EventStream = {
-	send: (event: Event) => void
+	send: (event: Event | null) => void
 	subscribe: (subscriber: EventStreamSubscriber) => void
 	unsubscribe: (subscriber: EventStreamSubscriber) => void
 }
@@ -14,7 +14,9 @@ export function createEventStream(): EventStream {
 
 	return {
 		send(event): void {
-			emitter.emit("message", event)
+			if (event !== null) {
+				emitter.emit("message", event)
+			}
 		},
 		subscribe(subscriber): void {
 			emitter.addListener("message", subscriber)

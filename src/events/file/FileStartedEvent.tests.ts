@@ -107,7 +107,7 @@ describe.each`
 		})
 
 		it("clears the suites and tests in the file", () => {
-			expect(actualFile.children).toHaveLength(0)
+			expect(actualFile.suitesAndTests).toHaveLength(0)
 		})
 
 		it("adds the file to the project", () => {

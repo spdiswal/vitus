@@ -1,6 +1,10 @@
 import { applyEvent } from "+events/Event"
 import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
-import { dummyFile } from "+models/File.fixtures"
+import {
+	type DummyFileId,
+	dummyFile,
+	getDummyFilePath,
+} from "+models/File.fixtures"
 import {
 	type Project,
 	type ProjectStatus,
@@ -22,33 +26,33 @@ beforeAll(() => {
 })
 
 describe.each`
-	deletedFilename       | expectedProjectDuration | expectedProjectStatus
-	${"Apples.tests.ts"}  | ${/**/ 20 + 40 + 80}    | ${"running"}
-	${"Bananas.tests.ts"} | ${10 + /**/ 40 + 80}    | ${"running"}
-	${"Oranges.tests.ts"} | ${10 + 20 + /**/ 80}    | ${"passed"}
-	${"Peaches.tests.ts"} | ${10 + 20 + 40 /**/}    | ${"running"}
+	id               | expectedProjectDuration | expectedProjectStatus
+	${"15b021ef72"}  | ${/**/ 20 + 40 + 80}    | ${"running"}
+	${"a3fdd8b6c3"}  | ${10 + /**/ 40 + 80}    | ${"running"}
+	${"-1730f876b4"} | ${10 + 20 + /**/ 80}    | ${"passed"}
+	${"-e45b128829"} | ${10 + 20 + 40 /**/}    | ${"running"}
 `(
-	"when an existing file $deletedFilename has been deleted",
+	"when an existing file $id has been deleted",
 	(props: {
-		deletedFilename: string
+		id: DummyFileId
 		expectedProjectDuration: Duration
 		expectedProjectStatus: ProjectStatus
 	}) => {
+		const deletedPath = getDummyFilePath(props.id)
+
 		let actualProject: Project
 
 		beforeEach(() => {
 			actualProject = applyEvent(
 				initialProject,
-				fileDeletedEvent({
-					path: `/Users/sdi/repositories/plantation/src/basket/${props.deletedFilename}`,
-				}),
+				fileDeletedEvent({ path: deletedPath }),
 			)
 		})
 
 		it("forgets about the deleted file", () => {
 			expect(actualProject.files).toHaveLength(initialProject.files.length - 1)
-			expect(actualProject.files.map((file) => file.filename)).not.toContain(
-				props.deletedFilename,
+			expect(actualProject.files.map((file) => file.path)).not.toContain(
+				deletedPath,
 			)
 		})
 

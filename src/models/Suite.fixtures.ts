@@ -1,9 +1,47 @@
-import type { DummyFileId } from "+models/File.fixtures"
-import { type Suite, type SuitePath, newSuite } from "+models/Suite"
+import { type DummyFileId, dummyVitestModule } from "+models/File.fixtures"
+import { type Suite, newSuite } from "+models/Suite"
+import type { SuitePath } from "+models/SuitePath"
 import type { Test } from "+models/Test"
-import type { TestModule, TestSuite, TestSuiteState } from "vitest/node"
+import type { EvenDigit } from "+types/Digit"
+import type { TestSuite, TestSuiteState } from "vitest/node"
 
-type EvenDigit = 0 | 2 | 4 | 6 | 8
+export function dummySuite(
+	id: DummySuiteId,
+	overrides?: Partial<Suite>,
+	suitesAndTests?: Array<Suite | Test>,
+): Suite {
+	const path = getDummySuitePath(id)
+
+	return newSuite({
+		name: getDummySuiteName(path),
+		path,
+		status: "passed",
+		suitesAndTests: suitesAndTests ?? [],
+		...overrides,
+	})
+}
+
+export function dummyVitestSuite(
+	id: DummySuiteId,
+	overrides?: Partial<{
+		status: TestSuiteState
+	}>,
+): TestSuite {
+	const path = getDummySuitePath(id)
+
+	const parentModule = dummyVitestModule(path[0] as DummyFileId)
+	const parentSuite =
+		path.length > 2 ? dummyVitestSuite(path.at(-2) as DummySuiteId) : null
+
+	return {
+		type: "suite",
+		module: parentModule,
+		parent: parentSuite ?? parentModule,
+		id,
+		name: getDummySuiteName(path),
+		state: () => overrides?.status ?? "pending",
+	} as TestSuite
+}
 
 export type DummySuiteId =
 	| `${DummyFileId}_${EvenDigit}` // Top-level suite.
@@ -41,44 +79,17 @@ const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
 	},
 }
 
-export function dummySuite(
-	id: DummySuiteId,
-	overrides?: Partial<Suite>,
-	children?: Array<Suite | Test>,
-): Suite {
-	const path = getPathFromDummySuiteId(id)
-	const fileId = path[0] as DummyFileId
-	const lastDigit = Number.parseInt(id.slice(-1)) as EvenDigit
-
-	return newSuite({
-		name: `${path.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`,
-		path,
-		status: "passed",
-		children: children ?? [],
-		...overrides,
-	})
-}
-
-export function getPathFromDummySuiteId(id: DummySuiteId): SuitePath {
+export function getDummySuitePath(id: DummySuiteId): SuitePath {
 	const segments = id.split("_")
 	return segments.map(
 		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
 	) as SuitePath
 }
 
-export function fakeVitestSuite(props: {
-	parentModule: TestModule
-	parentSuite: TestSuite | null
-	id: string
-	name: string
-	status: TestSuiteState
-}): TestSuite {
-	return {
-		type: "suite",
-		module: props.parentModule,
-		parent: props.parentSuite ?? props.parentModule,
-		id: props.id,
-		name: props.name,
-		state: () => props.status,
-	} as TestSuite
+export function getDummySuiteName(path: SuitePath): string {
+	const fileId = path[0] as DummyFileId
+	const suiteId = path.at(-1) as DummySuiteId
+	const lastDigit = Number.parseInt(suiteId.slice(-1)) as EvenDigit
+
+	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
 }

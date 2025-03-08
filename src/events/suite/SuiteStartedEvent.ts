@@ -1,5 +1,13 @@
-import { type Project, getSuiteByPath, putSuite } from "+models/Project"
-import { type SuitePath, newSuite } from "+models/Suite"
+import {
+	type Project,
+	getFileById,
+	getSuiteByPath,
+	putSuite,
+} from "+models/Project"
+import { newSuite } from "+models/Suite"
+import type { SuitePath } from "+models/SuitePath"
+import { assertNotNullish } from "+utilities/Assertions"
+import { logDebug } from "+utilities/Logging"
 
 export type SuiteStartedEvent = {
 	type: "suite-started"
@@ -23,8 +31,38 @@ export function applySuiteStartedEvent(
 		name: event.name,
 		path: event.path,
 		status: "running",
-		children: existingSuite?.children ?? [],
+		suitesAndTests: existingSuite?.suitesAndTests ?? [],
 	})
 
 	return putSuite(project, updatedSuite)
+}
+
+export function logSuiteStartedEvent(
+	project: Project,
+	event: SuiteStartedEvent,
+): void {
+	const { files, ...loggableProject } = project
+
+	const file = getFileById(project, event.path[0])
+	assertNotNullish(file)
+
+	const suite = getSuiteByPath(project, event.path)
+	assertNotNullish(suite)
+
+	const { suitesAndTests, ...loggableFile } = file
+	const { suitesAndTests: _suitesAndTests, ...loggableSuite } = suite
+
+	logDebug(
+		{
+			label: "Suite started",
+			labelColour: "#b45309",
+			message: `${file.filename} > ${event.path.length > 2 ? "... > " : ""}${suite.name}`,
+		},
+		{
+			event,
+			suite: loggableSuite,
+			file: loggableFile,
+			project: loggableProject,
+		},
+	)
 }

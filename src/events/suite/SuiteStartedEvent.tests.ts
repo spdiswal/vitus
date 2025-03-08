@@ -15,7 +15,7 @@ import type { Suite, SuiteStatus } from "+models/Suite"
 import {
 	type DummySuiteId,
 	dummySuite,
-	getPathFromDummySuiteId,
+	getDummySuitePath,
 } from "+models/Suite.fixtures"
 import { dummyTest } from "+models/Test.fixtures"
 import { assertNotNullish } from "+utilities/Assertions"
@@ -136,7 +136,7 @@ describe.each`
 		name: string
 		expectedChildIdOrder: Array<string>
 	}) => {
-		const path = getPathFromDummySuiteId(props.suiteId)
+		const path = getDummySuitePath(props.suiteId)
 		const [fileId] = path
 
 		const initialFile = getFileById(initialProject, fileId)
@@ -203,7 +203,7 @@ describe.each`
 		suiteId: DummySuiteId
 		name: string
 	}) => {
-		const path = getPathFromDummySuiteId(props.suiteId)
+		const path = getDummySuitePath(props.suiteId)
 		const [fileId] = path
 
 		const initialFile = getFileById(initialProject, fileId)
@@ -265,7 +265,7 @@ describe.each`
 		suiteId: DummySuiteId
 		name: string
 	}) => {
-		const path = getPathFromDummySuiteId(props.suiteId)
+		const path = getDummySuitePath(props.suiteId)
 
 		let actualProject: Project
 

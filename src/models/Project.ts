@@ -6,24 +6,24 @@ import {
 	getFileChildIds,
 	getTopLevelSuiteById,
 	getTopLevelTestById,
+	hasFileStatus,
+	mapVitestToFile,
 	putTopLevelSuiteOrTest,
 } from "+models/File"
 import type { DummyFileId } from "+models/File.fixtures"
 import {
 	type Suite,
 	type SuiteIds,
-	type SuitePath,
 	getDeeplyNestedSuiteByPath,
 	getNestedTestById,
 	hasNestedSuites,
 	putDeeplyNestedSuiteOrTest,
 	putNestedSuiteOrTest,
 } from "+models/Suite"
-import {
-	type DummySuiteId,
-	getPathFromDummySuiteId,
-} from "+models/Suite.fixtures"
-import type { Test, TestId, TestPath } from "+models/Test"
+import { type DummySuiteId, getDummySuitePath } from "+models/Suite.fixtures"
+import type { SuitePath } from "+models/SuitePath"
+import type { Test, TestId } from "+models/Test"
+import type { TestPath } from "+models/TestPath"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
 import type { Duration } from "+types/Duration"
@@ -31,6 +31,7 @@ import type { Path } from "+types/Path"
 import { toSum } from "+utilities/Arrays"
 import { assertNotNullish } from "+utilities/Assertions"
 import { count } from "+utilities/Strings"
+import type { Vitest } from "vitest/node"
 
 export type Project = {
 	duration: Computed<Duration>
@@ -52,9 +53,9 @@ export function newProject(props: PickNonComputed<Project>): Project {
 		...props,
 		files,
 		duration: files.map((file) => file.duration).reduce(toSum, 0),
-		status: files.some((file) => file.status === "running")
+		status: files.some(hasFileStatus("running"))
 			? "running"
-			: files.some((file) => file.status === "failed")
+			: files.some(hasFileStatus("failed"))
 				? "failed"
 				: "passed",
 	}
@@ -66,6 +67,10 @@ export function getFileById(project: Project, fileId: FileId): File | null {
 
 export function getOtherFiles(project: Project, excludedFileId: FileId): Files {
 	return project.files.filter((file) => file.id !== excludedFileId)
+}
+
+export function getFileByPath(project: Project, path: Path): File | null {
+	return project.files.find((file) => file.path === path) ?? null
 }
 
 export function getProjectChildIds(project: Project): Array<string> {
@@ -245,7 +250,7 @@ export function assertDummySuites(
 	expectations: Partial<Record<DummySuiteId, { duration: Duration }>>,
 ): void {
 	for (const [suiteId, suiteExpectations] of Object.entries(expectations)) {
-		const path = getPathFromDummySuiteId(suiteId as DummySuiteId)
+		const path = getDummySuitePath(suiteId as DummySuiteId)
 		const suite = getSuiteByPath(project, path)
 		assertNotNullish(suite)
 
@@ -258,4 +263,12 @@ export function assertDummySuites(
 			)
 		}
 	}
+}
+
+export function mapVitestToProject(vitest: Vitest): Project {
+	return newProject({
+		files: vitest.state.getTestModules().map(mapVitestToFile),
+		isConnected: true,
+		rootPath: vitest.config.root,
+	})
 }

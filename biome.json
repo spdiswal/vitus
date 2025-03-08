@@ -26,11 +26,21 @@
 			}
 		},
 		{
-			"include": ["src/server/*.ts"],
+			"include": ["src/events/EventStream.ts", "src/server/*.ts"],
 			"linter": {
 				"rules": {
 					"correctness": {
 						"noNodejsModules": "off"
+					}
+				}
+			}
+		},
+		{
+			"include": ["src/utilities/Logging.ts"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noConsole": "off"
 					}
 				}
 			}

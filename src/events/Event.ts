@@ -1,70 +1,87 @@
 import {
 	type FileDeletedEvent,
 	applyFileDeletedEvent,
+	logFileDeletedEvent,
 } from "+events/file/FileDeletedEvent"
 import {
 	type FileFailedEvent,
 	applyFileFailedEvent,
+	logFileFailedEvent,
 } from "+events/file/FileFailedEvent"
 import {
 	type FilePassedEvent,
 	applyFilePassedEvent,
+	logFilePassedEvent,
 } from "+events/file/FilePassedEvent"
 import {
 	type FileSkippedEvent,
 	applyFileSkippedEvent,
+	logFileSkippedEvent,
 } from "+events/file/FileSkippedEvent"
 import {
 	type FileStartedEvent,
 	applyFileStartedEvent,
+	logFileStartedEvent,
 } from "+events/file/FileStartedEvent"
 import {
 	type RunCompletedEvent,
 	applyRunCompletedEvent,
+	logRunCompletedEvent,
 } from "+events/run/RunCompletedEvent"
 import {
 	type RunStartedEvent,
 	applyRunStartedEvent,
+	logRunStartedEvent,
 } from "+events/run/RunStartedEvent"
 import {
 	type ServerDisconnectedEvent,
 	applyServerDisconnectedEvent,
+	logServerDisconnectedEvent,
 } from "+events/server/ServerDisconnectedEvent"
 import {
 	type ServerRestartedEvent,
 	applyServerRestartedEvent,
+	logServerRestartedEvent,
 } from "+events/server/ServerRestartedEvent"
 import {
 	type SuiteFailedEvent,
 	applySuiteFailedEvent,
+	logSuiteFailedEvent,
 } from "+events/suite/SuiteFailedEvent"
 import {
 	type SuitePassedEvent,
 	applySuitePassedEvent,
+	logSuitePassedEvent,
 } from "+events/suite/SuitePassedEvent"
 import {
 	type SuiteSkippedEvent,
 	applySuiteSkippedEvent,
+	logSuiteSkippedEvent,
 } from "+events/suite/SuiteSkippedEvent"
 import {
 	type SuiteStartedEvent,
 	applySuiteStartedEvent,
+	logSuiteStartedEvent,
 } from "+events/suite/SuiteStartedEvent"
 import {
 	type TestFailedEvent,
 	applyTestFailedEvent,
+	logTestFailedEvent,
 } from "+events/test/TestFailedEvent"
 import {
 	type TestPassedEvent,
 	applyTestPassedEvent,
+	logTestPassedEvent,
 } from "+events/test/TestPassedEvent"
 import {
 	type TestSkippedEvent,
 	applyTestSkippedEvent,
+	logTestSkippedEvent,
 } from "+events/test/TestSkippedEvent"
 import {
 	type TestStartedEvent,
 	applyTestStartedEvent,
+	logTestStartedEvent,
 } from "+events/test/TestStartedEvent"
 import type { Project } from "+models/Project"
 
@@ -139,6 +156,79 @@ export function applyEvent(project: Project, event: Event): Project {
 		}
 		case "test-started": {
 			return applyTestStartedEvent(project, event)
+		}
+	}
+}
+
+export function logEvent(project: Project, event: Event): void {
+	switch (event.type) {
+		case "file-deleted": {
+			logFileDeletedEvent(project, event)
+			break
+		}
+		case "file-failed": {
+			logFileFailedEvent(project, event)
+			break
+		}
+		case "file-passed": {
+			logFilePassedEvent(project, event)
+			break
+		}
+		case "file-skipped": {
+			logFileSkippedEvent(project, event)
+			break
+		}
+		case "file-started": {
+			logFileStartedEvent(project, event)
+			break
+		}
+		case "run-completed": {
+			logRunCompletedEvent(project, event)
+			break
+		}
+		case "run-started": {
+			logRunStartedEvent(project, event)
+			break
+		}
+		case "server-disconnected": {
+			logServerDisconnectedEvent(project, event)
+			break
+		}
+		case "server-restarted": {
+			logServerRestartedEvent(project, event)
+			break
+		}
+		case "suite-failed": {
+			logSuiteFailedEvent(project, event)
+			break
+		}
+		case "suite-passed": {
+			logSuitePassedEvent(project, event)
+			break
+		}
+		case "suite-skipped": {
+			logSuiteSkippedEvent(project, event)
+			break
+		}
+		case "suite-started": {
+			logSuiteStartedEvent(project, event)
+			break
+		}
+		case "test-failed": {
+			logTestFailedEvent(project, event)
+			break
+		}
+		case "test-passed": {
+			logTestPassedEvent(project, event)
+			break
+		}
+		case "test-skipped": {
+			logTestSkippedEvent(project, event)
+			break
+		}
+		case "test-started": {
+			logTestStartedEvent(project, event)
+			break
 		}
 	}
 }

@@ -1,16 +1,11 @@
-import type { EventStream } from "+server/EventStream"
-import { mapToDeletedFileEvent, mapToFileEvent } from "+server/events/FileEvent"
-import { mapToRunEvent } from "+server/events/RunEvent"
-import { mapToServerEvent } from "+server/events/ServerEvent"
-import { mapToSuiteEvent } from "+server/events/SuiteEvent"
-import { mapToTestEvent } from "+server/events/TestEvent"
+import type { EventStream } from "+events/EventStream"
+import { createEventReporter } from "+server/EventReporter"
 import type { Reporter } from "vitest/reporters"
 
 export type EventStreamReporter = Pick<
 	Required<Reporter>,
 	| "onServerRestart"
 	| "onTestRunStart"
-	| "onTestModuleQueued"
 	| "onTestModuleStart"
 	| "onTestSuiteReady"
 	| "onTestCaseReady"
@@ -24,41 +19,40 @@ export type EventStreamReporter = Pick<
 export function createEventStreamReporter(
 	eventStream: EventStream,
 ): EventStreamReporter {
+	const eventReporter = createEventReporter()
+
 	return {
-		onServerRestart(): void {
-			eventStream.send(mapToServerEvent("restarted"))
+		onServerRestart(reason): void {
+			eventStream.send(eventReporter.onServerRestart(reason))
 		},
 		onTestRunStart(specifications): void {
-			eventStream.send(mapToRunEvent(specifications, "started"))
-		},
-		onTestModuleQueued(module): void {
-			eventStream.send(mapToFileEvent(module, "registered"))
+			eventStream.send(eventReporter.onTestRunStart(specifications))
 		},
 		onTestModuleStart(module): void {
-			eventStream.send(mapToFileEvent(module, "started"))
+			eventStream.send(eventReporter.onTestModuleStart(module))
 		},
 		onTestSuiteReady(suite): void {
-			eventStream.send(mapToSuiteEvent(suite, "started"))
+			eventStream.send(eventReporter.onTestSuiteReady(suite))
 		},
 		onTestCaseReady(test): void {
-			eventStream.send(mapToTestEvent(test, "started"))
+			eventStream.send(eventReporter.onTestCaseReady(test))
 		},
 		onTestCaseResult(test): void {
-			eventStream.send(mapToTestEvent(test))
+			eventStream.send(eventReporter.onTestCaseResult(test))
 		},
 		onTestSuiteResult(suite): void {
-			eventStream.send(mapToSuiteEvent(suite))
+			eventStream.send(eventReporter.onTestSuiteResult(suite))
 		},
 		onTestModuleEnd(module): void {
-			eventStream.send(mapToFileEvent(module))
+			eventStream.send(eventReporter.onTestModuleEnd(module))
 		},
-		onTestRunEnd(modules): void {
-			eventStream.send(mapToRunEvent(modules, "completed"))
+		onTestRunEnd(modules, unhandledErrors, reason): void {
+			eventStream.send(
+				eventReporter.onTestRunEnd(modules, unhandledErrors, reason),
+			)
 		},
 		onTestRemoved(moduleId): void {
-			if (moduleId !== undefined) {
-				eventStream.send(mapToDeletedFileEvent(moduleId))
-			}
+			eventStream.send(eventReporter.onTestRemoved(moduleId))
 		},
 	}
 }

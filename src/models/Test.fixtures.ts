@@ -1,15 +1,46 @@
-import type { DummyFileId } from "+models/File.fixtures"
-import type { DummySuiteId } from "+models/Suite.fixtures"
-import { type Test, type TestPath, newTest } from "+models/Test"
-import type {
-	TestCase,
-	TestModule,
-	TestResult,
-	TestState,
-	TestSuite,
-} from "vitest/node"
+import { type DummyFileId, dummyVitestModule } from "+models/File.fixtures"
+import { type DummySuiteId, dummyVitestSuite } from "+models/Suite.fixtures"
+import { type Test, newTest } from "+models/Test"
+import type { TestPath } from "+models/TestPath"
+import type { OddDigit } from "+types/Digit"
+import type { Duration } from "+types/Duration"
+import type { TestCase, TestState } from "vitest/node"
 
-type OddDigit = 1 | 3 | 5 | 7 | 9
+export function dummyTest(id: DummyTestId, overrides?: Partial<Test>): Test {
+	const path = getDummyTestPath(id)
+
+	return newTest({
+		duration: 0,
+		name: getDummyTestName(path),
+		path,
+		status: "passed",
+		...overrides,
+	})
+}
+
+export function dummyVitestTest(
+	id: DummyTestId,
+	overrides?: Partial<{
+		status: TestState
+		duration: Duration
+	}>,
+): TestCase {
+	const path = getDummyTestPath(id)
+
+	const parentModule = dummyVitestModule(path[0] as DummyFileId)
+	const parentSuite =
+		path.length > 2 ? dummyVitestSuite(path.at(-2) as DummySuiteId) : null
+
+	return {
+		type: "test",
+		module: parentModule,
+		parent: parentSuite ?? parentModule,
+		id,
+		name: getDummyTestName(path),
+		result: () => ({ state: overrides?.status ?? "pending" }),
+		diagnostic: () => ({ duration: overrides?.duration ?? 0 }),
+	} as TestCase
+}
 
 export type DummyTestId =
 	| `${DummyFileId}_${OddDigit}` // Top-level test.
@@ -46,40 +77,17 @@ const dummyNamesById: Record<DummyFileId, Record<OddDigit, string>> = {
 	},
 }
 
-export function dummyTest(id: DummyTestId, overrides?: Partial<Test>): Test {
-	const path = getPathFromDummyTestId(id)
-	const fileId = path[0] as DummyFileId
-	const lastDigit = Number.parseInt(id.slice(-1)) as OddDigit
-
-	return newTest({
-		duration: 0,
-		name: dummyNamesById[fileId][lastDigit],
-		path,
-		status: "passed",
-		...overrides,
-	})
-}
-
-export function getPathFromDummyTestId(id: DummyTestId): TestPath {
+export function getDummyTestPath(id: DummyTestId): TestPath {
 	const segments = id.split("_")
 	return segments.map(
 		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
 	) as TestPath
 }
 
-export function fakeVitestTest(props: {
-	parentModule: TestModule
-	parentSuite: TestSuite | null
-	id: string
-	name: string
-	status: TestState
-}): TestCase {
-	return {
-		type: "test",
-		module: props.parentModule,
-		parent: props.parentSuite ?? props.parentModule,
-		id: props.id,
-		name: props.name,
-		result: () => ({ state: props.status }) as TestResult,
-	} as TestCase
+export function getDummyTestName(path: TestPath): string {
+	const fileId = path[0] as DummyFileId
+	const testId = path.at(-1) as DummyTestId
+	const lastDigit = Number.parseInt(testId.slice(-1)) as OddDigit
+
+	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
 }

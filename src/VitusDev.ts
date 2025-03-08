@@ -1,6 +1,6 @@
-import { renderInitialState } from "+explorer/ExplorerServer"
-import { getInitialState } from "+explorer/state/ExplorerState"
-import { createEventStream } from "+server/EventStream"
+import { createEventStream } from "+events/EventStream"
+import { renderInitialProject } from "+explorer/ExplorerServer"
+import { mapVitestToProject } from "+models/Project"
 import { createEventStreamReporter } from "+server/EventStreamReporter"
 import {
 	handleEventStreamRequests,
@@ -42,7 +42,7 @@ polka()
 			base,
 			indexHtmlParts,
 			async () => [
-				renderInitialState(getInitialState(vitest)),
+				renderInitialProject(mapVitestToProject(vitest)),
 				"", // Render the Preact app fully client-side to prevent hydration errors that cause hot module replacement (HMR) to malfunction.
 			],
 			vite.ssrFixStacktrace,
