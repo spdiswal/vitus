@@ -1,17 +1,17 @@
 import { ExplorerApp } from "+explorer/ExplorerApp"
-import type { ExplorerState } from "+explorer/state/ExplorerState"
+import type { Project } from "+models/Project"
 import { renderToStringAsync } from "preact-render-to-string"
 
 export async function renderBodyHtml(
-	initialState: ExplorerState,
+	initialProject: Project,
 	_requestUrl: string,
 ): Promise<string> {
 	return renderToStringAsync(
-		<ExplorerApp initialState={initialState} initialTheme={null} />,
+		<ExplorerApp initialProject={initialProject} initialTheme={null} />,
 	)
 }
 
-export function renderInitialState(initialState: ExplorerState): string {
+export function renderInitialProject(initialProject: Project): string {
 	// language=html
-	return `<script type="text/javascript">window.__VITUS_INITIAL_STATE__=${JSON.stringify(initialState)}</script>`
+	return `<script type="text/javascript">window.__VITUS_INITIAL_PROJECT__=${JSON.stringify(initialProject)}</script>`
 }

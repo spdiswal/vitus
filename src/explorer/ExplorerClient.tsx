@@ -2,10 +2,10 @@ import { ExplorerApp } from "+explorer/ExplorerApp"
 import { hydrate } from "preact"
 import "+explorer/Explorer.css"
 
-const initialState = window.__VITUS_INITIAL_STATE__
+const initialProject = window.__VITUS_INITIAL_PROJECT__
 const initialTheme = window.__VITUS_INITIAL_THEME__
 
 hydrate(
-	<ExplorerApp initialState={initialState} initialTheme={initialTheme} />,
+	<ExplorerApp initialProject={initialProject} initialTheme={initialTheme} />,
 	document.body,
 )
