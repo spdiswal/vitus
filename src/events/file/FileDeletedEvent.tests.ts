@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
 import {
 	type DummyFileId,
@@ -43,7 +43,7 @@ describe.each`
 		let actualProject: Project
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				fileDeletedEvent({ path: deletedPath }),
 			)
@@ -70,7 +70,7 @@ describe("when a non-existing file has been deleted", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
-		actualProject = applyEvent(
+		actualProject = applyProjectEvent(
 			initialProject,
 			fileDeletedEvent({
 				path: "/Users/sdi/repositories/plantation/src/basket/Imaginary.tests.ts",

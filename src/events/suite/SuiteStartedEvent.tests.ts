@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { suiteStartedEvent } from "+events/suite/SuiteStartedEvent"
 import { type File, countFileChildren, getFileChildIds } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -147,7 +147,7 @@ describe.each`
 		let actualSuite: Suite
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				suiteStartedEvent({ name: props.name, path }),
 			)
@@ -217,7 +217,7 @@ describe.each`
 		let actualSuite: Suite
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				suiteStartedEvent({ name: props.name, path }),
 			)
@@ -270,7 +270,7 @@ describe.each`
 		let actualProject: Project
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				suiteStartedEvent({ name: props.name, path }),
 			)

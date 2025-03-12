@@ -1,4 +1,8 @@
-import { type Event, applyEvent, logEvent } from "+events/Event"
+import {
+	type ProjectEvent,
+	applyProjectEvent,
+	logProjectEvent,
+} from "+events/ProjectEvent"
 import { useEventStream } from "+events/UseEventStream"
 import type { Project } from "+models/Project"
 import { useCallback, useState } from "preact/hooks"
@@ -6,10 +10,10 @@ import { useCallback, useState } from "preact/hooks"
 export function useProjectState(initialProject: Project): Project {
 	const [project, setProject] = useState(initialProject)
 
-	const handleEvent = useCallback((event: Event) => {
+	const handleEvent = useCallback((event: ProjectEvent) => {
 		setProject((oldProject) => {
-			const updatedProject = applyEvent(oldProject, event)
-			logEvent(updatedProject, event)
+			const updatedProject = applyProjectEvent(oldProject, event)
+			logProjectEvent(updatedProject, event)
 
 			return updatedProject
 		})

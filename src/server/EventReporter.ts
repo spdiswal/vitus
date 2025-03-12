@@ -1,4 +1,4 @@
-import type { Event } from "+events/Event"
+import type { ProjectEvent } from "+events/ProjectEvent"
 import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
 import { fileFailedEvent } from "+events/file/FileFailedEvent"
 import { filePassedEvent } from "+events/file/FilePassedEvent"
@@ -23,33 +23,33 @@ import { notNullish } from "+utilities/Arrays"
 export type EventReporter = {
 	[VitestEvent in keyof EventStreamReporter]: (
 		...args: Parameters<EventStreamReporter[VitestEvent]>
-	) => Event | null
+	) => ProjectEvent | null
 }
 
 export function createEventReporter(): EventReporter {
 	return {
-		onServerRestart(): Event | null {
+		onServerRestart(): ProjectEvent | null {
 			return serverRestartedEvent()
 		},
-		onTestRunStart(specifications): Event | null {
+		onTestRunStart(specifications): ProjectEvent | null {
 			const invalidatedFileIds = specifications
 				.map((specification) => specification.testModule?.id)
 				.filter(notNullish)
 
 			return runStartedEvent({ invalidatedFileIds })
 		},
-		onTestModuleStart(module): Event | null {
+		onTestModuleStart(module): ProjectEvent | null {
 			return fileStartedEvent({ id: module.id, path: module.moduleId })
 		},
-		onTestSuiteReady(suite): Event | null {
+		onTestSuiteReady(suite): ProjectEvent | null {
 			const path = mapVitestToSuitePath(suite)
 			return suiteStartedEvent({ name: suite.name, path })
 		},
-		onTestCaseReady(test): Event | null {
+		onTestCaseReady(test): ProjectEvent | null {
 			const path = mapVitestToTestPath(test)
 			return testStartedEvent({ name: test.name, path })
 		},
-		onTestCaseResult(test): Event | null {
+		onTestCaseResult(test): ProjectEvent | null {
 			const duration = test.diagnostic()?.duration ?? 0
 			const path = mapVitestToTestPath(test)
 
@@ -68,7 +68,7 @@ export function createEventReporter(): EventReporter {
 				}
 			}
 		},
-		onTestSuiteResult(suite): Event | null {
+		onTestSuiteResult(suite): ProjectEvent | null {
 			const path = mapVitestToSuitePath(suite)
 
 			switch (suite.state()) {
@@ -86,7 +86,7 @@ export function createEventReporter(): EventReporter {
 				}
 			}
 		},
-		onTestModuleEnd(module): Event | null {
+		onTestModuleEnd(module): ProjectEvent | null {
 			const duration = module.diagnostic().duration
 			const id = module.id
 
@@ -105,10 +105,10 @@ export function createEventReporter(): EventReporter {
 				}
 			}
 		},
-		onTestRunEnd(): Event | null {
+		onTestRunEnd(): ProjectEvent | null {
 			return runCompletedEvent()
 		},
-		onTestRemoved(moduleId): Event | null {
+		onTestRemoved(moduleId): ProjectEvent | null {
 			return moduleId !== undefined
 				? fileDeletedEvent({ path: moduleId })
 				: null

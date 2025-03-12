@@ -1,8 +1,10 @@
-import type { Event } from "+events/Event"
+import type { ProjectEvent } from "+events/ProjectEvent"
 import { serverDisconnectedEvent } from "+events/server/ServerDisconnectedEvent"
 import { useEffect } from "preact/hooks"
 
-export function useEventStream(subscriber: (event: Event) => void): void {
+export function useEventStream(
+	subscriber: (event: ProjectEvent) => void,
+): void {
 	useEffect(() => {
 		const eventSource = new EventSource("/api/events")
 

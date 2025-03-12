@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { serverDisconnectedEvent } from "+events/server/ServerDisconnectedEvent"
 import { dummyFile } from "+models/File.fixtures"
 import {
@@ -92,7 +92,7 @@ describe("when the server has disconnected", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
-		actualProject = applyEvent(initialProject, serverDisconnectedEvent())
+		actualProject = applyProjectEvent(initialProject, serverDisconnectedEvent())
 	})
 
 	it("is no longer connected", () => {

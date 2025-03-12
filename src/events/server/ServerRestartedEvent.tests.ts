@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
 import { dummyFile } from "+models/File.fixtures"
 import {
@@ -24,7 +24,7 @@ describe("when the server has restarted", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
-		actualProject = applyEvent(initialProject, serverRestartedEvent())
+		actualProject = applyProjectEvent(initialProject, serverRestartedEvent())
 	})
 
 	it("is still connected", () => {

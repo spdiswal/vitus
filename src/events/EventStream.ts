@@ -1,16 +1,16 @@
 import EventEmitter from "node:events"
-import type { Event } from "+events/Event"
+import type { ProjectEvent } from "+events/ProjectEvent"
 
 export type EventStream = {
-	send: (event: Event | null) => void
+	send: (event: ProjectEvent | null) => void
 	subscribe: (subscriber: EventStreamSubscriber) => void
 	unsubscribe: (subscriber: EventStreamSubscriber) => void
 }
 
-export type EventStreamSubscriber = (event: Event) => void
+export type EventStreamSubscriber = (event: ProjectEvent) => void
 
 export function createEventStream(): EventStream {
-	const emitter = new EventEmitter<{ message: [Event] }>()
+	const emitter = new EventEmitter<{ message: [ProjectEvent] }>()
 
 	return {
 		send(event): void {

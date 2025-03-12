@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { filePassedEvent } from "+events/file/FilePassedEvent"
 import type { File, FileId, FileStatus } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -43,7 +43,7 @@ describe.each`
 		let actualFile: File
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				filePassedEvent({ id: props.id, duration: props.duration }),
 			)
@@ -85,7 +85,7 @@ describe("when a non-existing file has passed", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
-		actualProject = applyEvent(
+		actualProject = applyProjectEvent(
 			initialProject,
 			filePassedEvent({ id: "f9bb9e8bc0", duration: 8 }),
 		)

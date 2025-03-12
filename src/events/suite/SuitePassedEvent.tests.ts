@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { suitePassedEvent } from "+events/suite/SuitePassedEvent"
 import { type File, countFileChildren } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -146,7 +146,10 @@ describe.each`
 		let actualSuite: Suite
 
 		beforeEach(() => {
-			actualProject = applyEvent(initialProject, suitePassedEvent({ path }))
+			actualProject = applyProjectEvent(
+				initialProject,
+				suitePassedEvent({ path }),
+			)
 
 			const file = getFileById(actualProject, fileId)
 			assertNotNullish(file)
@@ -191,7 +194,10 @@ describe.each`
 		let actualProject: Project
 
 		beforeEach(() => {
-			actualProject = applyEvent(initialProject, suitePassedEvent({ path }))
+			actualProject = applyProjectEvent(
+				initialProject,
+				suitePassedEvent({ path }),
+			)
 		})
 
 		it("does not affect the project", () => {

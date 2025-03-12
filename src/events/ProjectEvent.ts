@@ -85,7 +85,7 @@ import {
 } from "+events/test/TestStartedEvent"
 import type { Project } from "+models/Project"
 
-export type Event =
+export type ProjectEvent =
 	| FileDeletedEvent
 	| FileFailedEvent
 	| FilePassedEvent
@@ -104,7 +104,10 @@ export type Event =
 	| TestSkippedEvent
 	| TestStartedEvent
 
-export function applyEvent(project: Project, event: Event): Project {
+export function applyProjectEvent(
+	project: Project,
+	event: ProjectEvent,
+): Project {
 	switch (event.type) {
 		case "file-deleted": {
 			return applyFileDeletedEvent(project, event)
@@ -160,7 +163,7 @@ export function applyEvent(project: Project, event: Event): Project {
 	}
 }
 
-export function logEvent(project: Project, event: Event): void {
+export function logProjectEvent(project: Project, event: ProjectEvent): void {
 	switch (event.type) {
 		case "file-deleted": {
 			logFileDeletedEvent(project, event)
