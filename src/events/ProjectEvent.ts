@@ -104,6 +104,15 @@ export type ProjectEvent =
 	| TestSkippedEvent
 	| TestStartedEvent
 
+export type ProjectEvents = Array<ProjectEvent>
+
+export function applyProjectEvents(
+	project: Project,
+	events: ProjectEvents,
+): Project {
+	return events.reduce(applyProjectEvent, project)
+}
+
 export function applyProjectEvent(
 	project: Project,
 	event: ProjectEvent,
@@ -160,6 +169,15 @@ export function applyProjectEvent(
 		case "test-started": {
 			return applyTestStartedEvent(project, event)
 		}
+	}
+}
+
+export function logProjectEvents(
+	project: Project,
+	events: ProjectEvents,
+): void {
+	for (const event of events) {
+		logProjectEvent(project, event)
 	}
 }
 

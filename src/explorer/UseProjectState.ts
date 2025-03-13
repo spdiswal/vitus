@@ -1,24 +1,24 @@
 import {
-	type ProjectEvent,
-	applyProjectEvent,
-	logProjectEvent,
+	type ProjectEvents,
+	applyProjectEvents,
+	logProjectEvents,
 } from "+events/ProjectEvent"
-import { useEventStream } from "+events/UseEventStream"
+import { useBatchedEventStream } from "+events/UseBatchedEventStream"
 import type { Project } from "+models/Project"
 import { useCallback, useState } from "preact/hooks"
 
 export function useProjectState(initialProject: Project): Project {
 	const [project, setProject] = useState(initialProject)
 
-	const handleEvent = useCallback((event: ProjectEvent) => {
+	const handleEvent = useCallback((events: ProjectEvents) => {
 		setProject((oldProject) => {
-			const updatedProject = applyProjectEvent(oldProject, event)
-			logProjectEvent(updatedProject, event)
+			const updatedProject = applyProjectEvents(oldProject, events)
+			logProjectEvents(updatedProject, events)
 
 			return updatedProject
 		})
 	}, [])
 
-	useEventStream(handleEvent)
+	useBatchedEventStream(handleEvent, 100)
 	return project
 }
