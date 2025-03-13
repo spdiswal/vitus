@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { runCompletedEvent } from "+events/run/RunCompletedEvent"
 import { dummyFile } from "+models/File.fixtures"
 import {
@@ -92,7 +92,7 @@ describe("when the run has completed", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
-		actualProject = applyEvent(initialProject, runCompletedEvent())
+		actualProject = applyProjectEvent(initialProject, runCompletedEvent())
 	})
 
 	it("discards unfinished files, suites, and tests", () => {

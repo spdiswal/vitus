@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { runStartedEvent } from "+events/run/RunStartedEvent"
 import type { File, FileId, FileStatus } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -40,7 +40,7 @@ describe.each`
 		let actualFiles: Vector<File, 2>
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				runStartedEvent({ invalidatedFileIds: props.fileIds }),
 			)
@@ -82,7 +82,7 @@ describe("when a run has started for a non-existing file", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
-		actualProject = applyEvent(
+		actualProject = applyProjectEvent(
 			initialProject,
 			runStartedEvent({ invalidatedFileIds: ["f9bb9e8bc0"] }),
 		)

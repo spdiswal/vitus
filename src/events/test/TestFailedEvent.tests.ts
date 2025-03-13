@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { testFailedEvent } from "+events/test/TestFailedEvent"
 import { type File, countFileChildren } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -154,7 +154,7 @@ describe.each`
 		let actualTest: Test
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				testFailedEvent({ path, duration: props.duration }),
 			)
@@ -214,7 +214,7 @@ describe.each`
 		let actualProject: Project
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				testFailedEvent({ path, duration: props.duration }),
 			)

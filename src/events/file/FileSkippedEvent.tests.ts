@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { fileSkippedEvent } from "+events/file/FileSkippedEvent"
 import type { File, FileId, FileStatus } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -43,7 +43,7 @@ describe.each`
 		let actualFile: File
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				fileSkippedEvent({ id: props.id, duration: props.duration }),
 			)
@@ -85,7 +85,7 @@ describe("when a non-existing file has been skipped", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
-		actualProject = applyEvent(
+		actualProject = applyProjectEvent(
 			initialProject,
 			fileSkippedEvent({ id: "f9bb9e8bc0", duration: 8 }),
 		)

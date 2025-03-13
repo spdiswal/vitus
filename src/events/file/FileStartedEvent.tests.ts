@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { fileStartedEvent } from "+events/file/FileStartedEvent"
 import {
 	type File,
@@ -85,7 +85,7 @@ describe.each`
 		let actualFile: File
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				fileStartedEvent({
 					id: props.id,
@@ -151,7 +151,7 @@ describe.each`
 		let actualFile: File
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				fileStartedEvent({
 					id: props.id,

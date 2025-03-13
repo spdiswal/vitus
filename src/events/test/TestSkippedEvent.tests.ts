@@ -1,4 +1,4 @@
-import { applyEvent } from "+events/Event"
+import { applyProjectEvent } from "+events/ProjectEvent"
 import { testSkippedEvent } from "+events/test/TestSkippedEvent"
 import { type File, countFileChildren } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
@@ -154,7 +154,7 @@ describe.each`
 		let actualTest: Test
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				testSkippedEvent({ path, duration: props.duration }),
 			)
@@ -214,7 +214,7 @@ describe.each`
 		let actualProject: Project
 
 		beforeEach(() => {
-			actualProject = applyEvent(
+			actualProject = applyProjectEvent(
 				initialProject,
 				testSkippedEvent({ path, duration: props.duration }),
 			)

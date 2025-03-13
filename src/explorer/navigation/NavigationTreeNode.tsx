@@ -4,7 +4,7 @@ import type { Test } from "+models/Test"
 import { cn, cx } from "+types/ClassString"
 import { type Duration, formatDuration } from "+types/Duration"
 import type { Renderable } from "+types/Renderable"
-import { useState } from "preact/hooks"
+import { useMemo, useState } from "preact/hooks"
 
 export function NavigationTreeNode(props: {
 	duration: Duration
@@ -13,6 +13,31 @@ export function NavigationTreeNode(props: {
 	suitesAndTests: Array<Suite | Test>
 }): Renderable {
 	const [expanded, setExpanded] = useState(false)
+
+	const memoisedSuitesAndTests = useMemo(
+		() =>
+			props.suitesAndTests.length > 0 ? (
+				<ul
+					class={cn(
+						"flex flex-col ml-3.5 pl-2.5 border-l border-gray-400 dark:border-gray-700 transition",
+						!expanded && "hidden",
+					)}
+				>
+					{props.suitesAndTests.map((suiteOrTest) => (
+						<NavigationTreeNode
+							key={suiteOrTest.id}
+							duration={suiteOrTest.duration}
+							name={suiteOrTest.name}
+							status={suiteOrTest.status}
+							suitesAndTests={
+								isSuite(suiteOrTest) ? suiteOrTest.suitesAndTests : []
+							}
+						/>
+					))}
+				</ul>
+			) : null,
+		[props.suitesAndTests, expanded],
+	)
 
 	return (
 		<li class="pt-1 flex flex-col">
@@ -53,32 +78,13 @@ export function NavigationTreeNode(props: {
 				<span class="text-gray-950 dark:text-gray-50 transition">
 					{props.name}
 					{props.duration > 0 ? (
-						<span class="ml-2 text-xs font-light text-gray-500 whitespace-nowrap">
+						<span class="ml-2 text-xs/1 font-light text-gray-500 whitespace-nowrap">
 							in {formatDuration(props.duration)}
 						</span>
 					) : null}
 				</span>
 			</button>
-			{props.suitesAndTests.length > 0 ? (
-				<ul
-					class={cn(
-						"flex flex-col ml-3.5 pl-2.5 border-l border-gray-400 dark:border-gray-700 transition",
-						!expanded && "hidden",
-					)}
-				>
-					{props.suitesAndTests.map((suiteOrTest) => (
-						<NavigationTreeNode
-							key={suiteOrTest.id}
-							duration={suiteOrTest.duration}
-							name={suiteOrTest.name}
-							status={suiteOrTest.status}
-							suitesAndTests={
-								isSuite(suiteOrTest) ? suiteOrTest.suitesAndTests : []
-							}
-						/>
-					))}
-				</ul>
-			) : null}
+			{memoisedSuitesAndTests}
 		</li>
 	)
 }

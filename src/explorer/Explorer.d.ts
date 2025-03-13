@@ -1,4 +1,4 @@
-import type { SelectableTheme } from "+explorer/theme/UseTheme"
+import type { SelectableTheme } from "+explorer/theme/Theme"
 import type { Project } from "+models/Project"
 
 declare global {
