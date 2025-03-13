@@ -1,7 +1,4 @@
-import {
-	type EventStreamSubscriber,
-	createEventStream,
-} from "+events/EventStream"
+import { type EventStreamSubscriber, newEventStream } from "+events/EventStream"
 import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
 import { fileFailedEvent } from "+events/file/FileFailedEvent"
 import { filePassedEvent } from "+events/file/FilePassedEvent"
@@ -36,12 +33,12 @@ import {
 	getDummyTestName,
 	getDummyTestPath,
 } from "+models/Test.fixtures"
-import { createEventStreamReporter } from "+server/EventStreamReporter"
+import { newEventStreamReporter } from "+server/EventStreamReporter"
 import type { Duration } from "+types/Duration"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-const eventStream = createEventStream()
-const reporter = createEventStreamReporter(eventStream)
+const eventStream = newEventStream()
+const reporter = newEventStreamReporter(eventStream)
 
 const spy = vi.fn<EventStreamSubscriber>()
 
