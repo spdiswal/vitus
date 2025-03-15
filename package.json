@@ -36,7 +36,8 @@
 		"tslib": "2.8.1",
 		"typescript": "5.7.3",
 		"vite": "6.0.7",
-		"vitest": "3.0.5"
+		"vitest": "3.0.5",
+		"wouter-preact": "3.6.1"
 	},
 	"// devDependencies": {
 		"@biomejs/biome": "Biome is an opinionated linter and code formatter.",
@@ -57,7 +58,8 @@
 		"tslib": "This library optimises TypeScript applications when the `importHelpers` option is enabled in `tsconfig.json`.",
 		"typescript": "TypeScript is a statically typed programming language on top of JavaScript.",
 		"vite": "Vite is a development server and a bundler.",
-		"vitest": "Vitest is a unit testing framework."
+		"vitest": "Vitest is a unit testing framework.",
+		"wouter-preact": "Wouter is a History API-based router for Preact apps."
 	},
 	"peerDependencies": {
 		"vitest": ">=3.0.0 <4.0.0"
