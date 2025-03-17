@@ -1,6 +1,7 @@
 import { ExplorerStatusLine } from "+explorer/ExplorerStatusLine"
 import { ProjectProvider } from "+explorer/UseProject"
 import { NavigationTree } from "+explorer/navigation/NavigationTree"
+import { ResultsPage } from "+explorer/routes/results/ResultsPage"
 import { SummaryPage } from "+explorer/routes/summary/SummaryPage"
 import type { SelectableTheme } from "+explorer/theme/Theme"
 import { ThemePicker } from "+explorer/theme/ThemePicker"
@@ -24,6 +25,7 @@ export function ExplorerApp(props: {
 				<div class="ml-10 pt-10 pb-5">
 					<Switch>
 						<Route path="/" component={SummaryPage} />
+						<Route path="/*" component={ResultsPage} />
 					</Switch>
 				</div>
 			</div>
