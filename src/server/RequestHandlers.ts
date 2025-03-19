@@ -51,13 +51,12 @@ export function handleEventStreamRequests(
 }
 
 export function handleIndexHtmlRequests(
-	base: string,
 	indexHtmlParts: Vector<string, 3>,
 	renderHtmlOutlets: (requestUrl: string) => Promise<Vector<string, 2>>,
 	onError?: (error: Error) => void,
 ): RequestHandler {
 	return async (request, response): Promise<void> => {
-		const requestUrl = request.originalUrl.replace(base, "")
+		const requestUrl = request.originalUrl
 
 		try {
 			const [headHtml, bodyHtml] = await renderHtmlOutlets(requestUrl)

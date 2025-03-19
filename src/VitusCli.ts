@@ -33,7 +33,7 @@ polka()
 	.get("/api/events", handleEventStreamRequests(eventStream))
 	.get(
 		"*",
-		handleIndexHtmlRequests(base, indexHtmlParts, (requestUrl) => {
+		handleIndexHtmlRequests(indexHtmlParts, (requestUrl) => {
 			const initialProject = mapVitestToProject(vitest)
 
 			return Promise.all([

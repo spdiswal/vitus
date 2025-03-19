@@ -8,6 +8,7 @@ import type { TestPath } from "+models/TestPath"
 import type { Renderable } from "+types/Renderable"
 import { notNullish } from "+utilities/Arrays"
 import { assertNotNullish } from "+utilities/Assertions"
+import { useEffect } from "preact/hooks"
 import { useParams } from "wouter-preact"
 
 export function ResultsPage(): Renderable {
@@ -29,6 +30,12 @@ export function ResultsPage(): Renderable {
 		.map((suitePath) => getSuiteByPath(project, suitePath))
 
 	const test = getTestByPath(project, testPath)
+
+	useEffect(() => {
+		if (file !== null) {
+			document.title = `${file.filename} – Vitest – Vitus`
+		}
+	}, [file?.path])
 
 	if (file === null || suites.includes(null) || test === null) {
 		return null

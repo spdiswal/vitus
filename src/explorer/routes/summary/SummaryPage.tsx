@@ -1,9 +1,14 @@
 import { useProject } from "+explorer/UseProject"
 import type { Renderable } from "+types/Renderable"
 import { count } from "+utilities/Strings"
+import { useEffect } from "preact/hooks"
 
 export function SummaryPage(): Renderable {
 	const project = useProject()
+
+	useEffect(() => {
+		document.title = `${count(project.files, "file", "files")} – Vitest – Vitus`
+	}, [])
 
 	return (
 		<main class="flex flex-col gap-y-5">

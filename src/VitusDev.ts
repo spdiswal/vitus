@@ -39,7 +39,6 @@ polka()
 	.get(
 		"*",
 		handleIndexHtmlRequests(
-			base,
 			indexHtmlParts,
 			async () => [
 				renderInitialProject(mapVitestToProject(vitest)),

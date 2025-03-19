@@ -1,4 +1,6 @@
 import { ChevronRightIcon } from "+explorer/icons/ChevronRightIcon"
+import { NavigationTreeSuiteNode } from "+explorer/navigation/NavigationTreeSuiteNode"
+import { NavigationTreeTestNode } from "+explorer/navigation/NavigationTreeTestNode"
 import { type Suite, isSuite } from "+models/Suite"
 import type { Test } from "+models/Test"
 import { cn, cx } from "+types/ClassString"
@@ -15,27 +17,22 @@ export function NavigationTreeNode(props: {
 	const [expanded, setExpanded] = useState(false)
 
 	const memoisedSuitesAndTests = useMemo(
-		() =>
-			props.suitesAndTests.length > 0 ? (
-				<ul
-					class={cn(
-						"flex flex-col ml-3.5 pl-2.5 border-l border-gray-400 dark:border-gray-700 transition",
-						!expanded && "hidden",
-					)}
-				>
-					{props.suitesAndTests.map((suiteOrTest) => (
-						<NavigationTreeNode
-							key={suiteOrTest.id}
-							duration={suiteOrTest.duration}
-							name={suiteOrTest.name}
-							status={suiteOrTest.status}
-							suitesAndTests={
-								isSuite(suiteOrTest) ? suiteOrTest.suitesAndTests : []
-							}
-						/>
-					))}
-				</ul>
-			) : null,
+		() => (
+			<ul
+				class={cn(
+					"flex flex-col ml-3.5 pl-2.5 border-l border-gray-400 dark:border-gray-700 transition",
+					!expanded && "hidden",
+				)}
+			>
+				{props.suitesAndTests.map((suiteOrTest) =>
+					isSuite(suiteOrTest) ? (
+						<NavigationTreeSuiteNode key={suiteOrTest.id} {...suiteOrTest} />
+					) : (
+						<NavigationTreeTestNode key={suiteOrTest.id} {...suiteOrTest} />
+					),
+				)}
+			</ul>
+		),
 		[props.suitesAndTests, expanded],
 	)
 
@@ -58,23 +55,14 @@ export function NavigationTreeNode(props: {
 				)}
 				onClick={(): void => setExpanded(!expanded)}
 			>
-				{props.suitesAndTests.length > 0 ? (
-					<ChevronRightIcon
-						class={cn(
-							"shrink-0 size-4 transition",
-							expanded ? "rotate-90 translate-y-px" : "rotate-0 translate-x-px",
-							props.status === "running" && "animate-pulse",
-						)}
-						stroke-width="3"
-					/>
-				) : (
-					<span
-						class={cn(
-							"shrink-0 m-1 size-2 bg-current rounded-full transition",
-							props.status === "running" && "animate-pulse",
-						)}
-					/>
-				)}
+				<ChevronRightIcon
+					class={cn(
+						"shrink-0 size-4 transition",
+						expanded ? "rotate-90 translate-y-px" : "rotate-0 translate-x-px",
+						props.status === "running" && "animate-pulse",
+					)}
+					stroke-width="3"
+				/>
 				<span class="text-gray-950 dark:text-gray-50 transition">
 					{props.name}
 					{props.duration > 0 ? (

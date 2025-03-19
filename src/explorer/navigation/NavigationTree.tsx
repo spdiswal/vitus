@@ -1,5 +1,5 @@
 import { useProject } from "+explorer/UseProject"
-import { NavigationTreeNode } from "+explorer/navigation/NavigationTreeNode"
+import { NavigationTreeFileNode } from "+explorer/navigation/NavigationTreeFileNode"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { useMemo } from "preact/hooks"
@@ -11,13 +11,7 @@ export function NavigationTree(props: {
 	const memoisedFiles = useMemo(
 		() =>
 			project.files.map((file) => (
-				<NavigationTreeNode
-					key={file.id}
-					duration={file.duration}
-					name={file.filename}
-					status={file.status}
-					suitesAndTests={file.suitesAndTests}
-				/>
+				<NavigationTreeFileNode key={file.id} {...file} />
 			)),
 		[project.files],
 	)
