@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { createEventStream } from "+events/EventStream"
+import { newEventStream } from "+events/EventStream"
 import { renderBodyHtml, renderInitialProject } from "+explorer/ExplorerServer"
 import { mapVitestToProject } from "+models/Project"
-import { createEventStreamReporter } from "+server/EventStreamReporter"
+import { newEventStreamReporter } from "+server/EventStreamReporter"
 import {
 	handleEventStreamRequests,
 	handleIndexHtmlRequests,
@@ -18,9 +18,9 @@ const base = "/"
 
 const deferredIndexHtmlParts = loadIndexHtmlParts("./dist/explorer/index.html")
 
-const eventStream = createEventStream()
+const eventStream = newEventStream()
 const deferredVitest = startVitest("test", [], {
-	reporters: [createEventStreamReporter(eventStream)],
+	reporters: [newEventStreamReporter(eventStream)],
 })
 
 const [indexHtmlParts, vitest] = await Promise.all([
@@ -33,7 +33,7 @@ polka()
 	.get("/api/events", handleEventStreamRequests(eventStream))
 	.get(
 		"*",
-		handleIndexHtmlRequests(base, indexHtmlParts, (requestUrl) => {
+		handleIndexHtmlRequests(indexHtmlParts, (requestUrl) => {
 			const initialProject = mapVitestToProject(vitest)
 
 			return Promise.all([

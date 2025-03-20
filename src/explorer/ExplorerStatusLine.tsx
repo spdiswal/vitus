@@ -1,18 +1,18 @@
-import type { ProjectStatus } from "+models/Project"
+import { useProject } from "+explorer/UseProject"
 import { type ClassString, cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
 export function ExplorerStatusLine(props: {
 	class?: ClassString
-	connected: boolean
-	status: ProjectStatus
 }): Renderable {
+	const project = useProject()
+
 	return (
 		<div
 			class={cn(
 				"h-2 transition",
-				!props.connected && "hidden",
-				cx(props.status)({
+				!project.isConnected && "hidden",
+				cx(project.status)({
 					failed: "bg-rose-700",
 					passed: "bg-green-700",
 					running: "bg-amber-500 animate-pulse",

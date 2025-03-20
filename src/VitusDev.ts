@@ -1,7 +1,7 @@
-import { createEventStream } from "+events/EventStream"
+import { newEventStream } from "+events/EventStream"
 import { renderInitialProject } from "+explorer/ExplorerServer"
 import { mapVitestToProject } from "+models/Project"
-import { createEventStreamReporter } from "+server/EventStreamReporter"
+import { newEventStreamReporter } from "+server/EventStreamReporter"
 import {
 	handleEventStreamRequests,
 	handleIndexHtmlRequests,
@@ -16,9 +16,9 @@ const base = "/"
 
 const deferredIndexHtmlParts = loadIndexHtmlParts("./src/index.html")
 
-const eventStream = createEventStream()
+const eventStream = newEventStream()
 const deferredVitest = startVitest("test", [], {
-	reporters: [createEventStreamReporter(eventStream)],
+	reporters: [newEventStreamReporter(eventStream)],
 })
 
 const deferredVite = createServer({
@@ -39,7 +39,6 @@ polka()
 	.get(
 		"*",
 		handleIndexHtmlRequests(
-			base,
 			indexHtmlParts,
 			async () => [
 				renderInitialProject(mapVitestToProject(vitest)),

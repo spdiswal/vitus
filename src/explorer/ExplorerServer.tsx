@@ -1,13 +1,16 @@
 import { ExplorerApp } from "+explorer/ExplorerApp"
 import type { Project } from "+models/Project"
 import { renderToStringAsync } from "preact-render-to-string"
+import { Router } from "wouter-preact"
 
 export async function renderBodyHtml(
 	initialProject: Project,
-	_requestUrl: string,
+	requestUrl: string,
 ): Promise<string> {
 	return renderToStringAsync(
-		<ExplorerApp initialProject={initialProject} initialTheme={null} />,
+		<Router ssrPath={requestUrl}>
+			<ExplorerApp initialProject={initialProject} initialTheme={null} />
+		</Router>,
 	)
 }
 
