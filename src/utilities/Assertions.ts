@@ -11,8 +11,11 @@ export function assertContextValue<Value>(
 
 export function assertNotNullish<Value>(
 	value: Value | null | undefined,
+	name?: string,
 ): asserts value is Value {
 	if (value === null || value === undefined) {
-		throw new Error(`Expected a not-nullish value, but got ${value}`)
+		throw new Error(
+			`Expected ${name !== undefined ? `${name} to be ` : ""}a not-nullish value, but was ${value}`,
+		)
 	}
 }

@@ -1,12 +1,12 @@
-import { newEventStream } from "+events/EventStream"
-import { renderInitialProject } from "+explorer/ExplorerServer"
-import { mapVitestToProject } from "+models/Project"
+import { renderInitialState } from "+explorer/ExplorerServer"
+import { newEventStream } from "+server/EventStream"
 import { newEventStreamReporter } from "+server/EventStreamReporter"
 import {
 	handleEventStreamRequests,
 	handleIndexHtmlRequests,
 	loadIndexHtmlParts,
 } from "+server/RequestHandlers"
+import { vitestStateToDto } from "+server/models/VitestState"
 import polka from "polka"
 import { createServer } from "vite"
 import { startVitest } from "vitest/node"
@@ -41,7 +41,7 @@ polka()
 		handleIndexHtmlRequests(
 			indexHtmlParts,
 			async () => [
-				renderInitialProject(mapVitestToProject(vitest)),
+				renderInitialState(vitestStateToDto(vitest)),
 				"", // Render the Preact app fully client-side to prevent hydration errors that cause hot module replacement (HMR) to malfunction.
 			],
 			vite.ssrFixStacktrace,

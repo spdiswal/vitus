@@ -1,20 +1,23 @@
+import type { InitialStateDto } from "+api/models/InitialStateDto"
 import { ExplorerApp } from "+explorer/ExplorerApp"
-import type { Project } from "+models/Project"
+import { initialiseState } from "+explorer/models/InitialState"
 import { renderToStringAsync } from "preact-render-to-string"
 import { Router } from "wouter-preact"
 
 export async function renderBodyHtml(
-	initialProject: Project,
+	initialStateDto: InitialStateDto,
 	requestUrl: string,
 ): Promise<string> {
+	initialiseState(initialStateDto)
+
 	return renderToStringAsync(
 		<Router ssrPath={requestUrl}>
-			<ExplorerApp initialProject={initialProject} initialTheme={null} />
+			<ExplorerApp initialTheme={null} />
 		</Router>,
 	)
 }
 
-export function renderInitialProject(initialProject: Project): string {
+export function renderInitialState(state: InitialStateDto): string {
 	// language=html
-	return `<script type="text/javascript">window.__VITUS_INITIAL_PROJECT__=${JSON.stringify(initialProject)}</script>`
+	return `<script type="text/javascript">window.__VITUS_INITIAL_STATE__=${JSON.stringify(state)}</script>`
 }

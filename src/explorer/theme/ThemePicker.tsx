@@ -1,12 +1,17 @@
 import { ComputerDesktopIcon } from "+explorer/icons/ComputerDesktopIcon"
 import { MoonIcon } from "+explorer/icons/MoonIcon"
 import { SunIcon } from "+explorer/icons/SunIcon"
-import { type SelectableTheme, isApplicableTheme } from "+explorer/theme/Theme"
+import {
+	type ApplicableTheme,
+	type SelectableTheme,
+	isApplicableTheme,
+} from "+explorer/theme/Theme"
 import { ThemePickerButton } from "+explorer/theme/ThemePickerButton"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { useMediaQuery } from "+utilities/UseMediaQuery"
-import { useEffect, useState } from "preact/hooks"
+import { useSignal, useSignalEffect } from "@preact/signals"
+import { useComputed } from "@preact/signals"
 
 /**
  * @see https://tailwindcss.com/docs/dark-mode#with-system-theme-support
@@ -16,31 +21,36 @@ export function ThemePicker(props: {
 	initialTheme: SelectableTheme
 }): Renderable {
 	// Initialise the state with null to avoid hydration errors between server and client.
-	const [selectedTheme, setSelectedTheme] = useState<SelectableTheme>(null)
+	const selectedTheme = useSignal<SelectableTheme>(null)
+
+	useSignalEffect(() => {
+		// Apply the initial theme determined by the client, overriding the initial null state.
+		selectedTheme.value = props.initialTheme
+	})
+
+	function selectTheme(theme: SelectableTheme): void {
+		selectedTheme.value = theme
+	}
 
 	const prefersDark = useMediaQuery("(prefers-color-scheme: dark)")
 	const systemTheme = prefersDark ? "dark" : "light"
 
-	const appliedTheme = isApplicableTheme(selectedTheme)
-		? selectedTheme
-		: systemTheme
+	const appliedTheme = useComputed<ApplicableTheme>(() =>
+		isApplicableTheme(selectedTheme.value) ? selectedTheme.value : systemTheme,
+	)
 
-	useEffect(() => {
-		// Apply the initial theme determined by the client, overriding the initial null state.
-		setSelectedTheme(props.initialTheme)
-	}, [props.initialTheme])
+	useSignalEffect(() => {
+		const needsDarkTheme = appliedTheme.value === "dark"
+		document.documentElement.classList.toggle("dark", needsDarkTheme)
+	})
 
-	useEffect(() => {
-		document.documentElement.classList.toggle("dark", appliedTheme === "dark")
-	}, [appliedTheme])
-
-	useEffect(() => {
-		if (isApplicableTheme(selectedTheme)) {
-			localStorage.setItem("theme", selectedTheme)
+	useSignalEffect(() => {
+		if (isApplicableTheme(selectedTheme.value)) {
+			localStorage.setItem("theme", selectedTheme.value)
 		} else {
 			localStorage.removeItem("theme")
 		}
-	}, [selectedTheme])
+	})
 
 	return (
 		<div
@@ -52,24 +62,24 @@ export function ThemePicker(props: {
 			<ThemePickerButton
 				theme="match"
 				title="Match browser theme"
-				selectedTheme={selectedTheme}
-				onThemeSelected={setSelectedTheme}
+				selectedTheme={selectedTheme.value}
+				onThemeSelected={selectTheme}
 			>
 				<ComputerDesktopIcon class="size-5" />
 			</ThemePickerButton>
 			<ThemePickerButton
 				theme="light"
 				title="Light theme"
-				selectedTheme={selectedTheme}
-				onThemeSelected={setSelectedTheme}
+				selectedTheme={selectedTheme.value}
+				onThemeSelected={selectTheme}
 			>
 				<SunIcon class="size-5" />
 			</ThemePickerButton>
 			<ThemePickerButton
 				theme="dark"
 				title="Dark theme"
-				selectedTheme={selectedTheme}
-				onThemeSelected={setSelectedTheme}
+				selectedTheme={selectedTheme.value}
+				onThemeSelected={selectTheme}
 			>
 				<MoonIcon class="size-5" />
 			</ThemePickerButton>

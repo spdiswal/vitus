@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-import { newEventStream } from "+events/EventStream"
-import { renderBodyHtml, renderInitialProject } from "+explorer/ExplorerServer"
-import { mapVitestToProject } from "+models/Project"
+import { renderBodyHtml, renderInitialState } from "+explorer/ExplorerServer"
+import { newEventStream } from "+server/EventStream"
 import { newEventStreamReporter } from "+server/EventStreamReporter"
 import {
 	handleEventStreamRequests,
 	handleIndexHtmlRequests,
 	loadIndexHtmlParts,
 } from "+server/RequestHandlers"
+import { vitestStateToDto } from "+server/models/VitestState"
 import polka from "polka"
 import sirv from "sirv"
 import { startVitest } from "vitest/node"
@@ -34,11 +34,11 @@ polka()
 	.get(
 		"*",
 		handleIndexHtmlRequests(indexHtmlParts, (requestUrl) => {
-			const initialProject = mapVitestToProject(vitest)
+			const initialStateDto = vitestStateToDto(vitest)
 
 			return Promise.all([
-				renderInitialProject(initialProject),
-				renderBodyHtml(initialProject, requestUrl),
+				renderInitialState(initialStateDto),
+				renderBodyHtml(initialStateDto, requestUrl),
 			])
 		}),
 	)

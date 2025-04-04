@@ -1,22 +1,14 @@
-import type { EventStream } from "+events/EventStream"
-import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
-import { fileFailedEvent } from "+events/file/FileFailedEvent"
-import { filePassedEvent } from "+events/file/FilePassedEvent"
-import { fileSkippedEvent } from "+events/file/FileSkippedEvent"
-import { fileStartedEvent } from "+events/file/FileStartedEvent"
-import { runCompletedEvent } from "+events/run/RunCompletedEvent"
-import { runStartedEvent } from "+events/run/RunStartedEvent"
-import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { suiteFailedEvent } from "+events/suite/SuiteFailedEvent"
-import { suitePassedEvent } from "+events/suite/SuitePassedEvent"
-import { suiteSkippedEvent } from "+events/suite/SuiteSkippedEvent"
-import { suiteStartedEvent } from "+events/suite/SuiteStartedEvent"
-import { testFailedEvent } from "+events/test/TestFailedEvent"
-import { testPassedEvent } from "+events/test/TestPassedEvent"
-import { testSkippedEvent } from "+events/test/TestSkippedEvent"
-import { testStartedEvent } from "+events/test/TestStartedEvent"
-import { mapVitestToSuitePath } from "+models/Suite"
-import { mapVitestToTestPath } from "+models/Test"
+import { fileDeleted } from "+events/FileDeleted"
+import { runCompleted } from "+events/RunCompleted"
+import { runStarted } from "+events/RunStarted"
+import { serverRestarted } from "+events/ServerRestarted"
+import { taskUpdated } from "+events/TaskUpdated"
+import type { TaskIds } from "+models/TaskId"
+import { mapVitestModuleIdToName } from "+models/mappers/MapVitestModuleIdToName"
+import { mapVitestModuleToSerialisableFile } from "+models/mappers/MapVitestModuleToSerialisableFile"
+import { mapVitestSuiteToSerialisableSuite } from "+models/mappers/MapVitestSuiteToSerialisableSuite"
+import { mapVitestTestToSerialisableTest } from "+models/mappers/MapVitestTestToSerialisableTest"
+import type { EventStream } from "+server/EventStream"
 import { notNullish } from "+utilities/Arrays"
 import type { Reporter } from "vitest/reporters"
 
@@ -24,6 +16,7 @@ export type EventStreamReporter = Pick<
 	Required<Reporter>,
 	| "onServerRestart"
 	| "onTestRunStart"
+	| "onTestModuleQueued"
 	| "onTestModuleStart"
 	| "onTestSuiteReady"
 	| "onTestCaseReady"
@@ -39,90 +32,42 @@ export function newEventStreamReporter(
 ): EventStreamReporter {
 	return {
 		onServerRestart(): void {
-			eventStream.send(serverRestartedEvent())
+			eventStream.send(serverRestarted())
 		},
 		onTestRunStart(specifications): void {
-			const invalidatedFileIds = specifications
+			const invalidatedFileIds: TaskIds = specifications
 				.map((specification) => specification.testModule?.id)
 				.filter(notNullish)
 
-			eventStream.send(runStartedEvent({ invalidatedFileIds }))
+			eventStream.send(runStarted(invalidatedFileIds))
+		},
+		onTestModuleQueued(module): void {
+			eventStream.send(taskUpdated(mapVitestModuleToSerialisableFile(module)))
 		},
 		onTestModuleStart(module): void {
-			eventStream.send(
-				fileStartedEvent({ id: module.id, path: module.moduleId }),
-			)
+			eventStream.send(taskUpdated(mapVitestModuleToSerialisableFile(module)))
 		},
 		onTestSuiteReady(suite): void {
-			const path = mapVitestToSuitePath(suite)
-			eventStream.send(suiteStartedEvent({ name: suite.name, path }))
+			eventStream.send(taskUpdated(mapVitestSuiteToSerialisableSuite(suite)))
 		},
 		onTestCaseReady(test): void {
-			const path = mapVitestToTestPath(test)
-			eventStream.send(testStartedEvent({ name: test.name, path }))
+			eventStream.send(taskUpdated(mapVitestTestToSerialisableTest(test)))
 		},
 		onTestCaseResult(test): void {
-			const duration = test.diagnostic()?.duration ?? 0
-			const path = mapVitestToTestPath(test)
-
-			switch (test.result().state) {
-				case "failed": {
-					eventStream.send(testFailedEvent({ duration, path }))
-					break
-				}
-				case "passed": {
-					eventStream.send(testPassedEvent({ duration, path }))
-					break
-				}
-				case "skipped": {
-					eventStream.send(testSkippedEvent({ duration, path }))
-					break
-				}
-			}
+			eventStream.send(taskUpdated(mapVitestTestToSerialisableTest(test)))
 		},
 		onTestSuiteResult(suite): void {
-			const path = mapVitestToSuitePath(suite)
-
-			switch (suite.state()) {
-				case "failed": {
-					eventStream.send(suiteFailedEvent({ path }))
-					break
-				}
-				case "passed": {
-					eventStream.send(suitePassedEvent({ path }))
-					break
-				}
-				case "skipped": {
-					eventStream.send(suiteSkippedEvent({ path }))
-					break
-				}
-			}
+			eventStream.send(taskUpdated(mapVitestSuiteToSerialisableSuite(suite)))
 		},
 		onTestModuleEnd(module): void {
-			const duration = module.diagnostic().duration
-			const id = module.id
-
-			switch (module.state()) {
-				case "failed": {
-					eventStream.send(fileFailedEvent({ duration, id }))
-					break
-				}
-				case "passed": {
-					eventStream.send(filePassedEvent({ duration, id }))
-					break
-				}
-				case "skipped": {
-					eventStream.send(fileSkippedEvent({ duration, id }))
-					break
-				}
-			}
+			eventStream.send(taskUpdated(mapVitestModuleToSerialisableFile(module)))
 		},
 		onTestRunEnd(): void {
-			eventStream.send(runCompletedEvent())
+			eventStream.send(runCompleted())
 		},
 		onTestRemoved(moduleId): void {
-			if (moduleId !== undefined) {
-				eventStream.send(fileDeletedEvent({ path: moduleId }))
+			if (moduleId) {
+				eventStream.send(fileDeleted(mapVitestModuleIdToName(moduleId)))
 			}
 		},
 	}

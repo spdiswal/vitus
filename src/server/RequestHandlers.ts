@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises"
-import type { EventStream } from "+events/EventStream"
 import type { ProjectEvent } from "+events/ProjectEvent"
+import type { EventStream } from "+server/EventStream"
 import type { Vector } from "+types/Vector"
 import type { Middleware as PolkaMiddleware } from "polka"
 

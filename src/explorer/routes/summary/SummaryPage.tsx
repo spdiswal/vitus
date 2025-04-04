@@ -1,14 +1,16 @@
+import { useFiles } from "+explorer/UseFiles"
 import { useProject } from "+explorer/UseProject"
 import type { Renderable } from "+types/Renderable"
 import { count } from "+utilities/Strings"
-import { useEffect } from "preact/hooks"
+import { useSignalEffect } from "@preact/signals"
 
 export function SummaryPage(): Renderable {
 	const project = useProject()
+	const files = useFiles()
 
-	useEffect(() => {
-		document.title = `${count(project.files, "file", "files")} – Vitest – Vitus`
-	}, [])
+	useSignalEffect(() => {
+		document.title = `${count(files.value, "file", "files")} – Vitest – Vitus`
+	})
 
 	return (
 		<main class="flex flex-col gap-y-5">
@@ -16,7 +18,7 @@ export function SummaryPage(): Renderable {
 				Vitest &ndash; Vitus
 			</h1>
 			<div class="font-mono">{project.rootPath}</div>
-			<div>{count(project.files, "file", "files")}</div>
+			<div>{count(files.value, "file", "files")}</div>
 		</main>
 	)
 }

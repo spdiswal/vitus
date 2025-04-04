@@ -6,13 +6,13 @@
 	],
 	"compilerOptions": {
 		"baseUrl": "./",
+		"noUncheckedIndexedAccess": true,
 		"incremental": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact",
 		"paths": {
-			"+events/*": ["src/events/*"],
+			"+api/*": ["src/api/*"],
 			"+explorer/*": ["src/explorer/*"],
-			"+models/*": ["src/models/*"],
 			"+server/*": ["src/server/*"],
 			"+types/*": ["src/types/*"],
 			"+utilities/*": ["src/utilities/*"]

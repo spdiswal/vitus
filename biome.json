@@ -16,6 +16,42 @@
 	},
 	"overrides": [
 		{
+			"include": ["src/api/**/*"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"paths": {
+									"+explorer/*": "The API must be agnostic and cannot rely on 'explorer'",
+									"+server/*": "The API must be agnostic and cannot rely on 'server'"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
+			"include": ["src/explorer/**/*"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"paths": {
+									"clsx": "Use the 'cn' helper function instead of 'clsx'",
+									"clsx/lite": "Use the 'cn' helper function instead of 'clsx'"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		{
 			"include": ["src/explorer/**/Use*.tsx"],
 			"linter": {
 				"rules": {
@@ -26,7 +62,7 @@
 			}
 		},
 		{
-			"include": ["src/events/EventStream.ts", "src/server/*.ts"],
+			"include": ["src/server/**/*"],
 			"linter": {
 				"rules": {
 					"correctness": {

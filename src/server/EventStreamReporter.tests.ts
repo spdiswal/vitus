@@ -1,4 +1,3 @@
-import { type EventStreamSubscriber, newEventStream } from "+events/EventStream"
 import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
 import { fileFailedEvent } from "+events/file/FileFailedEvent"
 import { filePassedEvent } from "+events/file/FilePassedEvent"
@@ -33,6 +32,7 @@ import {
 	getDummyTestName,
 	getDummyTestPath,
 } from "+models/Test.fixtures"
+import { type EventStreamSubscriber, newEventStream } from "+server/EventStream"
 import { newEventStreamReporter } from "+server/EventStreamReporter"
 import type { Duration } from "+types/Duration"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"

@@ -2,9 +2,9 @@ import { applyProjectEvent } from "+events/ProjectEvent"
 import { filePassedEvent } from "+events/file/FilePassedEvent"
 import type { File, FileId, FileStatus } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
+import type { GlobalStatus } from "+models/GlobalStatus"
 import {
 	type Project,
-	type ProjectStatus,
 	assertDummyProject,
 	getFileById,
 	getOtherFiles,
@@ -37,7 +37,7 @@ describe.each`
 		id: FileId
 		duration: Duration
 		expectedProjectDuration: Duration
-		expectedProjectStatus: ProjectStatus
+		expectedProjectStatus: GlobalStatus
 	}) => {
 		let actualProject: Project
 		let actualFile: File

@@ -1,4 +1,3 @@
-import type { TypeBrand } from "+types/TypeBrand"
 import { clsx } from "clsx/lite"
 
 export type ClassString = ClassStringBrand & ClassValue
@@ -18,10 +17,14 @@ type NormalisedClassValue<Class extends ClassValue> = Class extends ""
 				? "Unexpected multiple consecutive whitespace in the `class` string"
 				: Class
 
+declare const discriminator: unique symbol
+
 /**
  * The type brand ensures that the `class` prop always appears as the last argument to the `cn()` function.
  */
-type ClassStringBrand = TypeBrand<"ClassString">
+type ClassStringBrand = {
+	readonly [discriminator]?: "ClassString"
+}
 
 /**
  * Combines the given class strings to a single string, excluding falsy values.

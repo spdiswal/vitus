@@ -16,7 +16,7 @@ type ModuleConfig = {
 	outputFilename?: string
 }
 
-const moduleConfigs: Record<string, ModuleConfig | undefined> = {
+const moduleConfigs: Record<string, ModuleConfig> = {
 	cli: {
 		entrypoint: inProjectDirectory("src/VitusCli.ts"),
 		outputDirectory: inProjectDirectory("dist/"),
@@ -75,7 +75,7 @@ function tsconfigPathAliases(): Record<string, string> {
 		Object.entries(tsconfigJson.compilerOptions.paths).map(
 			([alias, [path]]) => [
 				alias.slice(0, -"/*".length),
-				inProjectDirectory(path.slice(0, -"/*".length)),
+				inProjectDirectory((path as string).slice(0, -"/*".length)),
 			],
 		),
 	)

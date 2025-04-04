@@ -7,9 +7,9 @@ import {
 	countFileChildren,
 } from "+models/File"
 import { dummyFile } from "+models/File.fixtures"
+import type { GlobalStatus } from "+models/GlobalStatus"
 import {
 	type Project,
-	type ProjectStatus,
 	assertDummyFiles,
 	assertDummyProject,
 	getFileById,
@@ -126,7 +126,7 @@ describe.each`
 		})
 
 		it("updates the project status based on the latest fileset", () => {
-			expect(actualProject.status).toBe<ProjectStatus>("running")
+			expect(actualProject.status).toBe<GlobalStatus>("running")
 		})
 	},
 )
@@ -191,7 +191,7 @@ describe.each`
 		})
 
 		it("updates the project status based on the latest fileset", () => {
-			expect(actualProject.status).toBe<ProjectStatus>("running")
+			expect(actualProject.status).toBe<GlobalStatus>("running")
 		})
 	},
 )

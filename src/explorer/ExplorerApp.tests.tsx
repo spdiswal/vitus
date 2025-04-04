@@ -12,8 +12,6 @@ const project = dummyProject({}, [
 
 describe("ExplorerApp", () => {
 	it("should be defined", async () => {
-		expect(
-			<ExplorerApp initialProject={project} initialTheme={null} />,
-		).toBeDefined()
+		expect(<ExplorerApp project={project} initialTheme={null} />).toBeDefined()
 	})
 })

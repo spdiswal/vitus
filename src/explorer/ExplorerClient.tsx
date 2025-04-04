@@ -1,14 +1,16 @@
 import { ExplorerApp } from "+explorer/ExplorerApp"
+import { initialiseState } from "+explorer/models/InitialState"
 import { hydrate } from "preact"
-import "+explorer/Explorer.css"
 import { Router } from "wouter-preact"
 
-const initialProject = window.__VITUS_INITIAL_PROJECT__
+const initialStateDto = window.__VITUS_INITIAL_STATE__
 const initialTheme = window.__VITUS_INITIAL_THEME__
+
+initialiseState(initialStateDto)
 
 hydrate(
 	<Router>
-		<ExplorerApp initialProject={initialProject} initialTheme={initialTheme} />
+		<ExplorerApp initialTheme={initialTheme} />
 	</Router>,
 	document.body,
 )

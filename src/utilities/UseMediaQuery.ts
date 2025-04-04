@@ -1,16 +1,17 @@
-import { useEffect, useState } from "preact/hooks"
+import type { Computed } from "+types/Reactive"
+import { useSignal, useSignalEffect } from "@preact/signals"
 
 export type MediaQueryString = "(prefers-color-scheme: dark)"
 
-export function useMediaQuery(query: MediaQueryString): boolean {
-	const [matching, setMatching] = useState(false)
+export function useMediaQuery(query: MediaQueryString): Computed<boolean> {
+	const isMatching = useSignal(false)
 
-	useEffect(() => {
+	useSignalEffect(() => {
 		const mediaQuery = window.matchMedia(query)
 		updateMatch()
 
 		function updateMatch(): void {
-			setMatching(mediaQuery.matches)
+			isMatching.value = mediaQuery.matches
 		}
 
 		mediaQuery.addEventListener("change", updateMatch)
@@ -18,7 +19,7 @@ export function useMediaQuery(query: MediaQueryString): boolean {
 		return function cleanUp(): void {
 			mediaQuery.removeEventListener("change", updateMatch)
 		}
-	}, [query])
+	})
 
-	return matching
+	return isMatching
 }
