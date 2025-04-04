@@ -1,5 +1,5 @@
-import { useSubtasks } from "+explorer/UseSubtasks"
 import { ChevronRightIcon } from "+explorer/icons/ChevronRightIcon"
+import { useSubtasks } from "+explorer/models/Subtask"
 import type { Task } from "+explorer/models/Task"
 import { cn, cx } from "+types/ClassString"
 import { formatDuration } from "+types/Duration"

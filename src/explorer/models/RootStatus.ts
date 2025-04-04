@@ -1,5 +1,5 @@
 import { enumerateFiles } from "+explorer/models/File"
-import type { Reactive } from "+types/Reactive"
+import type { Computed, Reactive } from "+types/Reactive"
 import type { TaskStatus } from "+types/TaskStatus"
 import { mapIterable } from "+utilities/Iterables"
 import { signal } from "@preact/signals"
@@ -11,7 +11,11 @@ export type RootStatus =
 	| "skipped"
 	| "started"
 
-export const rootStatus: Reactive<RootStatus> = signal("disconnected")
+const rootStatus: Reactive<RootStatus> = signal("disconnected")
+
+export function useRootStatus(): Computed<RootStatus> {
+	return rootStatus
+}
 
 export function setRootStatus(status: RootStatus): void {
 	rootStatus.value = status

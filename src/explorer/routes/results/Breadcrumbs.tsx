@@ -1,14 +1,17 @@
 import { type ClassString, cn } from "+types/ClassString"
+import type { NonEmptyArray } from "+types/NonEmptyArray"
 import type { Renderable } from "+types/Renderable"
 
 export function Breadcrumbs(props: {
 	class?: ClassString
 	filePath: string
-	suiteNames: Array<string>
-	testName: string
+	subtaskNames: NonEmptyArray<string>
 }): Renderable {
 	const directories = props.filePath.split("/")
 	const filename = directories.pop()
+
+	const parentNames = props.subtaskNames.slice(0, -1)
+	const subtaskName = props.subtaskNames.at(-1) as string // `subtaskNames` is guaranteed to have at least one item.
 
 	return (
 		<div
@@ -23,9 +26,9 @@ export function Breadcrumbs(props: {
 				<span class="font-bold">{filename}</span>
 			</div>
 			<div>
-				<span>{props.suiteNames.join(" > ")}</span>
+				<span>{parentNames.join(" > ")}</span>
 				{" > "}
-				<span class="font-bold">{props.testName}</span>
+				<span class="font-bold">{subtaskName}</span>
 			</div>
 		</div>
 	)

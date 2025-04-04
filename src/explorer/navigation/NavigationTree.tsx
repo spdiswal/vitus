@@ -1,4 +1,4 @@
-import { useFiles } from "+explorer/UseFiles"
+import { useFiles } from "+explorer/models/File"
 import { NavigationTreeNode } from "+explorer/navigation/NavigationTreeNode"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"

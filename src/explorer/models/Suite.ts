@@ -12,6 +12,7 @@ export type Suite = {
 	type: "suite"
 	id: TaskId
 	parentId: TaskId
+	parentFileId: TaskId
 	fullName: Reactive<NonEmptyArray<string>>
 	name: Computed<string>
 	status: Reactive<TaskStatus>
@@ -26,6 +27,7 @@ export function dtoToSuite(dto: SuiteDto): Suite {
 		type: "suite",
 		id: dto.id,
 		parentId: dto.parentId,
+		parentFileId: dto.parentFileId,
 		fullName,
 		name: computed(() => fullName.value.at(-1) as string), // `fullName` is guaranteed to have at least one item.
 		status: signal(dto.status),
@@ -39,6 +41,7 @@ export function suiteToDto(suite: Suite): SuiteDto {
 		type: "suite",
 		id: suite.id,
 		parentId: suite.parentId,
+		parentFileId: suite.parentFileId,
 		fullName: suite.fullName.value,
 		status: suite.status.value,
 		duration: suite.duration.value,

@@ -1,11 +1,14 @@
 import type { FileDto } from "+api/models/FileDto"
+import type { Comparator } from "+types/Comparator"
 import type { Duration } from "+types/Duration"
 import type { Computed, Reactive } from "+types/Reactive"
 import type { TaskId } from "+types/TaskId"
 import type { TaskStatus } from "+types/TaskStatus"
+import { arrayEquals } from "+utilities/Arrays"
 import { filterIterable } from "+utilities/Iterables"
 import { enumerateObjectValues, filterObjectByValue } from "+utilities/Objects"
-import { computed, signal } from "@preact/signals"
+import { computed, signal, useComputed } from "@preact/signals"
+import { useRef } from "preact/hooks"
 
 export type File = {
 	type: "file"
@@ -19,7 +22,7 @@ export type File = {
 
 export type Files = Array<File>
 
-export const filesById: Reactive<Record<TaskId, File>> = signal({})
+const filesById: Reactive<Record<TaskId, File>> = signal({})
 
 export function initialiseFiles(dtos: Array<FileDto>): void {
 	filesById.value = Object.fromEntries(
@@ -60,6 +63,24 @@ export function fileToDto(file: File): FileDto {
 		duration: file.duration.value,
 		errors: file.errors.value,
 	}
+}
+
+const byName: Comparator<File> = (a, b) =>
+	a.name.peek().localeCompare(b.name.peek()) // `peek()` suffices as `name` does not change once a `File` is instantiated. A renamed file results in a new `File` instance.
+
+export function useFiles(): Computed<Files> {
+	const cachedFiles = useRef<Files>([])
+
+	return useComputed<Files>(() => {
+		const files = Array.from(enumerateFiles()).sort(byName)
+
+		if (arrayEquals(cachedFiles.current, files)) {
+			return cachedFiles.current
+		}
+
+		cachedFiles.current = files
+		return files
+	})
 }
 
 export function getFileById(fileId: TaskId): File | null {

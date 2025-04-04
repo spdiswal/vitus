@@ -12,8 +12,8 @@ importers:
         specifier: 1.9.4
         version: 1.9.4
       '@preact/signals':
-        specifier: 2.0.1
-        version: 2.0.1(preact@10.25.4)
+        specifier: 2.0.3
+        version: 2.0.3(preact@10.25.4)
       '@prefresh/vite':
         specifier: 2.4.6
         version: 2.4.6(preact@10.25.4)(vite@6.0.7(@types/node@20.17.12)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.37.0))
@@ -381,8 +381,8 @@ packages:
   '@preact/signals-core@1.8.0':
     resolution: {integrity: sha512-OBvUsRZqNmjzCZXWLxkZfhcgT+Fk8DDcT/8vD6a1xhDemodyy87UJRJfASMuSD8FaAIeGgGm85ydXhm7lr4fyA==}
 
-  '@preact/signals@2.0.1':
-    resolution: {integrity: sha512-f9p/utMgttPb9bJ+UgRBkTDZ9uQiZfX1/gV3pXGWz+yGNQj8MrnG55Xo8MAG4IHcb5UXQO6tvt9ZlsM4A2j+Rw==}
+  '@preact/signals@2.0.3':
+    resolution: {integrity: sha512-ZdC6w8+LdCMeALEoJgzwEAGw2YahqWGCQLfzRCRvRGC411SzcJOiti5gEqrSN+tKtGqMgicHtQ/eUUxWGTBw0A==}
     peerDependencies:
       preact: 10.x
 
@@ -1428,7 +1428,7 @@ snapshots:
 
   '@preact/signals-core@1.8.0': {}
 
-  '@preact/signals@2.0.1(preact@10.25.4)':
+  '@preact/signals@2.0.3(preact@10.25.4)':
     dependencies:
       '@preact/signals-core': 1.8.0
       preact: 10.25.4

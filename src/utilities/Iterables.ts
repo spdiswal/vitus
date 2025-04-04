@@ -36,3 +36,16 @@ export function* mapIterable<Item, TransformedItem>(
 		yield transform(item)
 	}
 }
+
+export function* mapNotNullishIterable<Item, TransformedItem>(
+	items: Iterable<Item>,
+	transform: (item: Item) => TransformedItem | null | undefined,
+): Iterable<TransformedItem> {
+	for (const item of items) {
+		const transformedItem = transform(item)
+
+		if (transformedItem !== null && transformedItem !== undefined) {
+			yield transformedItem
+		}
+	}
+}

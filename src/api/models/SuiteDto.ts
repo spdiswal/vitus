@@ -7,6 +7,7 @@ export type SuiteDto = {
 	type: "suite"
 	id: TaskId
 	parentId: TaskId
+	parentFileId: TaskId
 	fullName: NonEmptyArray<string>
 	status: TaskStatus
 	duration: Duration | null

@@ -1,18 +1,22 @@
 import type { SubtaskDto } from "+api/models/SubtaskDto"
 import { type Suite, dtoToSuite, suiteToDto } from "+explorer/models/Suite"
+import type { Task } from "+explorer/models/Task"
 import { type Test, dtoToTest, testToDto } from "+explorer/models/Test"
-import type { Reactive } from "+types/Reactive"
+import type { Comparator } from "+types/Comparator"
+import type { Computed, Reactive } from "+types/Reactive"
 import type { TaskId } from "+types/TaskId"
 import type { TaskStatus } from "+types/TaskStatus"
+import { arrayEquals } from "+utilities/Arrays"
 import { filterIterable } from "+utilities/Iterables"
 import { enumerateObjectValues, filterObjectByValue } from "+utilities/Objects"
-import { signal } from "@preact/signals"
+import { signal, useComputed } from "@preact/signals"
+import { useRef } from "preact/hooks"
 
 export type Subtask = Suite | Test
 export type Subtasks = Array<Subtask>
 
 // Suites and tests use a shared id namespace in Vitest (i.e. it is impossible to determine from an id alone whether it is a suite or test).
-export const subtasksById: Reactive<Record<TaskId, Subtask>> = signal({})
+const subtasksById: Reactive<Record<TaskId, Subtask>> = signal({})
 
 export function initialiseSubtasks(dtos: Array<SubtaskDto>): void {
 	subtasksById.value = Object.fromEntries(
@@ -26,6 +30,27 @@ export function dtoToSubtask(dto: SubtaskDto): Subtask {
 
 export function subtaskToDto(subtask: Subtask): SubtaskDto {
 	return subtask.type === "suite" ? suiteToDto(subtask) : testToDto(subtask)
+}
+
+const byId: Comparator<Subtask> = (a, b) => a.id.localeCompare(b.id)
+
+export function useSubtasks(parent: Task): Computed<Subtasks> {
+	const cachedSubtasks = useRef<Subtasks>([])
+
+	return useComputed<Subtasks>(() => {
+		if (parent.type === "test") {
+			return cachedSubtasks.current
+		}
+
+		const subtasks = Array.from(enumerateSubtasksByParent(parent.id)).sort(byId)
+
+		if (arrayEquals(cachedSubtasks.current, subtasks)) {
+			return cachedSubtasks.current
+		}
+
+		cachedSubtasks.current = subtasks
+		return subtasks
+	})
 }
 
 export function getSubtaskById(subtaskId: TaskId): Subtask | null {

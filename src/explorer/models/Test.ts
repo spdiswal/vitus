@@ -12,6 +12,7 @@ export type Test = {
 	type: "test"
 	id: TaskId
 	parentId: TaskId
+	parentFileId: TaskId
 	fullName: Reactive<NonEmptyArray<string>>
 	name: Computed<string>
 	status: Reactive<TaskStatus>
@@ -26,6 +27,7 @@ export function dtoToTest(dto: TestDto): Test {
 		type: "test",
 		id: dto.id,
 		parentId: dto.parentId,
+		parentFileId: dto.parentFileId,
 		fullName,
 		name: computed(() => fullName.value.at(-1) as string), // `fullName` is guaranteed to have at least one item.
 		status: signal(dto.status),
@@ -39,6 +41,7 @@ export function testToDto(test: Test): TestDto {
 		type: "test",
 		id: test.id,
 		parentId: test.parentId,
+		parentFileId: test.parentFileId,
 		fullName: test.fullName.value,
 		status: test.status.value,
 		duration: test.duration.value,

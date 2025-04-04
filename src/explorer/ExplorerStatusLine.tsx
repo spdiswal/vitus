@@ -1,10 +1,12 @@
-import { rootStatus } from "+explorer/models/RootStatus"
+import { useRootStatus } from "+explorer/models/RootStatus"
 import { type ClassString, cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
 export function ExplorerStatusLine(props: {
 	class?: ClassString
 }): Renderable {
+	const rootStatus = useRootStatus()
+
 	return (
 		<div
 			class={cn(

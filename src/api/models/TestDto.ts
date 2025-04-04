@@ -7,6 +7,7 @@ export type TestDto = {
 	type: "test"
 	id: TaskId
 	parentId: TaskId
+	parentFileId: TaskId
 	fullName: NonEmptyArray<string>
 	status: TaskStatus
 	duration: Duration | null

@@ -1,48 +1,38 @@
-import { useProject } from "+explorer/UseProject"
+import { getFileById } from "+explorer/models/File"
+import { useRootPath } from "+explorer/models/RootPath"
+import { getSubtaskById } from "+explorer/models/Subtask"
+import { Breadcrumbs } from "+explorer/routes/results/Breadcrumbs"
 import { DiffLegend } from "+explorer/routes/results/DiffLegend"
 import type { Renderable } from "+types/Renderable"
 import { assertNotNullish } from "+utilities/Assertions"
+import { useSignalEffect } from "@preact/signals"
 import { useParams } from "wouter-preact"
 
 export function ResultsPage(): Renderable {
+	const rootPath = useRootPath()
+
 	const params = useParams()
 	const taskId = params["*"]
 	assertNotNullish(taskId)
 
-	const project = useProject()
-	// const test = project.testsById.value[taskId]
+	const subtask = getSubtaskById(taskId)
+	const file = getFileById(subtask?.parentFileId ?? taskId)
+	assertNotNullish(file)
 
-	// const testPath = taskId as TestPath
-	//
-	// const [fileId, ...suiteAndTestIds] = testPath
-	// suiteAndTestIds.pop()
-	// const suiteIds = suiteAndTestIds as SuiteIds
-	//
-	// const file = getFileById(project, fileId)
-	//
-	// const suites = suiteIds
-	// 	.map((_, index) => [fileId, ...suiteIds.slice(0, index + 1)] as SuitePath)
-	// 	.map((suitePath) => getSuiteByPath(project, suitePath))
-	//
-	// const test = getTestByPath(project, testPath)
-	//
-	// useEffect(() => {
-	// 	if (file !== null) {
-	// 		document.title = `${file.filename} – Vitest – Vitus`
-	// 	}
-	// }, [file?.path])
-	//
-	// if (file === null || suites.includes(null) || test === null) {
-	// 	return null
-	// }
+	useSignalEffect(() => {
+		document.title = `${file.name.value} – Vitest – Vitus`
+	})
+
+	if (subtask === null) {
+		return null
+	}
 
 	return (
 		<main class="flex flex-col transition">
-			{/*<Breadcrumbs*/}
-			{/*	filePath={file.path.substring(project.rootPath.length + 1)}*/}
-			{/*	suiteNames={suites.filter(notNullish).map((suite) => suite.name)}*/}
-			{/*	testName={test.name}*/}
-			{/*/>*/}
+			<Breadcrumbs
+				filePath={file.path.value.substring(rootPath.value.length + 1)}
+				subtaskNames={subtask.fullName.value}
+			/>
 			<h1 class="p-5 text-2xl font-mono font-bold rounded-tl-2xl border-b border-gray-400 dark:border-gray-700 transition">
 				AssertionError: expected 29 to be 42
 			</h1>

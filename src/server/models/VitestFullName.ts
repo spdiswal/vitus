@@ -1,8 +1,8 @@
-import type { VitestSuite } from "+models/mappers/MapVitestSuiteToSerialisableSuite"
-import type { VitestTest } from "+models/mappers/MapVitestTestToSerialisableTest"
+import type { VitestSuite } from "+server/models/VitestSuite"
+import type { VitestTest } from "+server/models/VitestTest"
 import type { NonEmptyArray } from "+types/NonEmptyArray"
 
-export function mapVitestSuiteOrTestToName(
+export function vitestSuiteOrTestToFullName(
 	suiteOrTest: VitestSuite | VitestTest,
 ): NonEmptyArray<string> {
 	const result: NonEmptyArray<string> = [suiteOrTest.name]

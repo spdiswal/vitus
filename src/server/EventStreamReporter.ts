@@ -1,15 +1,13 @@
-import { fileDeleted } from "+events/FileDeleted"
-import { runCompleted } from "+events/RunCompleted"
-import { runStarted } from "+events/RunStarted"
-import { serverRestarted } from "+events/ServerRestarted"
-import { taskUpdated } from "+events/TaskUpdated"
-import type { TaskIds } from "+models/TaskId"
-import { mapVitestModuleIdToName } from "+models/mappers/MapVitestModuleIdToName"
-import { mapVitestModuleToSerialisableFile } from "+models/mappers/MapVitestModuleToSerialisableFile"
-import { mapVitestSuiteToSerialisableSuite } from "+models/mappers/MapVitestSuiteToSerialisableSuite"
-import { mapVitestTestToSerialisableTest } from "+models/mappers/MapVitestTestToSerialisableTest"
+import { fileDeleted } from "+api/events/FileDeletedDto"
+import { runCompleted } from "+api/events/RunCompletedDto"
+import { runStarted } from "+api/events/RunStartedDto"
+import { serverRestarted } from "+api/events/ServerRestartedDto"
+import { taskUpdated } from "+api/events/TaskUpdatedDto"
 import type { EventStream } from "+server/EventStream"
-import { notNullish } from "+utilities/Arrays"
+import { vitestModuleToDto } from "+server/models/VitestModule"
+import { vitestSuiteToDto } from "+server/models/VitestSuite"
+import { vitestTestToDto } from "+server/models/VitestTest"
+import { mapNotNullishIterable } from "+utilities/Iterables"
 import type { Reporter } from "vitest/reporters"
 
 export type EventStreamReporter = Pick<
@@ -35,39 +33,39 @@ export function newEventStreamReporter(
 			eventStream.send(serverRestarted())
 		},
 		onTestRunStart(specifications): void {
-			const invalidatedFileIds: TaskIds = specifications
-				.map((specification) => specification.testModule?.id)
-				.filter(notNullish)
-
-			eventStream.send(runStarted(invalidatedFileIds))
+			const invalidatedFileIds = mapNotNullishIterable(
+				specifications,
+				(specification) => specification.testModule?.id,
+			)
+			eventStream.send(runStarted(Array.from(invalidatedFileIds)))
 		},
 		onTestModuleQueued(module): void {
-			eventStream.send(taskUpdated(mapVitestModuleToSerialisableFile(module)))
+			eventStream.send(taskUpdated(vitestModuleToDto(module)))
 		},
 		onTestModuleStart(module): void {
-			eventStream.send(taskUpdated(mapVitestModuleToSerialisableFile(module)))
+			eventStream.send(taskUpdated(vitestModuleToDto(module)))
 		},
 		onTestSuiteReady(suite): void {
-			eventStream.send(taskUpdated(mapVitestSuiteToSerialisableSuite(suite)))
+			eventStream.send(taskUpdated(vitestSuiteToDto(suite)))
 		},
 		onTestCaseReady(test): void {
-			eventStream.send(taskUpdated(mapVitestTestToSerialisableTest(test)))
+			eventStream.send(taskUpdated(vitestTestToDto(test)))
 		},
 		onTestCaseResult(test): void {
-			eventStream.send(taskUpdated(mapVitestTestToSerialisableTest(test)))
+			eventStream.send(taskUpdated(vitestTestToDto(test)))
 		},
 		onTestSuiteResult(suite): void {
-			eventStream.send(taskUpdated(mapVitestSuiteToSerialisableSuite(suite)))
+			eventStream.send(taskUpdated(vitestSuiteToDto(suite)))
 		},
 		onTestModuleEnd(module): void {
-			eventStream.send(taskUpdated(mapVitestModuleToSerialisableFile(module)))
+			eventStream.send(taskUpdated(vitestModuleToDto(module)))
 		},
 		onTestRunEnd(): void {
 			eventStream.send(runCompleted())
 		},
 		onTestRemoved(moduleId): void {
 			if (moduleId) {
-				eventStream.send(fileDeleted(mapVitestModuleIdToName(moduleId)))
+				eventStream.send(fileDeleted(moduleId))
 			}
 		},
 	}

@@ -1,5 +1,8 @@
 import type { SuiteDto } from "+api/models/SuiteDto"
+import { vitestSuiteOrTestToFullName } from "+server/models/VitestFullName"
 import type { VitestModule } from "+server/models/VitestModule"
+import type { VitestTest } from "+server/models/VitestTest"
+import type { Duration } from "+types/Duration"
 import type { TestSuite } from "vitest/node"
 
 /**
@@ -25,14 +28,23 @@ export function vitestSuiteToDto(suite: VitestSuite): SuiteDto {
 		type: "suite",
 		id: suite.id,
 		parentId: suite.parent.id,
-		// TODO: Map fullName.
-		fullName: mapVitestSuiteOrTestToName(suite),
+		parentFileId: suite.module.id,
+		fullName: vitestSuiteOrTestToFullName(suite),
 		status,
 		duration:
 			status === "failed" || status !== "passed"
-				? // TODO: Map duration.
-					mapVitestTestsToDuration(suite.children.allTests())
+				? sumOfTestDurations(suite.children.allTests())
 				: null,
 		errors: errors,
 	}
+}
+
+export function sumOfTestDurations(tests: Iterable<VitestTest>): Duration {
+	let sum = 0
+
+	for (const test of tests) {
+		sum += test.diagnostic()?.duration ?? 0
+	}
+
+	return sum
 }
