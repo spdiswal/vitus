@@ -83,6 +83,10 @@ export function useFiles(): Computed<Files> {
 	})
 }
 
+export function useFile(fileId: TaskId): Computed<File | null> {
+	return useComputed(() => getFileById(fileId))
+}
+
 export function getFileById(fileId: TaskId): File | null {
 	return filesById.value[fileId] ?? null
 }

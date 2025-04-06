@@ -1,4 +1,5 @@
 import type { SubtaskDto } from "+api/models/SubtaskDto"
+import { getFileById } from "+explorer/models/File"
 import { type Suite, dtoToSuite, suiteToDto } from "+explorer/models/Suite"
 import type { Task } from "+explorer/models/Task"
 import { type Test, dtoToTest, testToDto } from "+explorer/models/Test"
@@ -53,6 +54,10 @@ export function useSubtasks(parent: Task): Computed<Subtasks> {
 	})
 }
 
+export function useSubtask(subtaskId: TaskId): Computed<Subtask | null> {
+	return useComputed(() => getSubtaskById(subtaskId))
+}
+
 export function getSubtaskById(subtaskId: TaskId): Subtask | null {
 	return subtasksById.value[subtaskId] ?? null
 }
@@ -90,6 +95,29 @@ export function* enumerateSubtasksByStatuses(
 
 export function enumerateSubtasks(): Iterable<Subtask> {
 	return enumerateObjectValues(subtasksById.value)
+}
+
+/**
+ * Returns an iterable of the ancestors of the given subtask from the file to the immediate parent suite, excluding the subtask itself.
+ */
+export function* enumerateSubtaskAncestors(subtask: Subtask): Iterable<Task> {
+	const ancestors: Array<Task> = []
+	let currentParentId: TaskId | null = subtask.parentId
+
+	while (currentParentId !== null) {
+		const parent: Task | null =
+			getSubtaskById(currentParentId) ?? getFileById(currentParentId)
+
+		if (parent === null) {
+			break
+		}
+
+		ancestors.push(parent)
+		currentParentId = parent.type !== "file" ? parent.parentId : null
+	}
+
+	ancestors.reverse()
+	yield* ancestors
 }
 
 export function removeSubtasksByIds(idsToRemove: Set<TaskId>): void {
