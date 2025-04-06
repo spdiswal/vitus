@@ -12,9 +12,9 @@ export function dummySuiteDto(
 	return {
 		type: "suite",
 		id,
-		parentId: parentSuiteIds.at(-1) ?? parentFileId,
+		parentId: parentSuiteIds.at(-2) ?? parentFileId,
 		parentFileId,
-		fullName: [...parentSuiteIds.map(getDummySuiteName), getDummySuiteName(id)],
+		name: getDummySuiteName(id),
 		status: "passed",
 		duration: 1,
 		errors: [],

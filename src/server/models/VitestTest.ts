@@ -1,5 +1,4 @@
 import type { TestDto } from "+api/models/TestDto"
-import { vitestSuiteOrTestToFullName } from "+server/models/VitestFullName"
 import type { VitestModule } from "+server/models/VitestModule"
 import type { VitestSuite } from "+server/models/VitestSuite"
 import type { TestCase } from "vitest/node"
@@ -23,7 +22,7 @@ export function vitestTestToDto(test: VitestTest): TestDto {
 		id: test.id,
 		parentId: test.parent.id,
 		parentFileId: test.module.id,
-		fullName: vitestSuiteOrTestToFullName(test),
+		name: test.name,
 		status,
 		duration:
 			status === "failed" || status === "passed"

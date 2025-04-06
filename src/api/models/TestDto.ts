@@ -1,5 +1,4 @@
 import type { Duration } from "+types/Duration"
-import type { NonEmptyArray } from "+types/NonEmptyArray"
 import type { TaskId } from "+types/TaskId"
 import type { TaskStatus } from "+types/TaskStatus"
 
@@ -8,7 +7,7 @@ export type TestDto = {
 	id: TaskId
 	parentId: TaskId
 	parentFileId: TaskId
-	fullName: NonEmptyArray<string>
+	name: string
 	status: TaskStatus
 	duration: Duration | null
 	errors: Array<unknown>

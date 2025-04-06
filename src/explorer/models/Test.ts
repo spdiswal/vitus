@@ -1,35 +1,29 @@
 import type { TestDto } from "+api/models/TestDto"
 import type { Subtask } from "+explorer/models/Subtask"
 import type { Duration } from "+types/Duration"
-import type { NonEmptyArray } from "+types/NonEmptyArray"
-import type { Computed, Reactive } from "+types/Reactive"
+import type { Reactive } from "+types/Reactive"
 import type { TaskId } from "+types/TaskId"
 import type { TaskStatus } from "+types/TaskStatus"
-import { arrayEquals } from "+utilities/Arrays"
-import { computed, signal } from "@preact/signals"
+import { signal } from "@preact/signals"
 
 export type Test = {
 	type: "test"
 	id: TaskId
 	parentId: TaskId
 	parentFileId: TaskId
-	fullName: Reactive<NonEmptyArray<string>>
-	name: Computed<string>
+	name: Reactive<string>
 	status: Reactive<TaskStatus>
 	duration: Reactive<Duration | null>
 	errors: Reactive<Array<unknown>>
 }
 
 export function dtoToTest(dto: TestDto): Test {
-	const fullName = signal(dto.fullName)
-
 	return {
 		type: "test",
 		id: dto.id,
 		parentId: dto.parentId,
 		parentFileId: dto.parentFileId,
-		fullName,
-		name: computed(() => fullName.value.at(-1) as string), // `fullName` is guaranteed to have at least one item.
+		name: signal(dto.name),
 		status: signal(dto.status),
 		duration: signal(dto.duration),
 		errors: signal(dto.errors),
@@ -42,7 +36,7 @@ export function testToDto(test: Test): TestDto {
 		id: test.id,
 		parentId: test.parentId,
 		parentFileId: test.parentFileId,
-		fullName: test.fullName.value,
+		name: test.name.value,
 		status: test.status.value,
 		duration: test.duration.value,
 		errors: test.errors.value,
@@ -50,9 +44,7 @@ export function testToDto(test: Test): TestDto {
 }
 
 export function updateTest(existingTest: Test, updatedTest: TestDto): void {
-	if (!arrayEquals(existingTest.fullName.value, updatedTest.fullName)) {
-		existingTest.fullName.value = updatedTest.fullName
-	}
+	existingTest.name.value = updatedTest.name
 	existingTest.status.value = updatedTest.status
 	existingTest.duration.value =
 		updatedTest.status === "failed" || updatedTest.status === "passed"

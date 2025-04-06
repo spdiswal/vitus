@@ -44,8 +44,7 @@ export function logTaskUpdated(event: TaskUpdatedDto): void {
 		{
 			label: `${task.type} ${task.status}`,
 			labelColour: coloursByStatus[task.status],
-			message:
-				task.type === "file" ? task.path : (task.fullName.at(-1) as string), // `fullName` is guaranteed to have at least one item.
+			message: task.type === "file" ? task.path : task.name,
 		},
 		loggableTask,
 	)

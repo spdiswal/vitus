@@ -31,13 +31,13 @@ export function initialiseFiles(dtos: Array<FileDto>): void {
 }
 
 export function dtoToFile(dto: FileDto): File {
-	const fullName = signal(dto.path)
+	const path = signal(dto.path)
 
 	return {
 		type: "file",
 		id: dto.id,
-		path: fullName,
-		name: computed(() => pathToFilename(fullName.value)),
+		path,
+		name: computed(() => pathToFilename(path.value)),
 		status: signal(dto.status),
 		duration: signal(dto.duration),
 		errors: signal(dto.errors),

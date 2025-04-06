@@ -1,11 +1,12 @@
 import { getFileById } from "+explorer/models/File"
 import { useRootPath } from "+explorer/models/RootPath"
-import { getSubtaskById } from "+explorer/models/Subtask"
+import { type Subtask, getSubtaskById } from "+explorer/models/Subtask"
 import { Breadcrumbs } from "+explorer/routes/results/Breadcrumbs"
 import { DiffLegend } from "+explorer/routes/results/DiffLegend"
+import type { NonEmptyArray } from "+types/NonEmptyArray"
 import type { Renderable } from "+types/Renderable"
 import { assertNotNullish } from "+utilities/Assertions"
-import { useSignalEffect } from "@preact/signals"
+import { useComputed, useSignalEffect } from "@preact/signals"
 import { useParams } from "wouter-preact"
 
 export function ResultsPage(): Renderable {
@@ -19,6 +20,10 @@ export function ResultsPage(): Renderable {
 	const file = getFileById(subtask?.parentFileId ?? taskId)
 	assertNotNullish(file)
 
+	const parentNames = useComputed<NonEmptyArray<string>>(() => {
+		return []
+	})
+
 	useSignalEffect(() => {
 		document.title = `${file.name.value} – Vitest – Vitus`
 	})
@@ -31,7 +36,7 @@ export function ResultsPage(): Renderable {
 		<main class="flex flex-col transition">
 			<Breadcrumbs
 				filePath={file.path.value.substring(rootPath.value.length + 1)}
-				subtaskNames={subtask.fullName.value}
+				subtaskNames={[...getParentNames(subtask), subtask.name.value]}
 			/>
 			<h1 class="p-5 text-2xl font-mono font-bold rounded-tl-2xl border-b border-gray-400 dark:border-gray-700 transition">
 				AssertionError: expected 29 to be 42
@@ -44,4 +49,17 @@ export function ResultsPage(): Renderable {
 			</div>
 		</main>
 	)
+}
+
+function getParentNames(subtask: Subtask): NonEmptyArray<string> {
+	const result: NonEmptyArray<string> = [subtask.name.value]
+	let current = subtask.parentId
+
+	while (current.type === "suite") {
+		result.push(current.name)
+		current = current.parent
+	}
+
+	result.reverse()
+	return result
 }

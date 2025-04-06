@@ -18,7 +18,7 @@ export function dummyTestDto(
 		id,
 		parentId: parentSuiteIds.at(-1) ?? parentFileId,
 		parentFileId,
-		fullName:
+		name:
 			parentSuiteIds.length > 1
 				? [
 						getDummySuiteName(parentSuiteIds[0]),
