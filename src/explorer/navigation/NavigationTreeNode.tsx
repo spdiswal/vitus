@@ -64,7 +64,7 @@ export function NavigationTreeNode(props: Task): Renderable {
 				<span class="text-gray-950 dark:text-gray-50 transition">
 					{props.name}
 					<span class="ml-2 text-xs/1 font-light text-gray-500 whitespace-nowrap">
-						{props.status}
+						{props.type} {props.status}
 						{props.duration.value !== null
 							? ` in ${formatDuration(props.duration.value)}`
 							: null}

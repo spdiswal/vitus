@@ -44,10 +44,12 @@ export function testToDto(test: Test): TestDto {
 }
 
 export function updateTest(existingTest: Test, updatedTest: TestDto): void {
+	const updatedStatus = updatedTest.status
+
 	existingTest.name.value = updatedTest.name
-	existingTest.status.value = updatedTest.status
+	existingTest.status.value = updatedStatus
 	existingTest.duration.value =
-		updatedTest.status === "failed" || updatedTest.status === "passed"
+		updatedStatus === "failed" || updatedStatus === "passed"
 			? updatedTest.duration
 			: null
 }

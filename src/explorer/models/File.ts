@@ -96,10 +96,12 @@ export function addFile(file: File): void {
 }
 
 export function updateFile(existingFile: File, updatedFile: FileDto): void {
+	const updatedStatus = updatedFile.status
+
 	existingFile.path.value = updatedFile.path
-	existingFile.status.value = updatedFile.status
+	existingFile.status.value = updatedStatus
 	existingFile.duration.value =
-		updatedFile.status === "failed" || updatedFile.status === "passed"
+		updatedStatus === "failed" || updatedStatus === "passed"
 			? updatedFile.duration
 			: null
 }

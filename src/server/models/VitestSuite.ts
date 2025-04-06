@@ -36,7 +36,7 @@ export function vitestSuiteToDto(suite: VitestSuite): SuiteDto {
 		name: suite.name,
 		status,
 		duration:
-			status === "failed" || status !== "passed"
+			status === "failed" || status === "passed"
 				? sumOfTestDurations(suite.children.allTests())
 				: null,
 		errors: errors,

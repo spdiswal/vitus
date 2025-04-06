@@ -47,12 +47,14 @@ export function updateSuite(
 	existingSuite: Suite,
 	updatedSuite: SuiteDto,
 ): void {
+	const updatedStatus = updatedSuite.status
+
 	existingSuite.name.value = updatedSuite.name
-	existingSuite.status.value = updatedSuite.status
+	existingSuite.status.value = updatedStatus
 
 	// TODO: Compute suite duration from children.
 	existingSuite.duration.value =
-		updatedSuite.status === "failed" || updatedSuite.status === "passed"
+		updatedStatus === "failed" || updatedStatus === "passed"
 			? updatedSuite.duration
 			: null
 }
