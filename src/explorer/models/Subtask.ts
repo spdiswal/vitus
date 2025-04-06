@@ -66,16 +66,14 @@ export function addSubtask(subtask: Subtask): void {
 	subtasksById.value = { ...subtasksById.value, [subtask.id]: subtask }
 }
 
-export function* enumerateSubtasksByParent(
-	parentId: TaskId,
-): Iterable<Subtask> {
+export function enumerateSubtasksByParent(parentId: TaskId): Iterable<Subtask> {
 	return filterIterable(
 		enumerateSubtasks(),
 		(subtask) => subtask.parentId === parentId,
 	)
 }
 
-export function* enumerateSubtasksByParents(
+export function enumerateSubtasksByParents(
 	parentIds: Set<TaskId>,
 ): Iterable<Subtask> {
 	return filterIterable(enumerateSubtasks(), (subtask) =>
@@ -83,7 +81,7 @@ export function* enumerateSubtasksByParents(
 	)
 }
 
-export function* enumerateSubtasksByStatuses(
+export function enumerateSubtasksByStatuses(
 	statusesToInclude: Array<TaskStatus>,
 ): Iterable<Subtask> {
 	const statuses = new Set(statusesToInclude)
@@ -100,7 +98,7 @@ export function enumerateSubtasks(): Iterable<Subtask> {
 /**
  * Returns an iterable of the ancestors of the given subtask from the file to the immediate parent suite, excluding the subtask itself.
  */
-export function* enumerateSubtaskAncestors(subtask: Subtask): Iterable<Task> {
+export function enumerateSubtaskAncestors(subtask: Subtask): Iterable<Task> {
 	const ancestors: Array<Task> = []
 	let currentParentId: TaskId | null = subtask.parentId
 
@@ -117,7 +115,7 @@ export function* enumerateSubtaskAncestors(subtask: Subtask): Iterable<Task> {
 	}
 
 	ancestors.reverse()
-	yield* ancestors
+	return ancestors
 }
 
 export function removeSubtasksByIds(idsToRemove: Set<TaskId>): void {

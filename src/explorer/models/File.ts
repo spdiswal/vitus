@@ -114,7 +114,7 @@ export function* enumerateFilesById(fileIds: Iterable<TaskId>): Iterable<File> {
 	}
 }
 
-export function* enumerateFilesByStatuses(
+export function enumerateFilesByStatuses(
 	statusesToInclude: Array<TaskStatus>,
 ): Iterable<File> {
 	const statuses = new Set(statusesToInclude)

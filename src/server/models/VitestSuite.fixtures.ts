@@ -23,7 +23,7 @@ export function dummyVitestSuite(
 	return {
 		type: "suite",
 		id,
-		name: getDummySuiteName(id).at(-1) as string,
+		name: getDummySuiteName(id),
 		module: parentModule,
 		parent: parentSuite ?? parentModule,
 		state: (): TestSuiteState => overrides?.status ?? "pending",

@@ -29,7 +29,7 @@ export function SubtaskBreadcrumbs(props: {
 				<span
 					// biome-ignore lint/suspicious/noArrayIndexKey: The array index is a stable key, as the order of path segments is immutable.
 					key={index}
-					class="last:font-bold after:content-[' > '] last:after:content-none"
+					class="last:font-bold after:px-1 after:content-['>'] last:after:content-none"
 				>
 					{segment}
 				</span>

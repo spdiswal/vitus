@@ -28,7 +28,7 @@ export function dummyVitestTest(
 	return {
 		type: "test",
 		id,
-		name: getDummyTestName(id).at(-1) as string,
+		name: getDummyTestName(id),
 		module: parentModule,
 		parent: parentSuite ?? parentModule,
 		result: (): TestResult => getDummyTestResult(props.status),

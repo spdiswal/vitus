@@ -61,7 +61,7 @@ export function removeOrphanedSubtasks(): void {
 	removeSubtasksByIds(orphanIds)
 }
 
-function* enumerateOrphanedSubtasks(): Iterable<Subtask> {
+function enumerateOrphanedSubtasks(): Iterable<Subtask> {
 	return filterIterable(
 		enumerateSubtasks(),
 		(subtask) =>
