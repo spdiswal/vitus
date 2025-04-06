@@ -1,8 +1,11 @@
 import type { FileDto } from "+api/models/FileDto"
-import type { InitialStateDto } from "+api/models/InitialStateDto"
+import type { StateDto } from "+api/models/StateDto"
 import type { SubtaskDto } from "+api/models/SubtaskDto"
 import { getRootStatus } from "+explorer/models/RootStatus"
-import { vitestModuleToDto } from "+server/models/VitestModule"
+import {
+	type VitestModule,
+	vitestModuleToDto,
+} from "+server/models/VitestModule"
 import { vitestSuiteToDto } from "+server/models/VitestSuite"
 import { vitestTestToDto } from "+server/models/VitestTest"
 import type { TaskStatus } from "+types/TaskStatus"
@@ -13,8 +16,8 @@ import type { Vitest } from "vitest/node"
  */
 export type VitestState = Pick<Vitest, "config" | "state">
 
-export function vitestStateToDto(state: VitestState): InitialStateDto {
-	const modules = state.state.getTestModules()
+export function vitestStateToDto(state: VitestState): StateDto {
+	const modules: Array<VitestModule> = state.state.getTestModules()
 
 	const files: Array<FileDto> = []
 	const subtasks: Array<SubtaskDto> = []

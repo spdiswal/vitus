@@ -1,39 +1,31 @@
-import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
-import { fileFailedEvent } from "+events/file/FileFailedEvent"
-import { filePassedEvent } from "+events/file/FilePassedEvent"
-import { fileSkippedEvent } from "+events/file/FileSkippedEvent"
-import { fileStartedEvent } from "+events/file/FileStartedEvent"
-import { runCompletedEvent } from "+events/run/RunCompletedEvent"
-import { runStartedEvent } from "+events/run/RunStartedEvent"
-import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { suiteFailedEvent } from "+events/suite/SuiteFailedEvent"
-import { suitePassedEvent } from "+events/suite/SuitePassedEvent"
-import { suiteSkippedEvent } from "+events/suite/SuiteSkippedEvent"
-import { suiteStartedEvent } from "+events/suite/SuiteStartedEvent"
-import { testFailedEvent } from "+events/test/TestFailedEvent"
-import { testPassedEvent } from "+events/test/TestPassedEvent"
-import { testSkippedEvent } from "+events/test/TestSkippedEvent"
-import { testStartedEvent } from "+events/test/TestStartedEvent"
+import { fileDeleted } from "+api/events/FileDeletedDto"
+import { runCompleted } from "+api/events/RunCompletedDto"
+import { runStarted } from "+api/events/RunStartedDto"
+import { serverRestarted } from "+api/events/ServerRestartedDto"
+import { taskUpdated } from "+api/events/TaskUpdatedDto"
+import type { FileDto } from "+api/models/FileDto"
 import {
 	type DummyFileId,
-	dummyVitestModule,
-	dummyVitestSpecification,
 	getDummyFilePath,
-} from "+models/File.fixtures"
+} from "+api/models/FileDto.fixtures"
+import type { SuiteDto } from "+api/models/SuiteDto"
 import {
 	type DummySuiteId,
-	dummyVitestSuite,
 	getDummySuiteName,
-	getDummySuitePath,
-} from "+models/Suite.fixtures"
+} from "+api/models/SuiteDto.fixtures"
+import type { TestDto } from "+api/models/TestDto"
 import {
 	type DummyTestId,
-	dummyVitestTest,
 	getDummyTestName,
-	getDummyTestPath,
-} from "+models/Test.fixtures"
+} from "+api/models/TestDto.fixtures"
 import { type EventStreamSubscriber, newEventStream } from "+server/EventStream"
 import { newEventStreamReporter } from "+server/EventStreamReporter"
+import {
+	dummyVitestModule,
+	dummyVitestSpecification,
+} from "+server/models/VitestModule.fixtures"
+import { dummyVitestSuite } from "+server/models/VitestSuite.fixtures"
+import { dummyVitestTest } from "+server/models/VitestTest.fixtures"
 import type { Duration } from "+types/Duration"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -51,7 +43,7 @@ describe("when the server restarts", () => {
 	})
 
 	it("sends a 'server-restarted' event", () => {
-		expect(spy).toHaveBeenCalledExactlyOnceWith(serverRestartedEvent())
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serverRestarted())
 	})
 })
 
@@ -68,9 +60,7 @@ describe.each`
 		})
 
 		it("sends a 'run-started' event", () => {
-			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				runStartedEvent({ invalidatedFileIds: fileProps.ids }),
-			)
+			expect(spy).toHaveBeenCalledExactlyOnceWith(runStarted(fileProps.ids))
 		})
 	})
 
@@ -84,7 +74,7 @@ describe.each`
 		})
 
 		it("sends a 'run-completed' event", () => {
-			expect(spy).toHaveBeenCalledExactlyOnceWith(runCompletedEvent())
+			expect(spy).toHaveBeenCalledExactlyOnceWith(runCompleted())
 		})
 	})
 })
@@ -109,9 +99,16 @@ describe.each`
 			reporter.onTestModuleStart(module)
 		})
 
-		it("sends a 'file-started' event", () => {
+		it("sends a 'task-updated' event containing the file", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				fileStartedEvent({ id: fileId, path: filePath }),
+				taskUpdated({
+					type: "file",
+					id: fileId,
+					path: filePath,
+					status: "started",
+					duration: null,
+					errors: [],
+				} satisfies FileDto),
 			)
 		})
 	})
@@ -126,9 +123,16 @@ describe.each`
 			reporter.onTestModuleEnd(module)
 		})
 
-		it("sends a 'file-failed' event", () => {
+		it("sends a 'task-updated' event containing the file", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				fileFailedEvent({ id: fileId, duration: fileDuration }),
+				taskUpdated({
+					type: "file",
+					id: fileId,
+					path: filePath,
+					status: "started",
+					duration: fileDuration,
+					errors: [],
+				} satisfies FileDto),
 			)
 		})
 	})
@@ -143,9 +147,16 @@ describe.each`
 			reporter.onTestModuleEnd(module)
 		})
 
-		it("sends a 'file-passed' event", () => {
+		it("sends a 'task-updated' event containing the file", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				filePassedEvent({ id: fileId, duration: fileDuration }),
+				taskUpdated({
+					type: "file",
+					id: fileId,
+					path: filePath,
+					status: "started",
+					duration: fileDuration,
+					errors: [],
+				} satisfies FileDto),
 			)
 		})
 	})
@@ -160,9 +171,16 @@ describe.each`
 			reporter.onTestModuleEnd(module)
 		})
 
-		it("sends a 'file-skipped' event", () => {
+		it("sends a 'task-updated' event containing the file", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				fileSkippedEvent({ id: fileId, duration: fileDuration }),
+				taskUpdated({
+					type: "file",
+					id: fileId,
+					path: filePath,
+					status: "started",
+					duration: fileDuration,
+					errors: [],
+				} satisfies FileDto),
 			)
 		})
 	})
@@ -173,9 +191,7 @@ describe.each`
 		})
 
 		it("sends a 'file-deleted' event", () => {
-			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				fileDeletedEvent({ path: filePath }),
-			)
+			expect(spy).toHaveBeenCalledExactlyOnceWith(fileDeleted(filePath))
 		})
 	})
 
@@ -188,8 +204,7 @@ describe.each`
 		"and given a top-level suite $id",
 		(topLevelSuiteProps: { id: DummySuiteId }) => {
 			const topLevelSuiteId = topLevelSuiteProps.id
-			const topLevelSuitePath = getDummySuitePath(topLevelSuiteId)
-			const topLevelSuiteName = getDummySuiteName(topLevelSuitePath)
+			const topLevelSuiteName = getDummySuiteName(topLevelSuiteId)
 
 			describe("when the suite starts running", () => {
 				const suite = dummyVitestSuite(topLevelSuiteId, { status: "pending" })
@@ -198,12 +213,18 @@ describe.each`
 					reporter.onTestSuiteReady(suite)
 				})
 
-				it("sends a 'suite-started' event", () => {
+				it("sends a 'task-updated' event containing the suite", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteStartedEvent({
-							name: topLevelSuiteName,
-							path: topLevelSuitePath,
-						}),
+						taskUpdated({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelSuiteName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies SuiteDto),
 					)
 				})
 			})
@@ -215,9 +236,18 @@ describe.each`
 					reporter.onTestSuiteResult(suite)
 				})
 
-				it("sends a 'suite-failed' event", () => {
+				it("sends a 'task-updated' event containing the suite", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteFailedEvent({ path: topLevelSuitePath }),
+						taskUpdated({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelSuiteName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies SuiteDto),
 					)
 				})
 			})
@@ -229,9 +259,18 @@ describe.each`
 					reporter.onTestSuiteResult(suite)
 				})
 
-				it("sends a 'suite-passed' event", () => {
+				it("sends a 'task-updated' event containing the suite", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suitePassedEvent({ path: topLevelSuitePath }),
+						taskUpdated({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelSuiteName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies SuiteDto),
 					)
 				})
 			})
@@ -243,9 +282,18 @@ describe.each`
 					reporter.onTestSuiteResult(suite)
 				})
 
-				it("sends a 'suite-skipped' event", () => {
+				it("sends a 'task-updated' event containing the suite", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteSkippedEvent({ path: topLevelSuitePath }),
+						taskUpdated({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelSuiteName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies SuiteDto),
 					)
 				})
 			})
@@ -262,8 +310,7 @@ describe.each`
 					duration: Duration
 				}) => {
 					const nestedTestId = nestedTestProps.id
-					const nestedTestPath = getDummyTestPath(nestedTestId)
-					const nestedTestName = getDummyTestName(nestedTestPath)
+					const nestedTestName = getDummyTestName(nestedTestId)
 					const nestedTestDuration = nestedTestProps.duration
 
 					describe("when the test starts running", () => {
@@ -275,12 +322,18 @@ describe.each`
 							reporter.onTestCaseReady(test)
 						})
 
-						it("sends a 'test-started' event", () => {
+						it("sends a 'task-updated' event containing the test", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testStartedEvent({
-									name: nestedTestName,
-									path: nestedTestPath,
-								}),
+								taskUpdated({
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentFileId: fileId,
+									fullName: [topLevelSuiteName, nestedTestName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies TestDto),
 							)
 						})
 					})
@@ -295,12 +348,18 @@ describe.each`
 							reporter.onTestCaseResult(test)
 						})
 
-						it("sends a 'test-failed' event", () => {
+						it("sends a 'task-updated' event containing the test", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testFailedEvent({
-									duration: nestedTestDuration,
-									path: nestedTestPath,
-								}),
+								taskUpdated({
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentFileId: fileId,
+									fullName: [topLevelSuiteName, nestedTestName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies TestDto),
 							)
 						})
 					})
@@ -315,12 +374,18 @@ describe.each`
 							reporter.onTestCaseResult(test)
 						})
 
-						it("sends a 'test-passed' event", () => {
+						it("sends a 'task-updated' event containing the test", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testPassedEvent({
-									duration: nestedTestDuration,
-									path: nestedTestPath,
-								}),
+								taskUpdated({
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentFileId: fileId,
+									fullName: [topLevelSuiteName, nestedTestName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies TestDto),
 							)
 						})
 					})
@@ -335,12 +400,18 @@ describe.each`
 							reporter.onTestCaseResult(test)
 						})
 
-						it("sends a 'test-skipped' event", () => {
+						it("sends a 'task-updated' event containing the test", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testSkippedEvent({
-									duration: nestedTestDuration,
-									path: nestedTestPath,
-								}),
+								taskUpdated({
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentFileId: fileId,
+									fullName: [topLevelSuiteName, nestedTestName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies TestDto),
 							)
 						})
 					})
@@ -355,8 +426,7 @@ describe.each`
 				"and given a nested suite $id",
 				(nestedSuiteProps: { id: DummySuiteId }) => {
 					const nestedSuiteId = nestedSuiteProps.id
-					const nestedSuitePath = getDummySuitePath(nestedSuiteId)
-					const nestedSuiteName = getDummySuiteName(nestedSuitePath)
+					const nestedSuiteName = getDummySuiteName(nestedSuiteId)
 
 					describe("when the suite starts running", () => {
 						const suite = dummyVitestSuite(nestedSuiteId, { status: "pending" })
@@ -365,12 +435,18 @@ describe.each`
 							reporter.onTestSuiteReady(suite)
 						})
 
-						it("sends a 'suite-started' event", () => {
+						it("sends a 'task-updated' event containing the suite", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteStartedEvent({
-									name: nestedSuiteName,
-									path: nestedSuitePath,
-								}),
+								taskUpdated({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: fileId,
+									parentFileId: topLevelSuiteId,
+									fullName: [topLevelSuiteName, nestedSuiteName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies SuiteDto),
 							)
 						})
 					})
@@ -382,9 +458,18 @@ describe.each`
 							reporter.onTestSuiteResult(suite)
 						})
 
-						it("sends a 'suite-failed' event", () => {
+						it("sends a 'task-updated' event containing the suite", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteFailedEvent({ path: nestedSuitePath }),
+								taskUpdated({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: fileId,
+									parentFileId: topLevelSuiteId,
+									fullName: [topLevelSuiteName, nestedSuiteName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies SuiteDto),
 							)
 						})
 					})
@@ -396,9 +481,18 @@ describe.each`
 							reporter.onTestSuiteResult(suite)
 						})
 
-						it("sends a 'suite-passed' event", () => {
+						it("sends a 'task-updated' event containing the suite", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suitePassedEvent({ path: nestedSuitePath }),
+								taskUpdated({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: fileId,
+									parentFileId: topLevelSuiteId,
+									fullName: [topLevelSuiteName, nestedSuiteName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies SuiteDto),
 							)
 						})
 					})
@@ -410,9 +504,18 @@ describe.each`
 							reporter.onTestSuiteResult(suite)
 						})
 
-						it("sends a 'suite-skipped' event", () => {
+						it("sends a 'task-updated' event containing the suite", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteSkippedEvent({ path: nestedSuitePath }),
+								taskUpdated({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: fileId,
+									parentFileId: topLevelSuiteId,
+									fullName: [topLevelSuiteName, nestedSuiteName],
+									status: "started",
+									duration: null,
+									errors: [],
+								} satisfies SuiteDto),
 							)
 						})
 					})
@@ -428,8 +531,7 @@ describe.each`
 							duration: Duration
 						}) => {
 							const nestedTestId = nestedTestProps.id
-							const nestedTestPath = getDummyTestPath(nestedTestId)
-							const nestedTestName = getDummyTestName(nestedTestPath)
+							const nestedTestName = getDummyTestName(nestedTestId)
 							const nestedTestDuration = nestedTestProps.duration
 
 							describe("when the test starts running", () => {
@@ -441,12 +543,22 @@ describe.each`
 									reporter.onTestCaseReady(test)
 								})
 
-								it("sends a 'test-started' event", () => {
+								it("sends a 'task-updated' event containing the test", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testStartedEvent({
-											name: nestedTestName,
-											path: nestedTestPath,
-										}),
+										taskUpdated({
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentFileId: fileId,
+											fullName: [
+												topLevelSuiteName,
+												nestedSuiteName,
+												nestedTestName,
+											],
+											status: "started",
+											duration: null,
+											errors: [],
+										} satisfies TestDto),
 									)
 								})
 							})
@@ -461,12 +573,22 @@ describe.each`
 									reporter.onTestCaseResult(test)
 								})
 
-								it("sends a 'test-failed' event", () => {
+								it("sends a 'task-updated' event containing the test", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testFailedEvent({
-											duration: nestedTestDuration,
-											path: nestedTestPath,
-										}),
+										taskUpdated({
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentFileId: fileId,
+											fullName: [
+												topLevelSuiteName,
+												nestedSuiteName,
+												nestedTestName,
+											],
+											status: "started",
+											duration: null,
+											errors: [],
+										} satisfies TestDto),
 									)
 								})
 							})
@@ -481,12 +603,22 @@ describe.each`
 									reporter.onTestCaseResult(test)
 								})
 
-								it("sends a 'test-passed' event", () => {
+								it("sends a 'task-updated' event containing the test", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testPassedEvent({
-											duration: nestedTestDuration,
-											path: nestedTestPath,
-										}),
+										taskUpdated({
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentFileId: fileId,
+											fullName: [
+												topLevelSuiteName,
+												nestedSuiteName,
+												nestedTestName,
+											],
+											status: "started",
+											duration: null,
+											errors: [],
+										} satisfies TestDto),
 									)
 								})
 							})
@@ -501,12 +633,22 @@ describe.each`
 									reporter.onTestCaseResult(test)
 								})
 
-								it("sends a 'test-skipped' event", () => {
+								it("sends a 'task-updated' event containing the test", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testSkippedEvent({
-											duration: nestedTestDuration,
-											path: nestedTestPath,
-										}),
+										taskUpdated({
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentFileId: fileId,
+											fullName: [
+												topLevelSuiteName,
+												nestedSuiteName,
+												nestedTestName,
+											],
+											status: "started",
+											duration: null,
+											errors: [],
+										} satisfies TestDto),
 									)
 								})
 							})
@@ -529,8 +671,7 @@ describe.each`
 			duration: Duration
 		}) => {
 			const topLevelTestId = topLevelTestProps.id
-			const topLevelTestPath = getDummyTestPath(topLevelTestId)
-			const topLevelTestName = getDummyTestName(topLevelTestPath)
+			const topLevelTestName = getDummyTestName(topLevelTestId)
 			const topLevelTestDuration = topLevelTestProps.duration
 
 			describe("when the test starts running", () => {
@@ -542,12 +683,18 @@ describe.each`
 					reporter.onTestCaseReady(test)
 				})
 
-				it("sends a 'test-started' event", () => {
+				it("sends a 'task-updated' event containing the test", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testStartedEvent({
-							name: topLevelTestName,
-							path: topLevelTestPath,
-						}),
+						taskUpdated({
+							type: "test",
+							id: topLevelTestId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelTestName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies TestDto),
 					)
 				})
 			})
@@ -562,12 +709,18 @@ describe.each`
 					reporter.onTestCaseResult(test)
 				})
 
-				it("sends a 'test-failed' event", () => {
+				it("sends a 'task-updated' event containing the test", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testFailedEvent({
-							duration: topLevelTestDuration,
-							path: topLevelTestPath,
-						}),
+						taskUpdated({
+							type: "test",
+							id: topLevelTestId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelTestName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies TestDto),
 					)
 				})
 			})
@@ -582,12 +735,18 @@ describe.each`
 					reporter.onTestCaseResult(test)
 				})
 
-				it("sends a 'test-passed' event", () => {
+				it("sends a 'task-updated' event containing the test", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testPassedEvent({
-							duration: topLevelTestDuration,
-							path: topLevelTestPath,
-						}),
+						taskUpdated({
+							type: "test",
+							id: topLevelTestId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelTestName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies TestDto),
 					)
 				})
 			})
@@ -602,12 +761,18 @@ describe.each`
 					reporter.onTestCaseResult(test)
 				})
 
-				it("sends a 'test-skipped' event", () => {
+				it("sends a 'task-updated' event containing the test", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testSkippedEvent({
-							duration: topLevelTestDuration,
-							path: topLevelTestPath,
-						}),
+						taskUpdated({
+							type: "test",
+							id: topLevelTestId,
+							parentId: fileId,
+							parentFileId: fileId,
+							fullName: [topLevelTestName],
+							status: "started",
+							duration: null,
+							errors: [],
+						} satisfies TestDto),
 					)
 				})
 			})

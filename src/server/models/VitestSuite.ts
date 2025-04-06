@@ -10,8 +10,13 @@ import type { TestSuite } from "vitest/node"
  */
 export type VitestSuite = Pick<
 	TestSuite,
-	"children" | "errors" | "id" | "module" | "name" | "state" | "type"
-> & { parent: VitestModule | VitestSuite }
+	"errors" | "id" | "module" | "name" | "state" | "type"
+> & {
+	children: {
+		allTests: () => Iterable<VitestTest>
+	}
+	parent: VitestModule | VitestSuite
+}
 
 export function vitestSuiteToDto(suite: VitestSuite): SuiteDto {
 	const errors = suite.errors()

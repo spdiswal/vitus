@@ -1,13 +1,9 @@
-import { fileDeleted } from "+events/FileDeleted"
-import { applyProjectEvent } from "+events/ProjectEvent"
-import {
-	type Project,
-	type SerialisableProject,
-	hydrateProject,
-	serialiseProject,
-} from "+models/Project"
-import { dummyProject } from "+models/Project.fixtures"
-import { beforeAll, describe, expect, it } from "vitest"
+import { fileDeleted } from "+api/events/FileDeletedDto"
+import type { StateDto } from "+api/models/StateDto"
+import { dummyStateDto } from "+api/models/StateDto.fixtures"
+import { handleEvent } from "+explorer/events/HandleEvent"
+import { initialiseState } from "+explorer/models/State"
+import { beforeEach, describe, expect, it } from "vitest"
 
 // const initialProject = dummyProject({}, [
 // 	dummyFile("15b021ef72", { duration: 10, status: "passed" }),
@@ -59,24 +55,22 @@ import { beforeAll, describe, expect, it } from "vitest"
 // )
 
 describe("when a non-existing file has been deleted", () => {
-	const initialProject = dummyProject()
-	let actualProject: SerialisableProject
+	const initialState = dummyStateDto()
+	let actualState: StateDto
 
-	beforeAll(() => {
-		const project: Project = hydrateProject(initialProject)
+	beforeEach(() => {
+		initialiseState(initialState)
 
-		applyProjectEvent(
-			project,
-			fileDeleted([
-				"/Users/sdi/repositories/plantation/src/basket",
-				"Imaginary.tests.ts",
-			]),
+		handleEvent(
+			fileDeleted(
+				"/Users/spdiswal/repositories/plantation/src/basket/Imaginary.tests.ts",
+			),
 		)
 
-		actualProject = serialiseProject(project)
+		// actualState = serialiseProject(project)
 	})
 
 	it("does not affect the project", () => {
-		expect(actualProject).toEqual(initialProject)
+		expect(actualState).toEqual(initialState)
 	})
 })

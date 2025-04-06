@@ -16,25 +16,7 @@
 	},
 	"overrides": [
 		{
-			"include": ["src/api/**/*"],
-			"linter": {
-				"rules": {
-					"nursery": {
-						"noRestrictedImports": {
-							"level": "error",
-							"options": {
-								"paths": {
-									"+explorer/*": "The API must be agnostic and cannot rely on 'explorer'",
-									"+server/*": "The API must be agnostic and cannot rely on 'server'"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		{
-			"include": ["src/explorer/**/*"],
+			"include": ["src/explorer/**/*.tsx"],
 			"linter": {
 				"rules": {
 					"nursery": {

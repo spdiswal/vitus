@@ -12,6 +12,8 @@ export type VitestTest = Pick<
 	"diagnostic" | "id" | "module" | "name" | "result" | "type"
 > & { parent: VitestModule | VitestSuite }
 
+export type VitestTestDiagnostic = ReturnType<VitestTest["diagnostic"]>
+
 export function vitestTestToDto(test: VitestTest): TestDto {
 	const vitestStatus = test.result().state
 	const status = vitestStatus === "pending" ? "started" : vitestStatus

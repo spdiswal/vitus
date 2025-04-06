@@ -1,5 +1,5 @@
 import { ExplorerApp } from "+explorer/ExplorerApp"
-import { initialiseState } from "+explorer/models/InitialState"
+import { initialiseState } from "+explorer/models/State"
 import { hydrate } from "preact"
 import { Router } from "wouter-preact"
 
