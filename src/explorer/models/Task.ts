@@ -1,10 +1,10 @@
 import {
-	type File,
-	enumerateFilesByStatuses,
-	getFileById,
-	removeAllFiles,
-	removeFilesByStatuses,
-} from "+explorer/models/File"
+	type Module,
+	enumerateModulesByStatuses,
+	getModuleById,
+	removeAllModules,
+	removeModulesByStatuses,
+} from "+explorer/models/Module"
 import {
 	type Subtask,
 	enumerateSubtasks,
@@ -18,19 +18,19 @@ import {
 import type { TaskStatus } from "+types/TaskStatus"
 import { filterIterable, mapIterable } from "+utilities/Iterables"
 
-export type Task = File | Subtask
+export type Task = Module | Subtask
 
 export function* enumerateTasksByStatuses(
 	statusesToInclude: Array<TaskStatus>,
 ): Iterable<Task> {
-	yield* enumerateFilesByStatuses(statusesToInclude)
+	yield* enumerateModulesByStatuses(statusesToInclude)
 	yield* enumerateSubtasksByStatuses(statusesToInclude)
 }
 
 export function removeTasksByStatuses(
 	statusesToRemove: Array<TaskStatus>,
 ): void {
-	removeFilesByStatuses(statusesToRemove)
+	removeModulesByStatuses(statusesToRemove)
 	removeSubtasksByStatuses(statusesToRemove)
 	removeOrphanedSubtasks()
 }
@@ -65,12 +65,12 @@ function enumerateOrphanedSubtasks(): Iterable<Subtask> {
 	return filterIterable(
 		enumerateSubtasks(),
 		(subtask) =>
-			getFileById(subtask.parentId) === null &&
+			getModuleById(subtask.parentId) === null &&
 			getSubtaskById(subtask.parentId) === null,
 	)
 }
 
 export function removeAllTasks(): void {
-	removeAllFiles()
+	removeAllModules()
 	removeAllSubtasks()
 }

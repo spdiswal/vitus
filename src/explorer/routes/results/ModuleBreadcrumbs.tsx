@@ -1,23 +1,23 @@
-import { useFile } from "+explorer/models/File"
+import { useModule } from "+explorer/models/Module"
 import { useRootPath } from "+explorer/models/RootPath"
 import type { Renderable } from "+types/Renderable"
 import type { TaskId } from "+types/TaskId"
 import { useComputed } from "@preact/signals"
 
-export function FileBreadcrumbs(props: {
-	fileId: TaskId
+export function ModuleBreadcrumbs(props: {
+	moduleId: TaskId
 }): Renderable {
-	const file = useFile(props.fileId)
+	const module = useModule(props.moduleId)
 	const rootPath = useRootPath()
 
 	const segments = useComputed(() => {
-		if (file.value === null) {
+		if (module.value === null) {
 			return null
 		}
 
-		const filePath = file.value.path.value
-		const relativeFilePath = filePath.slice(rootPath.value.length + 1)
-		return relativeFilePath.split("/")
+		const modulePath = module.value.path.value
+		const relativePath = modulePath.slice(rootPath.value.length + 1)
+		return relativePath.split("/")
 	})
 
 	return segments.value !== null ? (

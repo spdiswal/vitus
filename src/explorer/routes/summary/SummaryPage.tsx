@@ -1,15 +1,15 @@
-import { useFiles } from "+explorer/models/File"
+import { useModules } from "+explorer/models/Module"
 import { useRootPath } from "+explorer/models/RootPath"
 import type { Renderable } from "+types/Renderable"
 import { count } from "+utilities/Strings"
 import { useSignalEffect } from "@preact/signals"
 
 export function SummaryPage(): Renderable {
-	const files = useFiles()
+	const modules = useModules()
 	const rootPath = useRootPath()
 
 	useSignalEffect(() => {
-		document.title = `${count(files.value, "file", "files")} – Vitest – Vitus`
+		document.title = `${count(modules.value, "module", "modules")} – Vitest – Vitus`
 	})
 
 	return (
@@ -18,7 +18,7 @@ export function SummaryPage(): Renderable {
 				Vitest &ndash; Vitus
 			</h1>
 			<div class="font-mono">{rootPath}</div>
-			<div>{count(files.value, "file", "files")}</div>
+			<div>{count(modules.value, "module", "modules")}</div>
 		</main>
 	)
 }

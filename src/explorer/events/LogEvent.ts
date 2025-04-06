@@ -1,5 +1,5 @@
 import type { EventDto } from "+api/events/EventDto"
-import type { FileDeletedDto } from "+api/events/FileDeletedDto"
+import type { ModuleDeletedDto } from "+api/events/ModuleDeletedDto"
 import type { RunStartedDto } from "+api/events/RunStartedDto"
 import type { TaskUpdatedDto } from "+api/events/TaskUpdatedDto"
 import type { HexColour } from "+types/HexColour"
@@ -17,8 +17,8 @@ export function logEvent(event: EventDto): void {
 	if (event.type === "run-completed") {
 		logRunCompleted()
 	}
-	if (event.type === "file-deleted") {
-		logFileDeleted(event)
+	if (event.type === "module-deleted") {
+		logModuleDeleted(event)
 	}
 	if (event.type === "server-disconnected") {
 		logServerDisconnected()
@@ -44,7 +44,7 @@ export function logTaskUpdated(event: TaskUpdatedDto): void {
 		{
 			label: `${task.type} ${task.status}`,
 			labelColour: coloursByStatus[task.status],
-			message: task.type === "file" ? task.path : task.name,
+			message: task.type === "module" ? task.path : task.name,
 		},
 		loggableTask,
 	)
@@ -57,7 +57,7 @@ export function logRunStarted(event: RunStartedDto): void {
 			labelColour: "#1d4ed8",
 			message: "",
 		},
-		{ invalidatedFileIds: event.invalidatedFileIds },
+		{ invalidatedModuleIds: event.invalidatedModuleIds },
 	)
 }
 
@@ -69,9 +69,9 @@ export function logRunCompleted(): void {
 	})
 }
 
-export function logFileDeleted(event: FileDeletedDto): void {
+export function logModuleDeleted(event: ModuleDeletedDto): void {
 	logDebug({
-		label: "file deleted",
+		label: "module deleted",
 		labelColour: "#374151",
 		message: event.path,
 	})

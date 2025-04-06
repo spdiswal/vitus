@@ -1,4 +1,7 @@
-import { type DummyFileId, dummyParentIds } from "+api/models/FileDto.fixtures"
+import {
+	type DummyModuleId,
+	dummyParentIds,
+} from "+api/models/ModuleDto.fixtures"
 import type { SuiteDto } from "+api/models/SuiteDto"
 import type { EvenDigit } from "+types/Digit"
 
@@ -10,7 +13,7 @@ export function dummySuiteDto(
 		type: "suite",
 		id,
 		parentId: id.slice(0, id.lastIndexOf("_")),
-		parentFileId: id.slice(0, id.indexOf("_")),
+		moduleId: id.slice(0, id.indexOf("_")),
 		name: getDummySuiteName(id),
 		status: "passed",
 		duration: 1,
@@ -20,11 +23,11 @@ export function dummySuiteDto(
 }
 
 export type DummySuiteId =
-	| `${DummyFileId}_${EvenDigit}` // Top-level suite.
-	| `${DummyFileId}_${EvenDigit}_${EvenDigit}` // Nested suite (level 1).
-	| `${DummyFileId}_${EvenDigit}_${EvenDigit}_${EvenDigit}` // Nested suite (level 2).
+	| `${DummyModuleId}_${EvenDigit}` // Top-level suite.
+	| `${DummyModuleId}_${EvenDigit}_${EvenDigit}` // Nested suite (level 1).
+	| `${DummyModuleId}_${EvenDigit}_${EvenDigit}_${EvenDigit}` // Nested suite (level 2).
 
-const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
+const dummyNamesById: Record<DummyModuleId, Record<EvenDigit, string>> = {
 	"15b021ef72": {
 		0: "the fruit basket has no apples",
 		2: "the spring break is over",
@@ -56,8 +59,8 @@ const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
 }
 
 export function getDummySuiteName(id: DummySuiteId): string {
-	const [fileId, parentSuiteId] = dummyParentIds(id)
+	const [moduleId, parentSuiteId] = dummyParentIds(id)
 	const lastDigit = Number.parseInt(id.slice(-1)) as EvenDigit
 
-	return `${parentSuiteId === null ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
+	return `${parentSuiteId === null ? "when" : "and"} ${dummyNamesById[moduleId][lastDigit]}`
 }

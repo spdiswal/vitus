@@ -1,8 +1,8 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { fileSkippedEvent } from "+events/file/FileSkippedEvent"
-import type { File, FileId, FileStatus } from "+models/File"
-import { dummyFile } from "+models/File.fixtures"
 import type { GlobalStatus } from "+models/GlobalStatus"
+import type { File, FileId, FileStatus } from "+models/Module"
+import { dummyFile } from "+models/Module.fixtures"
 import {
 	type Project,
 	assertDummyProject,

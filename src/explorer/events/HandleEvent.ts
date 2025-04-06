@@ -1,17 +1,17 @@
 import type { EventDto } from "+api/events/EventDto"
-import type { FileDeletedDto } from "+api/events/FileDeletedDto"
+import type { ModuleDeletedDto } from "+api/events/ModuleDeletedDto"
 import type { RunStartedDto } from "+api/events/RunStartedDto"
 import type { TaskUpdatedDto } from "+api/events/TaskUpdatedDto"
-import type { FileDto } from "+api/models/FileDto"
+import type { ModuleDto } from "+api/models/ModuleDto"
 import type { SubtaskDto } from "+api/models/SubtaskDto"
 import {
-	addFile,
-	dtoToFile,
-	enumerateFilesById,
-	getFileById,
-	removeFilesByPath,
-	updateFile,
-} from "+explorer/models/File"
+	addModule,
+	dtoToModule,
+	enumerateModulesById,
+	getModuleById,
+	removeModulesByPath,
+	updateModule,
+} from "+explorer/models/Module"
 import { refreshRootStatus, setRootStatus } from "+explorer/models/RootStatus"
 import {
 	addSubtask,
@@ -38,8 +38,8 @@ export function handleEvent(event: EventDto): void {
 	if (event.type === "run-completed") {
 		handleRunCompleted()
 	}
-	if (event.type === "file-deleted") {
-		handleFileDeleted(event)
+	if (event.type === "module-deleted") {
+		handleModuleDeleted(event)
 	}
 	if (event.type === "server-disconnected") {
 		handleServerDisconnected()
@@ -52,20 +52,20 @@ export function handleEvent(event: EventDto): void {
 function handleTaskUpdated(event: TaskUpdatedDto): void {
 	const task = event.task
 
-	if (task.type === "file") {
-		handleFileUpdated(task)
+	if (task.type === "module") {
+		handleModuleUpdated(task)
 	} else {
 		handleSubtaskUpdated(task)
 	}
 }
 
-function handleFileUpdated(file: FileDto): void {
-	const existingFile = getFileById(file.id)
+function handleModuleUpdated(module: ModuleDto): void {
+	const existingModule = getModuleById(module.id)
 
-	if (existingFile === null) {
-		addFile(dtoToFile(file))
+	if (existingModule === null) {
+		addModule(dtoToModule(module))
 	} else {
-		updateFile(existingFile, file)
+		updateModule(existingModule, module)
 	}
 }
 
@@ -84,11 +84,11 @@ function handleSubtaskUpdated(subtask: SubtaskDto): void {
 }
 
 function handleRunStarted(event: RunStartedDto): void {
-	const invalidatedFiles = enumerateFilesById(event.invalidatedFileIds)
+	const invalidatedModules = enumerateModulesById(event.invalidatedModuleIds)
 
-	for (const file of invalidatedFiles) {
-		file.status.value = "queued"
-		file.duration.value = null
+	for (const modules of invalidatedModules) {
+		modules.status.value = "queued"
+		modules.duration.value = null
 	}
 
 	setRootStatus("started")
@@ -99,8 +99,8 @@ function handleRunCompleted(): void {
 	refreshRootStatus()
 }
 
-function handleFileDeleted(event: FileDeletedDto): void {
-	removeFilesByPath(event.path)
+function handleModuleDeleted(event: ModuleDeletedDto): void {
+	removeModulesByPath(event.path)
 	removeOrphanedSubtasks()
 	refreshRootStatus()
 }

@@ -6,7 +6,7 @@ export type SuiteDto = {
 	type: "suite"
 	id: TaskId
 	parentId: TaskId
-	parentFileId: TaskId
+	moduleId: TaskId
 	name: string
 	status: TaskStatus
 	duration: Duration | null

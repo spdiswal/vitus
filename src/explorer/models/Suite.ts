@@ -10,7 +10,7 @@ export type Suite = {
 	type: "suite"
 	id: TaskId
 	parentId: TaskId
-	parentFileId: TaskId
+	moduleId: TaskId
 	name: Reactive<string>
 	status: Reactive<TaskStatus>
 	duration: Reactive<Duration | null>
@@ -22,7 +22,7 @@ export function dtoToSuite(dto: SuiteDto): Suite {
 		type: "suite",
 		id: dto.id,
 		parentId: dto.parentId,
-		parentFileId: dto.parentFileId,
+		moduleId: dto.moduleId,
 		name: signal(dto.name),
 		status: signal(dto.status),
 		duration: signal(dto.duration),
@@ -35,7 +35,7 @@ export function suiteToDto(suite: Suite): SuiteDto {
 		type: "suite",
 		id: suite.id,
 		parentId: suite.parentId,
-		parentFileId: suite.parentFileId,
+		moduleId: suite.moduleId,
 		name: suite.name.value,
 		status: suite.status.value,
 		duration: suite.duration.value,

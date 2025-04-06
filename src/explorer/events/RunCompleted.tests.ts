@@ -1,7 +1,7 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { runCompletedEvent } from "+events/run/RunCompletedEvent"
-import { dummyFile } from "+models/File.fixtures"
 import type { GlobalStatus } from "+models/GlobalStatus"
+import { dummyFile } from "+models/Module.fixtures"
 import {
 	type Project,
 	assertDummyFiles,

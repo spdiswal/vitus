@@ -10,7 +10,7 @@ export type Test = {
 	type: "test"
 	id: TaskId
 	parentId: TaskId
-	parentFileId: TaskId
+	moduleId: TaskId
 	name: Reactive<string>
 	status: Reactive<TaskStatus>
 	duration: Reactive<Duration | null>
@@ -22,7 +22,7 @@ export function dtoToTest(dto: TestDto): Test {
 		type: "test",
 		id: dto.id,
 		parentId: dto.parentId,
-		parentFileId: dto.parentFileId,
+		moduleId: dto.moduleId,
 		name: signal(dto.name),
 		status: signal(dto.status),
 		duration: signal(dto.duration),
@@ -35,7 +35,7 @@ export function testToDto(test: Test): TestDto {
 		type: "test",
 		id: test.id,
 		parentId: test.parentId,
-		parentFileId: test.parentFileId,
+		moduleId: test.moduleId,
 		name: test.name.value,
 		status: test.status.value,
 		duration: test.duration.value,

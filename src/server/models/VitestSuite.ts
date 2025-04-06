@@ -32,7 +32,7 @@ export function vitestSuiteToDto(suite: VitestSuite): SuiteDto {
 		type: "suite",
 		id: suite.id,
 		parentId: suite.parent.id,
-		parentFileId: suite.module.id,
+		moduleId: suite.module.id,
 		name: suite.name,
 		status,
 		duration:

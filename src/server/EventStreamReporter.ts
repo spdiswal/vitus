@@ -1,4 +1,4 @@
-import { fileDeleted } from "+api/events/FileDeletedDto"
+import { moduleDeleted } from "+api/events/ModuleDeletedDto"
 import { runCompleted } from "+api/events/RunCompletedDto"
 import { runStarted } from "+api/events/RunStartedDto"
 import { serverRestarted } from "+api/events/ServerRestartedDto"
@@ -33,11 +33,11 @@ export function newEventStreamReporter(
 			eventStream.send(serverRestarted())
 		},
 		onTestRunStart(specifications): void {
-			const invalidatedFileIds = mapNotNullishIterable(
+			const invalidatedModuleIds = mapNotNullishIterable(
 				specifications,
 				(specification) => specification.testModule?.id,
 			)
-			eventStream.send(runStarted(Array.from(invalidatedFileIds)))
+			eventStream.send(runStarted(Array.from(invalidatedModuleIds)))
 		},
 		onTestModuleQueued(module): void {
 			eventStream.send(taskUpdated(vitestModuleToDto(module)))
@@ -65,7 +65,7 @@ export function newEventStreamReporter(
 		},
 		onTestRemoved(moduleId): void {
 			if (moduleId) {
-				eventStream.send(fileDeleted(moduleId))
+				eventStream.send(moduleDeleted(moduleId))
 			}
 		},
 	}

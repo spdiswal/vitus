@@ -1,7 +1,7 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { testFailedEvent } from "+events/test/TestFailedEvent"
-import { type File, countFileChildren } from "+models/File"
-import { dummyFile } from "+models/File.fixtures"
+import { type File, countFileChildren } from "+models/Module"
+import { dummyFile } from "+models/Module.fixtures"
 import {
 	type Project,
 	assertDummyFiles,

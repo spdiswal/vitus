@@ -1,7 +1,7 @@
-import { useFile } from "+explorer/models/File"
+import { useModule } from "+explorer/models/Module"
 import { useSubtask } from "+explorer/models/Subtask"
 import { DiffLegend } from "+explorer/routes/results/DiffLegend"
-import { FileBreadcrumbs } from "+explorer/routes/results/FileBreadcrumbs"
+import { ModuleBreadcrumbs } from "+explorer/routes/results/ModuleBreadcrumbs"
 import { SubtaskBreadcrumbs } from "+explorer/routes/results/SubtaskBreadcrumbs"
 import type { Renderable } from "+types/Renderable"
 import { assertNotNullish } from "+utilities/Assertions"
@@ -14,16 +14,16 @@ export function ResultsPage(): Renderable {
 	assertNotNullish(taskId) // `ResultsPage` must only be rendered when the `*` parameter is present in the path.
 
 	const subtask = useSubtask(taskId)
-	const file = useFile(subtask.value?.parentFileId ?? taskId)
+	const module = useModule(subtask.value?.moduleId ?? taskId)
 
 	useSignalEffect(() => {
-		if (file.value !== null) {
-			document.title = `${file.value.name.value} – Vitest – Vitus`
+		if (module.value !== null) {
+			document.title = `${module.value.name.value} – Vitest – Vitus`
 		}
 	})
 
 	if (
-		file.value === null ||
+		module.value === null ||
 		subtask.value === null ||
 		subtask.value.type !== "test"
 	) {
@@ -33,7 +33,7 @@ export function ResultsPage(): Renderable {
 	return (
 		<main class="flex flex-col transition">
 			<div class="pb-5 flex flex-col gap-y-3 text-gray-800 dark:text-gray-200 transition">
-				<FileBreadcrumbs fileId={file.value.id} />
+				<ModuleBreadcrumbs moduleId={module.value.id} />
 				<SubtaskBreadcrumbs subtaskId={subtask.value.id} />
 			</div>
 			<h1 class="p-5 text-2xl font-mono font-bold rounded-tl-2xl border-b border-gray-400 dark:border-gray-700 transition">

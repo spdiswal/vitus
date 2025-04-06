@@ -21,7 +21,7 @@ export function vitestTestToDto(test: VitestTest): TestDto {
 		type: "test",
 		id: test.id,
 		parentId: test.parent.id,
-		parentFileId: test.module.id,
+		moduleId: test.module.id,
 		name: test.name,
 		status,
 		duration:

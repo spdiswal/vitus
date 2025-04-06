@@ -1,13 +1,13 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { fileStartedEvent } from "+events/file/FileStartedEvent"
+import type { GlobalStatus } from "+models/GlobalStatus"
 import {
 	type File,
 	type FileId,
 	type FileStatus,
 	countFileChildren,
-} from "+models/File"
-import { dummyFile } from "+models/File.fixtures"
-import type { GlobalStatus } from "+models/GlobalStatus"
+} from "+models/Module"
+import { dummyFile } from "+models/Module.fixtures"
 import {
 	type Project,
 	assertDummyFiles,

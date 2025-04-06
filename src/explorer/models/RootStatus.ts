@@ -1,4 +1,4 @@
-import { enumerateFiles } from "+explorer/models/File"
+import { enumerateModules } from "+explorer/models/Module"
 import type { Computed, Reactive } from "+types/Reactive"
 import type { TaskStatus } from "+types/TaskStatus"
 import { mapIterable } from "+utilities/Iterables"
@@ -23,7 +23,7 @@ export function setRootStatus(status: RootStatus): void {
 
 export function refreshRootStatus(): void {
 	const taskStatuses = new Set(
-		mapIterable(enumerateFiles(), (file) => file.status.value),
+		mapIterable(enumerateModules(), (module) => module.status.value),
 	)
 
 	rootStatus.value = getRootStatus(taskStatuses)

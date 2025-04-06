@@ -1,4 +1,4 @@
-import type { FileDto } from "+api/models/FileDto"
+import type { ModuleDto } from "+api/models/ModuleDto"
 import type { VitestSuite } from "+server/models/VitestSuite"
 import type { VitestTest } from "+server/models/VitestTest"
 import type { TestModule } from "vitest/node"
@@ -18,7 +18,7 @@ export type VitestModule = Pick<
 
 export type VitestModuleDiagnostic = ReturnType<VitestModule["diagnostic"]>
 
-export function vitestModuleToDto(module: VitestModule): FileDto {
+export function vitestModuleToDto(module: VitestModule): ModuleDto {
 	const errors = module.errors()
 	const vitestStatus = module.state()
 
@@ -30,7 +30,7 @@ export function vitestModuleToDto(module: VitestModule): FileDto {
 			: "failed"
 
 	return {
-		type: "file",
+		type: "module",
 		id: module.id,
 		path: module.moduleId,
 		status,

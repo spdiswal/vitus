@@ -2,8 +2,8 @@ import type { Duration } from "+types/Duration"
 import type { TaskId } from "+types/TaskId"
 import type { TaskStatus } from "+types/TaskStatus"
 
-export type FileDto = {
-	type: "file"
+export type ModuleDto = {
+	type: "module"
 	id: TaskId
 	path: string
 	status: TaskStatus

@@ -1,4 +1,4 @@
-import { fileDeleted } from "+api/events/FileDeletedDto"
+import { moduleDeleted } from "+api/events/ModuleDeletedDto"
 import type { StateDto } from "+api/models/StateDto"
 import { dummyStateDto } from "+api/models/StateDto.fixtures"
 import { handleEvent } from "+explorer/events/HandleEvent"
@@ -62,7 +62,7 @@ describe("when a non-existing file has been deleted", () => {
 		initialiseState(initialState)
 
 		handleEvent(
-			fileDeleted(
+			moduleDeleted(
 				"/Users/spdiswal/repositories/plantation/src/basket/Imaginary.tests.ts",
 			),
 		)

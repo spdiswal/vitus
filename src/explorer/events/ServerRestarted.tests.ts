@@ -1,7 +1,7 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { dummyFile } from "+models/File.fixtures"
 import type { GlobalStatus } from "+models/GlobalStatus"
+import { dummyFile } from "+models/Module.fixtures"
 import { type Project, assertDummyProject } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"

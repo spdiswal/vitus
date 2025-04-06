@@ -1,4 +1,4 @@
-import { useFiles } from "+explorer/models/File"
+import { useModules } from "+explorer/models/Module"
 import { NavigationTreeNode } from "+explorer/navigation/NavigationTreeNode"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
@@ -6,7 +6,7 @@ import type { Renderable } from "+types/Renderable"
 export function NavigationTree(props: {
 	class?: ClassString
 }): Renderable {
-	const files = useFiles()
+	const modules = useModules()
 
 	return (
 		<nav
@@ -23,8 +23,8 @@ export function NavigationTree(props: {
 				/>
 			</div>
 			<ul class="pl-2 flex flex-col">
-				{files.value.map((task) => (
-					<NavigationTreeNode key={task.id} {...task} />
+				{modules.value.map((module) => (
+					<NavigationTreeNode key={module.id} {...module} />
 				))}
 			</ul>
 		</nav>

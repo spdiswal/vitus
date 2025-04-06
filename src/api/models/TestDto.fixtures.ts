@@ -1,4 +1,7 @@
-import { type DummyFileId, dummyParentIds } from "+api/models/FileDto.fixtures"
+import {
+	type DummyModuleId,
+	dummyParentIds,
+} from "+api/models/ModuleDto.fixtures"
 import type { DummySuiteId } from "+api/models/SuiteDto.fixtures"
 import type { TestDto } from "+api/models/TestDto"
 import type { OddDigit } from "+types/Digit"
@@ -11,7 +14,7 @@ export function dummyTestDto(
 		type: "test",
 		id,
 		parentId: id.slice(0, id.lastIndexOf("_")),
-		parentFileId: id.slice(0, id.indexOf("_")),
+		moduleId: id.slice(0, id.indexOf("_")),
 		name: getDummyTestName(id),
 		status: "passed",
 		duration: 0,
@@ -21,10 +24,10 @@ export function dummyTestDto(
 }
 
 export type DummyTestId =
-	| `${DummyFileId}_${OddDigit}` // Top-level test.
+	| `${DummyModuleId}_${OddDigit}` // Top-level test.
 	| `${DummySuiteId}_${OddDigit}` // Nested test.
 
-const dummyNamesById: Record<DummyFileId, Record<OddDigit, string>> = {
+const dummyNamesById: Record<DummyModuleId, Record<OddDigit, string>> = {
 	"15b021ef72": {
 		1: "pours a cup of apple juice",
 		3: "changes the batteries",
@@ -56,8 +59,8 @@ const dummyNamesById: Record<DummyFileId, Record<OddDigit, string>> = {
 }
 
 export function getDummyTestName(id: DummyTestId): string {
-	const [fileId] = dummyParentIds(id)
+	const [moduleId] = dummyParentIds(id)
 	const lastDigit = Number.parseInt(id.slice(-1)) as OddDigit
 
-	return dummyNamesById[fileId][lastDigit]
+	return dummyNamesById[moduleId][lastDigit]
 }

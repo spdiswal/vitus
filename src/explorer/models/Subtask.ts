@@ -1,5 +1,5 @@
 import type { SubtaskDto } from "+api/models/SubtaskDto"
-import { getFileById } from "+explorer/models/File"
+import { getModuleById } from "+explorer/models/Module"
 import { type Suite, dtoToSuite, suiteToDto } from "+explorer/models/Suite"
 import type { Task } from "+explorer/models/Task"
 import { type Test, dtoToTest, testToDto } from "+explorer/models/Test"
@@ -96,7 +96,7 @@ export function enumerateSubtasks(): Iterable<Subtask> {
 }
 
 /**
- * Returns an iterable of the ancestors of the given subtask from the file to the immediate parent suite, excluding the subtask itself.
+ * Returns an iterable of the ancestors of the given subtask from the module to the immediate parent suite, excluding the subtask itself.
  */
 export function enumerateSubtaskAncestors(subtask: Subtask): Iterable<Task> {
 	const ancestors: Array<Task> = []
@@ -104,14 +104,14 @@ export function enumerateSubtaskAncestors(subtask: Subtask): Iterable<Task> {
 
 	while (currentParentId !== null) {
 		const parent: Task | null =
-			getSubtaskById(currentParentId) ?? getFileById(currentParentId)
+			getSubtaskById(currentParentId) ?? getModuleById(currentParentId)
 
 		if (parent === null) {
 			break
 		}
 
 		ancestors.push(parent)
-		currentParentId = parent.type !== "file" ? parent.parentId : null
+		currentParentId = parent.type !== "module" ? parent.parentId : null
 	}
 
 	ancestors.reverse()

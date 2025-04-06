@@ -1,7 +1,7 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { suiteStartedEvent } from "+events/suite/SuiteStartedEvent"
-import { type File, countFileChildren, getFileChildIds } from "+models/File"
-import { dummyFile } from "+models/File.fixtures"
+import { type File, countFileChildren, getFileChildIds } from "+models/Module"
+import { dummyFile } from "+models/Module.fixtures"
 import {
 	type Project,
 	assertDummyFiles,

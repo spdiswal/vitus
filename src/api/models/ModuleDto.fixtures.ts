@@ -1,15 +1,15 @@
-import type { FileDto } from "+api/models/FileDto"
+import type { ModuleDto } from "+api/models/ModuleDto"
 import type { DummySuiteId } from "+api/models/SuiteDto.fixtures"
 import type { DummyTestId } from "+api/models/TestDto.fixtures"
 
-export function dummyFileDto(
-	id: DummyFileId,
-	overrides?: Partial<Omit<FileDto, "type" | "id">>,
-): FileDto {
+export function dummyModuleDto(
+	id: DummyModuleId,
+	overrides?: Partial<Omit<ModuleDto, "type" | "id">>,
+): ModuleDto {
 	return {
-		type: "file",
+		type: "module",
 		id,
-		path: dummyFilePath(id),
+		path: dummyModulePath(id),
 		status: "passed",
 		duration: 1,
 		errors: [],
@@ -17,13 +17,13 @@ export function dummyFileDto(
 	}
 }
 
-export type DummyFileId =
+export type DummyModuleId =
 	| "15b021ef72"
 	| "a3fdd8b6c3"
 	| "-1730f876b4"
 	| "-e45b128829"
 
-const dummyPathsById: Record<DummyFileId, string> = {
+const dummyPathsById: Record<DummyModuleId, string> = {
 	"15b021ef72":
 		"/Users/spdiswal/repositories/plantation/src/orchard/Apples.tests.ts",
 	a3fdd8b6c3:
@@ -34,18 +34,18 @@ const dummyPathsById: Record<DummyFileId, string> = {
 		"/Users/spdiswal/repositories/plantation/src/supermarket/Peaches.tests.ts",
 }
 
-export function dummyFilePath(fileId: DummyFileId): string {
-	return dummyPathsById[fileId]
+export function dummyModulePath(moduleId: DummyModuleId): string {
+	return dummyPathsById[moduleId]
 }
 
 export function dummyParentIds(
 	id: DummySuiteId | DummyTestId,
-): [DummyFileId, DummySuiteId | null] {
-	const parentFileId = id.slice(0, id.indexOf("_"))
+): [DummyModuleId, DummySuiteId | null] {
+	const moduleId = id.slice(0, id.indexOf("_"))
 	const parentSuiteId = id.slice(0, id.lastIndexOf("_"))
 
 	return [
-		parentFileId as DummyFileId,
-		parentSuiteId !== parentFileId ? (parentSuiteId as DummySuiteId) : null,
+		moduleId as DummyModuleId,
+		parentSuiteId !== moduleId ? (parentSuiteId as DummySuiteId) : null,
 	]
 }

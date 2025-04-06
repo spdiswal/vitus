@@ -1,4 +1,4 @@
-import { dummyParentIds } from "+api/models/FileDto.fixtures"
+import { dummyParentIds } from "+api/models/ModuleDto.fixtures"
 import {
 	type DummySuiteId,
 	getDummySuiteName,
@@ -14,9 +14,9 @@ export function dummyVitestSuite(
 		status: TestSuiteState
 	}>,
 ): TestSuite {
-	const [parentFileId, parentSuiteId] = dummyParentIds(id)
+	const [moduleId, parentSuiteId] = dummyParentIds(id)
 
-	const parentModule = dummyVitestModule(parentFileId)
+	const parentModule = dummyVitestModule(moduleId)
 	const parentSuite =
 		parentSuiteId !== null ? dummyVitestSuite(parentSuiteId) : null
 

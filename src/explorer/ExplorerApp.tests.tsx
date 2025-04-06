@@ -1,5 +1,5 @@
 import { ExplorerApp } from "+explorer/ExplorerApp"
-import { dummyFile } from "+models/File.fixtures"
+import { dummyFile } from "+models/Module.fixtures"
 import { dummyProject } from "+models/Project.fixtures"
 import { describe, expect, it } from "vitest"
 
