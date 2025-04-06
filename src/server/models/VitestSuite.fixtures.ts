@@ -1,7 +1,7 @@
+import { dummyParentIds } from "+api/models/FileDto.fixtures"
 import {
 	type DummySuiteId,
 	getDummySuiteName,
-	getStructuredDummySuiteId,
 } from "+api/models/SuiteDto.fixtures"
 import { dummyVitestModule } from "+server/models/VitestModule.fixtures"
 import type { VitestSuite } from "+server/models/VitestSuite"
@@ -14,13 +14,11 @@ export function dummyVitestSuite(
 		status: TestSuiteState
 	}>,
 ): TestSuite {
-	const structuredId = getStructuredDummySuiteId(id)
+	const [parentFileId, parentSuiteId] = dummyParentIds(id)
 
-	const parentModule = dummyVitestModule(structuredId[0])
+	const parentModule = dummyVitestModule(parentFileId)
 	const parentSuite =
-		structuredId.length > 2
-			? dummyVitestSuite(structuredId.at(-2) as DummySuiteId)
-			: null
+		parentSuiteId !== null ? dummyVitestSuite(parentSuiteId) : null
 
 	return {
 		type: "suite",

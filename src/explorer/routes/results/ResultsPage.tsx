@@ -35,7 +35,7 @@ export function ResultsPage(): Renderable {
 	return (
 		<main class="flex flex-col transition">
 			<Breadcrumbs
-				filePath={file.path.value.substring(rootPath.value.length + 1)}
+				filePath={file.path.value.slice(rootPath.value.length + 1)}
 				subtaskNames={[...getParentNames(subtask), subtask.name.value]}
 			/>
 			<h1 class="p-5 text-2xl font-mono font-bold rounded-tl-2xl border-b border-gray-400 dark:border-gray-700 transition">

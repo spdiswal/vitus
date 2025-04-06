@@ -1,4 +1,4 @@
-import type { DummyFileId } from "+api/models/FileDto.fixtures"
+import { type DummyFileId, dummyParentIds } from "+api/models/FileDto.fixtures"
 import type { SuiteDto } from "+api/models/SuiteDto"
 import type { EvenDigit } from "+types/Digit"
 
@@ -6,14 +6,11 @@ export function dummySuiteDto(
 	id: DummySuiteId,
 	overrides?: Partial<Omit<SuiteDto, "type" | "id">>,
 ): SuiteDto {
-	const [parentFileId, ...parentSuiteIds] = getStructuredDummySuiteId(id)
-	parentSuiteIds.pop()
-
 	return {
 		type: "suite",
 		id,
-		parentId: parentSuiteIds.at(-2) ?? parentFileId,
-		parentFileId,
+		parentId: id.slice(0, id.lastIndexOf("_")),
+		parentFileId: id.slice(0, id.indexOf("_")),
 		name: getDummySuiteName(id),
 		status: "passed",
 		duration: 1,
@@ -26,12 +23,6 @@ export type DummySuiteId =
 	| `${DummyFileId}_${EvenDigit}` // Top-level suite.
 	| `${DummyFileId}_${EvenDigit}_${EvenDigit}` // Nested suite (level 1).
 	| `${DummyFileId}_${EvenDigit}_${EvenDigit}_${EvenDigit}` // Nested suite (level 2).
-
-export type StructuredDummySuiteId = [
-	DummyFileId,
-	...Array<DummySuiteId>,
-	DummySuiteId,
-]
 
 const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
 	"15b021ef72": {
@@ -65,20 +56,8 @@ const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
 }
 
 export function getDummySuiteName(id: DummySuiteId): string {
-	const structuredId = getStructuredDummySuiteId(id)
+	const [fileId, parentSuiteId] = dummyParentIds(id)
+	const lastDigit = Number.parseInt(id.slice(-1)) as EvenDigit
 
-	const fileId = structuredId[0] as DummyFileId
-	const suiteId = structuredId.at(-1) as DummySuiteId
-	const lastDigit = Number.parseInt(suiteId.slice(-1)) as EvenDigit
-
-	return `${structuredId.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
-}
-
-export function getStructuredDummySuiteId(
-	id: DummySuiteId,
-): StructuredDummySuiteId {
-	const segments = id.split("_")
-	return segments.map(
-		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
-	) as StructuredDummySuiteId
+	return `${parentSuiteId === null ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
 }

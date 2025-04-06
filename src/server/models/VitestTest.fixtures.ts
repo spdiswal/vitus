@@ -1,8 +1,7 @@
-import type { DummySuiteId } from "+api/models/SuiteDto.fixtures"
+import { dummyParentIds } from "+api/models/FileDto.fixtures"
 import {
 	type DummyTestId,
 	getDummyTestName,
-	getStructuredDummyTestId,
 } from "+api/models/TestDto.fixtures"
 import { dummyVitestModule } from "+server/models/VitestModule.fixtures"
 import { dummyVitestSuite } from "+server/models/VitestSuite.fixtures"
@@ -20,13 +19,11 @@ export function dummyVitestTest(
 		duration?: Duration
 	},
 ): TestCase {
-	const structuredId = getStructuredDummyTestId(id)
+	const [parentFileId, parentSuiteId] = dummyParentIds(id)
 
-	const parentModule = dummyVitestModule(structuredId[0])
+	const parentModule = dummyVitestModule(parentFileId)
 	const parentSuite =
-		structuredId.length > 2
-			? dummyVitestSuite(structuredId.at(-2) as DummySuiteId)
-			: null
+		parentSuiteId !== null ? dummyVitestSuite(parentSuiteId) : null
 
 	return {
 		type: "test",

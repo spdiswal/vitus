@@ -1,7 +1,4 @@
-import {
-	type DummyFileId,
-	getDummyFilePath,
-} from "+api/models/FileDto.fixtures"
+import { type DummyFileId, dummyFilePath } from "+api/models/FileDto.fixtures"
 import type {
 	VitestModule,
 	VitestModuleDiagnostic,
@@ -20,7 +17,7 @@ export function dummyVitestSpecification(
 	fileId: DummyFileId,
 ): TestSpecification {
 	return {
-		moduleId: getDummyFilePath(fileId),
+		moduleId: dummyFilePath(fileId),
 		get testModule(): TestModule {
 			return dummyVitestModule(fileId)
 		},
@@ -37,7 +34,7 @@ export function dummyVitestModule(
 	return {
 		type: "module",
 		id: fileId,
-		moduleId: getDummyFilePath(fileId),
+		moduleId: dummyFilePath(fileId),
 		state: (): TestModuleState => overrides?.status ?? "pending",
 		diagnostic: (): VitestModuleDiagnostic => ({
 			environmentSetupDuration: 0,

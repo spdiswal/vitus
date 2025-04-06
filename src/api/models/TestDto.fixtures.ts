@@ -1,8 +1,5 @@
-import type { DummyFileId } from "+api/models/FileDto.fixtures"
-import {
-	type DummySuiteId,
-	getDummySuiteName,
-} from "+api/models/SuiteDto.fixtures"
+import { type DummyFileId, dummyParentIds } from "+api/models/FileDto.fixtures"
+import type { DummySuiteId } from "+api/models/SuiteDto.fixtures"
 import type { TestDto } from "+api/models/TestDto"
 import type { OddDigit } from "+types/Digit"
 
@@ -10,21 +7,12 @@ export function dummyTestDto(
 	id: DummyTestId,
 	overrides?: Partial<Omit<TestDto, "type" | "id">>,
 ): TestDto {
-	const [parentFileId, ...parentSuiteIds] = getStructuredDummyTestId(id)
-	parentSuiteIds.pop()
-
 	return {
 		type: "test",
 		id,
-		parentId: parentSuiteIds.at(-1) ?? parentFileId,
-		parentFileId,
-		name:
-			parentSuiteIds.length > 1
-				? [
-						getDummySuiteName(parentSuiteIds[0]),
-						...parentSuiteIds.slice(1).map(getDummySuiteName),
-					]
-				: [getDummyTestName(parentSuiteIds[0])],
+		parentId: id.slice(0, id.lastIndexOf("_")),
+		parentFileId: id.slice(0, id.indexOf("_")),
+		name: getDummyTestName(id),
 		status: "passed",
 		duration: 0,
 		errors: [],
@@ -35,12 +23,6 @@ export function dummyTestDto(
 export type DummyTestId =
 	| `${DummyFileId}_${OddDigit}` // Top-level test.
 	| `${DummySuiteId}_${OddDigit}` // Nested test.
-
-export type StructuredDummyTestId = [
-	DummyFileId,
-	...Array<DummySuiteId>,
-	DummyTestId,
-]
 
 const dummyNamesById: Record<DummyFileId, Record<OddDigit, string>> = {
 	"15b021ef72": {
@@ -74,20 +56,8 @@ const dummyNamesById: Record<DummyFileId, Record<OddDigit, string>> = {
 }
 
 export function getDummyTestName(id: DummyTestId): string {
-	const structuredId = getStructuredDummyTestId(id)
+	const [fileId] = dummyParentIds(id)
+	const lastDigit = Number.parseInt(id.slice(-1)) as OddDigit
 
-	const fileId = structuredId[0] as DummyFileId
-	const testId = structuredId.at(-1) as DummyTestId
-	const lastDigit = Number.parseInt(testId.slice(-1)) as OddDigit
-
-	return `${structuredId.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
-}
-
-export function getStructuredDummyTestId(
-	id: DummyTestId,
-): StructuredDummyTestId {
-	const segments = id.split("_")
-	return segments.map(
-		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
-	) as StructuredDummyTestId
+	return dummyNamesById[fileId][lastDigit]
 }

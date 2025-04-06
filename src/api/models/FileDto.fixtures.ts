@@ -1,4 +1,6 @@
 import type { FileDto } from "+api/models/FileDto"
+import type { DummySuiteId } from "+api/models/SuiteDto.fixtures"
+import type { DummyTestId } from "+api/models/TestDto.fixtures"
 
 export function dummyFileDto(
 	id: DummyFileId,
@@ -7,7 +9,7 @@ export function dummyFileDto(
 	return {
 		type: "file",
 		id,
-		path: getDummyFilePath(id),
+		path: dummyFilePath(id),
 		status: "passed",
 		duration: 1,
 		errors: [],
@@ -32,6 +34,18 @@ const dummyPathsById: Record<DummyFileId, string> = {
 		"/Users/spdiswal/repositories/plantation/src/supermarket/Peaches.tests.ts",
 }
 
-export function getDummyFilePath(fileId: DummyFileId): string {
+export function dummyFilePath(fileId: DummyFileId): string {
 	return dummyPathsById[fileId]
+}
+
+export function dummyParentIds(
+	id: DummySuiteId | DummyTestId,
+): [DummyFileId, DummySuiteId | null] {
+	const parentFileId = id.slice(0, id.indexOf("_"))
+	const parentSuiteId = id.slice(0, id.lastIndexOf("_"))
+
+	return [
+		parentFileId as DummyFileId,
+		parentSuiteId !== parentFileId ? (parentSuiteId as DummySuiteId) : null,
+	]
 }
