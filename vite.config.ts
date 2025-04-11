@@ -5,80 +5,109 @@ import { fileURLToPath } from "node:url"
 import prefreshPlugin from "@prefresh/vite"
 import tailwindcssPlugin from "@tailwindcss/vite"
 import { minify as minifyHtml } from "html-minifier-terser"
-import { type Plugin as VitePlugin, defineConfig } from "vitest/config"
+import {
+	type ViteUserConfig as ViteConfig,
+	type Plugin as VitePlugin,
+	defineConfig,
+	mergeConfig,
+} from "vitest/config"
 import tsconfigJson from "./tsconfig.json" assert { type: "json" }
 
 const nodejsModules = builtinModules.map((moduleName) => `node:${moduleName}`)
 
-type ModuleConfig = {
-	entrypoint: string
-	outputDirectory: string
-	outputFilename?: string
-}
-
-const moduleConfigs: Record<string, ModuleConfig | undefined> = {
-	cli: {
-		entrypoint: inProjectDirectory("src/VitusCli.ts"),
-		outputDirectory: inProjectDirectory("dist/"),
-		outputFilename: "vitus-cli.js",
-	},
-	dev: {
-		entrypoint: inProjectDirectory("src/VitusDev.ts"),
-		outputDirectory: inProjectDirectory("dist/"),
-		outputFilename: "vitus-dev.js",
-	},
-	explorer: {
-		entrypoint: inProjectDirectory("src/index.html"),
-		outputDirectory: inProjectDirectory("dist/explorer/"),
-	},
-}
-
-const moduleConfig = moduleConfigs[env.MODULE ?? "unknown"]
-
-export default defineConfig({
-	build: {
-		emptyOutDir: false,
-		minify: true,
-		outDir: moduleConfig?.outputDirectory,
-		rollupOptions: {
-			external: [...nodejsModules, "vite", "vitest", "vitest/node"],
-			input: moduleConfig?.entrypoint,
-			output: {
-				entryFileNames: moduleConfig?.outputFilename,
-				format: "esm",
+export default defineConfig((): ViteConfig => {
+	const baseConfiguration: ViteConfig = {
+		build: {
+			emptyOutDir: false,
+			minify: true,
+			rollupOptions: {
+				external: [...nodejsModules, "vite", "vitest", "vitest/node"],
+				output: {
+					format: "esm",
+				},
+			},
+			target: "node20",
+		},
+		cacheDir: inProjectDirectory("node_modules/.cache/"),
+		plugins: [
+			minifyIndexHtmlPlugin(),
+			prefreshPlugin(), // Hot module replacement (HMR) in Preact.
+			tailwindcssPlugin(), // Tailwind CSS.
+		],
+		publicDir: false,
+		resolve: {
+			alias: {
+				...tsconfigPathAliases(),
+				...consistentNodejsModules(),
 			},
 		},
-		target: "node20",
-	},
-	cacheDir: inProjectDirectory("node_modules/.cache/"),
-	plugins: [
-		minifyIndexHtmlPlugin(),
-		prefreshPlugin(), // Hot module replacement (HMR) in Preact.
-		tailwindcssPlugin(), // Tailwind CSS.
-	],
-	publicDir: false,
-	resolve: {
-		alias: {
-			...tsconfigPathAliases(),
-			...consistentNodejsModules(),
+		root: inProjectDirectory("src/"),
+		test: {
+			include: ["**/*.tests.{ts,tsx}"],
+			mockReset: true,
 		},
-	},
-	root: inProjectDirectory("src/"),
-	test: {
-		include: ["**/*.tests.{ts,tsx}"],
-		mockReset: true,
-	},
+	}
+
+	switch (env.MODULE) {
+		case "cli": {
+			return mergeConfig(baseConfiguration, {
+				build: {
+					outDir: inProjectDirectory("dist/"),
+					rollupOptions: {
+						input: inProjectDirectory("src/VitusCli.ts"),
+						output: { entryFileNames: "vitus-cli.js" },
+					},
+				},
+			} satisfies ViteConfig)
+		}
+		case "dev": {
+			return mergeConfig(baseConfiguration, {
+				build: {
+					outDir: inProjectDirectory("dist/"),
+					rollupOptions: {
+						input: inProjectDirectory("src/VitusDev.ts"),
+						output: { entryFileNames: "vitus-dev.js" },
+					},
+				},
+			} satisfies ViteConfig)
+		}
+		case "explorer": {
+			return mergeConfig(baseConfiguration, {
+				build: {
+					outDir: inProjectDirectory("dist/explorer/"),
+					rollupOptions: {
+						input: inProjectDirectory("src/index.html"),
+					},
+				},
+			} satisfies ViteConfig)
+		}
+	}
+
+	return baseConfiguration
 })
 
 function tsconfigPathAliases(): Record<string, string> {
 	return Object.fromEntries(
-		Object.entries(tsconfigJson.compilerOptions.paths).map(
-			([alias, [path]]) => [
+		Object.entries(tsconfigJson.compilerOptions.paths).map((entry) => {
+			assertSinglePath(entry)
+			const [alias, [path]] = entry
+			return [
 				alias.slice(0, -"/*".length),
 				inProjectDirectory(path.slice(0, -"/*".length)),
-			],
-		),
+			]
+		}),
 	)
+}
+
+function assertSinglePath(
+	entry: [alias: string, paths: Array<string>],
+): asserts entry is [alias: string, paths: [string]] {
+	const [alias, paths] = entry
+	if (paths.length !== 1) {
+		throw new Error(
+			`Path alias '${alias}' in 'tsconfig.json' must specify exactly one path, but has ${paths.length} paths`,
+		)
+	}
 }
 
 function consistentNodejsModules(): Record<string, string> {
