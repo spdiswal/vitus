@@ -6,6 +6,7 @@
 	],
 	"compilerOptions": {
 		"baseUrl": "./",
+		"exactOptionalPropertyTypes": true,
 		"noUncheckedIndexedAccess": true,
 		"incremental": true,
 		"jsx": "react-jsx",

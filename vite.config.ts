@@ -35,39 +35,43 @@ const moduleConfigs: Record<string, ModuleConfig> = {
 
 const moduleConfig = moduleConfigs[env.MODULE ?? "unknown"]
 
-export default defineConfig({
-	build: {
-		emptyOutDir: false,
-		minify: true,
-		outDir: moduleConfig?.outputDirectory,
-		rollupOptions: {
-			external: [...nodejsModules, "vite", "vitest", "vitest/node"],
-			input: moduleConfig?.entrypoint,
-			output: {
-				entryFileNames: moduleConfig?.outputFilename,
-				format: "esm",
+export default defineConfig(() => {
+	return {
+		build: moduleConfig
+			? {
+					emptyOutDir: false,
+					minify: true,
+					outDir: moduleConfig?.outputDirectory,
+					rollupOptions: {
+						external: [...nodejsModules, "vite", "vitest", "vitest/node"],
+						input: moduleConfig?.entrypoint,
+						output: {
+							entryFileNames: moduleConfig.outputFilename,
+							format: "esm",
+						},
+					},
+					target: "node20",
+				}
+			: undefined,
+		cacheDir: inProjectDirectory("node_modules/.cache/"),
+		plugins: [
+			minifyIndexHtmlPlugin(),
+			prefreshPlugin(), // Hot module replacement (HMR) in Preact.
+			tailwindcssPlugin(), // Tailwind CSS.
+		],
+		publicDir: false,
+		resolve: {
+			alias: {
+				...tsconfigPathAliases(),
+				...consistentNodejsModules(),
 			},
 		},
-		target: "node20",
-	},
-	cacheDir: inProjectDirectory("node_modules/.cache/"),
-	plugins: [
-		minifyIndexHtmlPlugin(),
-		prefreshPlugin(), // Hot module replacement (HMR) in Preact.
-		tailwindcssPlugin(), // Tailwind CSS.
-	],
-	publicDir: false,
-	resolve: {
-		alias: {
-			...tsconfigPathAliases(),
-			...consistentNodejsModules(),
+		root: inProjectDirectory("src/"),
+		test: {
+			include: ["**/*.tests.{ts,tsx}"],
+			mockReset: true,
 		},
-	},
-	root: inProjectDirectory("src/"),
-	test: {
-		include: ["**/*.tests.{ts,tsx}"],
-		mockReset: true,
-	},
+	}
 })
 
 function tsconfigPathAliases(): Record<string, string> {

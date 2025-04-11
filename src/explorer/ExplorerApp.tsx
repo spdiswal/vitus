@@ -31,7 +31,7 @@ export function ExplorerApp(props: {
 			<div class="ml-10 pt-10 pb-5">
 				<Switch>
 					<Route path="/" component={SummaryPage} />
-					<Route path="/*" component={ResultsPage} />
+					<Route path="/:taskId" component={ResultsPage} />
 				</Switch>
 			</div>
 		</div>

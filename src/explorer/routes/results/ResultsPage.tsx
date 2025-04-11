@@ -4,19 +4,26 @@ import { DiffLegend } from "+explorer/routes/results/DiffLegend"
 import { ModuleBreadcrumbs } from "+explorer/routes/results/ModuleBreadcrumbs"
 import { SubtaskBreadcrumbs } from "+explorer/routes/results/SubtaskBreadcrumbs"
 import type { Renderable } from "+types/Renderable"
-import { assertNotNullish } from "+utilities/Assertions"
-import { useSignalEffect } from "@preact/signals"
+import type { TaskId } from "+types/TaskId"
+import { useSignal, useSignalEffect } from "@preact/signals"
+import { useEffect } from "preact/hooks"
 import { useParams } from "wouter-preact"
 
 export function ResultsPage(): Renderable {
 	const params = useParams()
-	const taskId = params["*"]
-	assertNotNullish(taskId) // `ResultsPage` must only be rendered when the `*` parameter is present in the path.
+	const taskId = useSignal(params.taskId as TaskId)
 
-	const subtask = useSubtask(taskId)
-	const module = useModule(subtask.value?.moduleId ?? taskId)
+	useEffect(() => {
+		taskId.value = params.taskId as TaskId
+	}, [params.taskId])
+
+	const subtask = useSubtask(taskId.value)
+	const module = useModule(subtask.value?.moduleId ?? taskId.value)
 
 	useSignalEffect(() => {
+		console.log(taskId.value)
+		// console.log(module.value?.id)
+
 		if (module.value !== null) {
 			document.title = `${module.value.name.value} – Vitest – Vitus`
 		}
