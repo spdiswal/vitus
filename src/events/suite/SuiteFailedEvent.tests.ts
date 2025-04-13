@@ -1,14 +1,14 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { suiteFailedEvent } from "+events/suite/SuiteFailedEvent"
-import { type File, countFileChildren } from "+models/File"
-import { dummyFile } from "+models/File.fixtures"
+import { type Module, countModuleChildren } from "+models/Module"
+import { dummyModule } from "+models/Module.fixtures"
 import {
 	type Project,
-	assertDummyFiles,
+	assertDummyModules,
 	assertDummyProject,
 	assertDummySuites,
-	getFileById,
-	getOtherFiles,
+	getModuleById,
+	getOtherModules,
 	getSuiteByPath,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
@@ -23,7 +23,7 @@ import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyFile("15b021ef72", { duration: 14, status: "passed" }, [
+	dummyModule("15b021ef72", { duration: 14, status: "passed" }, [
 		dummySuite("15b021ef72_0", { status: "passed" }, [
 			dummyTest("15b021ef72_0_1", { duration: 1, status: "passed" }),
 		]),
@@ -36,7 +36,7 @@ const initialProject = dummyProject({}, [
 			]),
 		]),
 	]),
-	dummyFile("a3fdd8b6c3", { duration: 6, status: "passed" }, [
+	dummyModule("a3fdd8b6c3", { duration: 6, status: "passed" }, [
 		dummySuite("a3fdd8b6c3_0", { status: "passed" }, [
 			dummyTest("a3fdd8b6c3_0_1", { duration: 1, status: "passed" }),
 			dummyTest("a3fdd8b6c3_0_3", { duration: 7, status: "passed" }),
@@ -61,7 +61,7 @@ const initialProject = dummyProject({}, [
 			dummyTest("a3fdd8b6c3_4_5", { duration: 8, status: "skipped" }),
 		]),
 	]),
-	dummyFile("-1730f876b4", { duration: 9, status: "skipped" }, [
+	dummyModule("-1730f876b4", { duration: 9, status: "skipped" }, [
 		dummySuite("-1730f876b4_0", { status: "passed" }, [
 			dummyTest("-1730f876b4_0_1", { duration: 29, status: "skipped" }),
 			dummyTest("-1730f876b4_0_3", { duration: 11, status: "skipped" }),
@@ -72,7 +72,7 @@ const initialProject = dummyProject({}, [
 		dummyTest("-1730f876b4_7", { duration: 14, status: "skipped" }),
 		dummyTest("-1730f876b4_9", { duration: 19, status: "skipped" }),
 	]),
-	dummyFile("-e45b128829", { duration: 11, status: "passed" }, [
+	dummyModule("-e45b128829", { duration: 11, status: "passed" }, [
 		dummySuite("-e45b128829_2", { status: "passed" }, [
 			dummyTest("-e45b128829_2_1", { duration: 9, status: "skipped" }),
 		]),
@@ -89,7 +89,7 @@ const initialProject = dummyProject({}, [
 
 beforeAll(() => {
 	assertDummyProject(initialProject, { duration: 40, status: "passed" })
-	assertDummyFiles(initialProject, {
+	assertDummyModules(initialProject, {
 		"15b021ef72": { totalChildCount: 8 },
 		a3fdd8b6c3: { totalChildCount: 17 },
 		"-1730f876b4": { totalChildCount: 7 },
@@ -133,16 +133,16 @@ describe.each`
 	"when a suite with id $suiteId has failed",
 	(props: { suiteId: DummySuiteId }) => {
 		const path = getDummySuitePath(props.suiteId)
-		const [fileId] = path
+		const [moduleId] = path
 
-		const initialFile = getFileById(initialProject, fileId)
-		assertNotNullish(initialFile)
+		const initialModule = getModuleById(initialProject, moduleId)
+		assertNotNullish(initialModule)
 
 		const initialSuite = getSuiteByPath(initialProject, path)
 		assertNotNullish(initialSuite)
 
 		let actualProject: Project
-		let actualFile: File
+		let actualModule: Module
 		let actualSuite: Suite
 
 		beforeEach(() => {
@@ -151,9 +151,9 @@ describe.each`
 				suiteFailedEvent({ path }),
 			)
 
-			const file = getFileById(actualProject, fileId)
-			assertNotNullish(file)
-			actualFile = file
+			const module = getModuleById(actualProject, moduleId)
+			assertNotNullish(module)
+			actualModule = module
 
 			const suite = getSuiteByPath(actualProject, path)
 			assertNotNullish(suite)
@@ -164,17 +164,19 @@ describe.each`
 			expect(actualSuite.status).toBe<SuiteStatus>("failed")
 		})
 
-		it("does not affect the number of suites and tests in the file", () => {
-			expect(countFileChildren(actualFile)).toBe(countFileChildren(initialFile))
+		it("does not affect the number of suites and tests in the module", () => {
+			expect(countModuleChildren(actualModule)).toBe(
+				countModuleChildren(initialModule),
+			)
 		})
 
 		it("does not affect the suite duration", () => {
 			expect(actualSuite.duration).toBe(initialSuite.duration)
 		})
 
-		it("does not affect the other files in the project", () => {
-			expect(getOtherFiles(actualProject, fileId)).toEqual(
-				getOtherFiles(initialProject, fileId),
+		it("does not affect the other modules in the project", () => {
+			expect(getOtherModules(actualProject, moduleId)).toEqual(
+				getOtherModules(initialProject, moduleId),
 			)
 		})
 	},

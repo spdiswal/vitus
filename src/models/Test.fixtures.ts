@@ -1,4 +1,4 @@
-import { type DummyFileId, dummyVitestModule } from "+models/File.fixtures"
+import { type DummyModuleId, dummyVitestModule } from "+models/Module.fixtures"
 import { type DummySuiteId, dummyVitestSuite } from "+models/Suite.fixtures"
 import { type Test, newTest } from "+models/Test"
 import type { TestPath } from "+models/TestPath"
@@ -27,7 +27,7 @@ export function dummyVitestTest(
 ): TestCase {
 	const path = getDummyTestPath(id)
 
-	const parentModule = dummyVitestModule(path[0] as DummyFileId)
+	const parentModule = dummyVitestModule(path[0] as DummyModuleId)
 	const parentSuite =
 		path.length > 2 ? dummyVitestSuite(path.at(-2) as DummySuiteId) : null
 
@@ -43,10 +43,10 @@ export function dummyVitestTest(
 }
 
 export type DummyTestId =
-	| `${DummyFileId}_${OddDigit}` // Top-level test.
+	| `${DummyModuleId}_${OddDigit}` // Top-level test.
 	| `${DummySuiteId}_${OddDigit}` // Nested test.
 
-const dummyNamesById: Record<DummyFileId, Record<OddDigit, string>> = {
+const dummyNamesById: Record<DummyModuleId, Record<OddDigit, string>> = {
 	"15b021ef72": {
 		1: "pours a cup of apple juice",
 		3: "changes the batteries",
@@ -85,9 +85,9 @@ export function getDummyTestPath(id: DummyTestId): TestPath {
 }
 
 export function getDummyTestName(path: TestPath): string {
-	const fileId = path[0] as DummyFileId
+	const moduleId = path[0] as DummyModuleId
 	const testId = path.at(-1) as DummyTestId
 	const lastDigit = Number.parseInt(testId.slice(-1)) as OddDigit
 
-	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
+	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[moduleId][lastDigit]}`
 }

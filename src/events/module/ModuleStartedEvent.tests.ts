@@ -1,19 +1,19 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
-import { fileStartedEvent } from "+events/file/FileStartedEvent"
+import { moduleStartedEvent } from "+events/module/ModuleStartedEvent"
 import {
-	type File,
-	type FileId,
-	type FileStatus,
-	countFileChildren,
-} from "+models/File"
-import { dummyFile } from "+models/File.fixtures"
+	type Module,
+	type ModuleId,
+	type ModuleStatus,
+	countModuleChildren,
+} from "+models/Module"
+import { dummyModule } from "+models/Module.fixtures"
 import {
 	type Project,
 	type ProjectStatus,
-	assertDummyFiles,
+	assertDummyModules,
 	assertDummyProject,
-	getFileById,
-	getOtherFiles,
+	getModuleById,
+	getOtherModules,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import { dummySuite } from "+models/Suite.fixtures"
@@ -23,19 +23,19 @@ import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyFile("15b021ef72", { duration: 10, status: "passed" }, [
+	dummyModule("15b021ef72", { duration: 10, status: "passed" }, [
 		dummySuite("15b021ef72_0", { status: "passed" }, [
 			dummyTest("15b021ef72_0_1", { status: "failed" }),
 		]),
 		dummyTest("15b021ef72_3", { status: "failed" }),
 		dummyTest("15b021ef72_5", { status: "failed" }),
 	]),
-	dummyFile("a3fdd8b6c3", { duration: 20, status: "failed" }, [
+	dummyModule("a3fdd8b6c3", { duration: 20, status: "failed" }, [
 		dummyTest("a3fdd8b6c3_1", { status: "passed" }),
 		dummyTest("a3fdd8b6c3_3", { status: "passed" }),
 		dummyTest("a3fdd8b6c3_5", { status: "failed" }),
 	]),
-	dummyFile("-1730f876b4", { duration: 40, status: "passed" }, [
+	dummyModule("-1730f876b4", { duration: 40, status: "passed" }, [
 		dummySuite("-1730f876b4_0", { status: "passed" }, [
 			dummyTest("-1730f876b4_0_1", { status: "failed" }),
 			dummyTest("-1730f876b4_0_3", { status: "passed" }),
@@ -43,7 +43,7 @@ const initialProject = dummyProject({}, [
 		]),
 		dummyTest("-1730f876b4_7", { status: "passed" }),
 	]),
-	dummyFile("-e45b128829", { duration: 80, status: "passed" }, [
+	dummyModule("-e45b128829", { duration: 80, status: "passed" }, [
 		dummySuite("-e45b128829_0", { status: "failed" }, [
 			dummyTest("-e45b128829_0_1", { status: "failed" }),
 			dummyTest("-e45b128829_0_3", { status: "passed" }),
@@ -58,7 +58,7 @@ const initialProject = dummyProject({}, [
 
 beforeAll(() => {
 	assertDummyProject(initialProject, { duration: 150, status: "failed" })
-	assertDummyFiles(initialProject, {
+	assertDummyModules(initialProject, {
 		"15b021ef72": { totalChildCount: 4 },
 		a3fdd8b6c3: { totalChildCount: 3 },
 		"-1730f876b4": { totalChildCount: 5 },
@@ -75,48 +75,50 @@ describe.each`
 	${"6ab50b9861"}  | ${"Cherries.tests.ts"}     | ${["Apples.tests.ts", "Bananas.tests.ts", "Cherries.tests.ts", "Oranges.tests.ts", "Peaches.tests.ts"]}
 	${"44bc1aaa4d"}  | ${"apples.tests.ts"}       | ${["apples.tests.ts", "Apples.tests.ts", "Bananas.tests.ts", "Oranges.tests.ts", "Peaches.tests.ts"]}
 `(
-	"when a new file named $filename with id $id has started running",
+	"when a new module named $filename with id $id has started running",
 	(props: {
-		id: FileId
+		id: ModuleId
 		filename: string
 		expectedFilenameOrder: Array<string>
 	}) => {
 		let actualProject: Project
-		let actualFile: File
+		let actualModule: Module
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				fileStartedEvent({
+				moduleStartedEvent({
 					id: props.id,
 					path: initialProject.rootPath + props.filename,
 				}),
 			)
 
-			const file = getFileById(actualProject, props.id)
-			assertNotNullish(file)
-			actualFile = file
+			const module = getModuleById(actualProject, props.id)
+			assertNotNullish(module)
+			actualModule = module
 		})
 
-		it("sets the file status to 'running'", () => {
-			expect(actualFile.status).toBe<FileStatus>("running")
+		it("sets the module status to 'running'", () => {
+			expect(actualModule.status).toBe<ModuleStatus>("running")
 		})
 
-		it("clears the file duration", () => {
-			expect(actualFile.duration).toBe(0)
+		it("clears the module duration", () => {
+			expect(actualModule.duration).toBe(0)
 		})
 
-		it("clears the suites and tests in the file", () => {
-			expect(actualFile.suitesAndTests).toHaveLength(0)
+		it("clears the suites and tests in the module", () => {
+			expect(actualModule.suitesAndTests).toHaveLength(0)
 		})
 
-		it("adds the file to the project", () => {
-			expect(actualProject.files).toHaveLength(initialProject.files.length + 1)
-			expect(actualProject.files).toContainEqual(actualFile)
+		it("adds the module to the project", () => {
+			expect(actualProject.modules).toHaveLength(
+				initialProject.modules.length + 1,
+			)
+			expect(actualProject.modules).toContainEqual(actualModule)
 		})
 
-		it("sorts the files by their filenames in alphabetic order", () => {
-			expect(actualProject.files.map((file) => file.filename)).toEqual(
+		it("sorts the modules by their filenames in alphabetic order", () => {
+			expect(actualProject.modules.map((module) => module.filename)).toEqual(
 				props.expectedFilenameOrder,
 			)
 		})
@@ -125,7 +127,7 @@ describe.each`
 			expect(actualProject.duration).toBe(10 + 20 + 40 + 80)
 		})
 
-		it("updates the project status based on the latest fileset", () => {
+		it("updates the project status based on the latest set of modules", () => {
 			expect(actualProject.status).toBe<ProjectStatus>("running")
 		})
 	},
@@ -138,59 +140,61 @@ describe.each`
 	${"-1730f876b4"} | ${"Oranges.tests.ts"} | ${10 + 20 + /**/ 80}
 	${"-e45b128829"} | ${"Peaches.tests.ts"} | ${10 + 20 + 40 /**/}
 `(
-	"when an existing file named $filename with id $id has started running",
+	"when an existing module named $filename with id $id has started running",
 	(props: {
-		id: FileId
+		id: ModuleId
 		filename: string
 		expectedProjectDuration: Duration
 	}) => {
-		const initialFile = getFileById(initialProject, props.id)
-		assertNotNullish(initialFile)
+		const initialModule = getModuleById(initialProject, props.id)
+		assertNotNullish(initialModule)
 
 		let actualProject: Project
-		let actualFile: File
+		let actualModule: Module
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				fileStartedEvent({
+				moduleStartedEvent({
 					id: props.id,
 					path: initialProject.rootPath + props.filename,
 				}),
 			)
 
-			const file = getFileById(actualProject, props.id)
-			assertNotNullish(file)
-			actualFile = file
+			const module = getModuleById(actualProject, props.id)
+			assertNotNullish(module)
+			actualModule = module
 		})
 
-		it("sets the file status to 'running'", () => {
-			expect(actualFile.status).toBe<FileStatus>("running")
+		it("sets the module status to 'running'", () => {
+			expect(actualModule.status).toBe<ModuleStatus>("running")
 		})
 
-		it("clears the file duration", () => {
-			expect(actualFile.duration).toBe(0)
+		it("clears the module duration", () => {
+			expect(actualModule.duration).toBe(0)
 		})
 
-		it("does not affect the number of suites and tests in the file", () => {
-			expect(countFileChildren(actualFile)).toBe(countFileChildren(initialFile))
-		})
-
-		it("does not affect the number of files in the project", () => {
-			expect(actualProject.files).toHaveLength(initialProject.files.length)
-		})
-
-		it("does not affect the other files in the project", () => {
-			expect(getOtherFiles(actualProject, props.id)).toEqual(
-				getOtherFiles(initialProject, props.id),
+		it("does not affect the number of suites and tests in the module", () => {
+			expect(countModuleChildren(actualModule)).toBe(
+				countModuleChildren(initialModule),
 			)
 		})
 
-		it("updates the project duration based on the latest fileset", () => {
+		it("does not affect the number of modules in the project", () => {
+			expect(actualProject.modules).toHaveLength(initialProject.modules.length)
+		})
+
+		it("does not affect the other modules in the project", () => {
+			expect(getOtherModules(actualProject, props.id)).toEqual(
+				getOtherModules(initialProject, props.id),
+			)
+		})
+
+		it("updates the project duration based on the latest set of modules", () => {
 			expect(actualProject.duration).toBe(props.expectedProjectDuration)
 		})
 
-		it("updates the project status based on the latest fileset", () => {
+		it("updates the project status based on the latest set of modules", () => {
 			expect(actualProject.status).toBe<ProjectStatus>("running")
 		})
 	},

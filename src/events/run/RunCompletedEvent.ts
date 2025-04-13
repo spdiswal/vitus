@@ -1,4 +1,7 @@
-import { dropUnfinishedFileChildren, hasNotFileStatus } from "+models/File"
+import {
+	dropUnfinishedModuleChildren,
+	hasNotModuleStatus,
+} from "+models/Module"
 import { type Project, newProject } from "+models/Project"
 import { logDebug } from "+utilities/Logging"
 
@@ -13,9 +16,9 @@ export function runCompletedEvent(): RunCompletedEvent {
 export function applyRunCompletedEvent(project: Project): Project {
 	return newProject({
 		...project,
-		files: project.files
-			.filter(hasNotFileStatus("running"))
-			.map(dropUnfinishedFileChildren),
+		modules: project.modules
+			.filter(hasNotModuleStatus("running"))
+			.map(dropUnfinishedModuleChildren),
 	})
 }
 
@@ -23,7 +26,7 @@ export function logRunCompletedEvent(
 	project: Project,
 	event: RunCompletedEvent,
 ): void {
-	const { files, ...loggableProject } = project
+	const { modules, ...loggableProject } = project
 
 	logDebug(
 		{

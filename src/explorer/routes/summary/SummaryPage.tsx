@@ -7,7 +7,7 @@ export function SummaryPage(): Renderable {
 	const project = useProject()
 
 	useEffect(() => {
-		document.title = `${count(project.files, "file", "files")} – Vitest – Vitus`
+		document.title = `${count(project.modules, "module", "modules")} – Vitest – Vitus`
 	}, [])
 
 	return (
@@ -16,7 +16,7 @@ export function SummaryPage(): Renderable {
 				Vitest &ndash; Vitus
 			</h1>
 			<div class="font-mono">{project.rootPath}</div>
-			<div>{count(project.files, "file", "files")}</div>
+			<div>{count(project.modules, "module", "modules")}</div>
 		</main>
 	)
 }

@@ -1,6 +1,6 @@
 import {
 	type Project,
-	getFileById,
+	getModuleById,
 	getSuiteByPath,
 	putSuite,
 } from "+models/Project"
@@ -38,27 +38,27 @@ export function logSuiteFailedEvent(
 	project: Project,
 	event: SuiteFailedEvent,
 ): void {
-	const { files, ...loggableProject } = project
+	const { modules, ...loggableProject } = project
 
-	const file = getFileById(project, event.path[0])
-	assertNotNullish(file)
+	const module = getModuleById(project, event.path[0])
+	assertNotNullish(module)
 
 	const suite = getSuiteByPath(project, event.path)
 	assertNotNullish(suite)
 
-	const { suitesAndTests, ...loggableFile } = file
+	const { suitesAndTests, ...loggableModule } = module
 	const { suitesAndTests: _suitesAndTests, ...loggableSuite } = suite
 
 	logDebug(
 		{
 			label: "Suite failed",
 			labelColour: "#b91c1c",
-			message: `${file.filename} > ${event.path.length > 2 ? "... > " : ""}${suite.name}`,
+			message: `${module.filename} > ${event.path.length > 2 ? "... > " : ""}${suite.name}`,
 		},
 		{
 			event,
 			suite: loggableSuite,
-			file: loggableFile,
+			module: loggableModule,
 			project: loggableProject,
 		},
 	)

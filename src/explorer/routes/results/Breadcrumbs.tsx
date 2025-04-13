@@ -3,11 +3,11 @@ import type { Renderable } from "+types/Renderable"
 
 export function Breadcrumbs(props: {
 	class?: ClassString
-	filePath: string
+	modulePath: string
 	suiteNames: Array<string>
 	testName: string
 }): Renderable {
-	const directories = props.filePath.split("/")
+	const directories = props.modulePath.split("/")
 	const filename = directories.pop()
 
 	return (

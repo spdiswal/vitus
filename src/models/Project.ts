@@ -1,16 +1,16 @@
 import {
-	type File,
-	type FileId,
-	type Files,
-	countFileChildren,
-	getFileChildIds,
+	type Module,
+	type ModuleId,
+	type Modules,
+	countModuleChildren,
+	getModuleChildIds,
 	getTopLevelSuiteById,
 	getTopLevelTestById,
-	hasFileStatus,
-	mapVitestToFile,
+	hasModuleStatus,
+	mapVitestToModule,
 	putTopLevelSuiteOrTest,
-} from "+models/File"
-import type { DummyFileId } from "+models/File.fixtures"
+} from "+models/Module"
+import type { DummyModuleId } from "+models/Module.fixtures"
 import {
 	type Suite,
 	type SuiteIds,
@@ -35,7 +35,7 @@ import type { Vitest } from "vitest/node"
 
 export type Project = {
 	duration: Computed<Duration>
-	files: Files
+	modules: Modules
 	isConnected: boolean
 	rootPath: Path
 	status: Computed<ProjectStatus>
@@ -43,66 +43,75 @@ export type Project = {
 
 export type ProjectStatus = "failed" | "passed" | "running"
 
-const byFilename: Comparator<File> = (a, b) =>
+const byFilename: Comparator<Module> = (a, b) =>
 	a.filename.localeCompare(b.filename)
 
 export function newProject(props: PickNonComputed<Project>): Project {
-	const files = props.files.toSorted(byFilename)
+	const modules = props.modules.toSorted(byFilename)
 
 	return {
 		...props,
-		files,
-		duration: files.map((file) => file.duration).reduce(toSum, 0),
-		status: files.some(hasFileStatus("running"))
+		modules,
+		duration: modules.map((module) => module.duration).reduce(toSum, 0),
+		status: modules.some(hasModuleStatus("running"))
 			? "running"
-			: files.some(hasFileStatus("failed"))
+			: modules.some(hasModuleStatus("failed"))
 				? "failed"
 				: "passed",
 	}
 }
 
-export function getFileById(project: Project, fileId: FileId): File | null {
-	return project.files.find((file) => file.id === fileId) ?? null
+export function getModuleById(
+	project: Project,
+	moduleId: ModuleId,
+): Module | null {
+	return project.modules.find((module) => module.id === moduleId) ?? null
 }
 
-export function getOtherFiles(project: Project, excludedFileId: FileId): Files {
-	return project.files.filter((file) => file.id !== excludedFileId)
+export function getOtherModules(
+	project: Project,
+	excludedModuleId: ModuleId,
+): Modules {
+	return project.modules.filter((module) => module.id !== excludedModuleId)
 }
 
-export function getFileByPath(project: Project, path: Path): File | null {
-	return project.files.find((file) => file.path === path) ?? null
+export function getModuleByPath(project: Project, path: Path): Module | null {
+	return project.modules.find((module) => module.path === path) ?? null
 }
 
 export function getProjectChildIds(project: Project): Array<string> {
-	return project.files.flatMap((file) => [file.id, ...getFileChildIds(file)])
+	return project.modules.flatMap((module) => [
+		module.id,
+		...getModuleChildIds(module),
+	])
 }
 
-export function putFile(project: Project, fileToInsert: File): Project {
-	const existingFileIndex = project.files.findIndex(
-		(file) => file.id === fileToInsert.id,
+export function putModule(project: Project, moduleToInsert: Module): Project {
+	const existingModuleIndex = project.modules.findIndex(
+		(module) => module.id === moduleToInsert.id,
 	)
 
-	const files: Files =
-		existingFileIndex === -1
-			? [...project.files, fileToInsert]
-			: project.files.with(existingFileIndex, fileToInsert)
+	const modules: Modules =
+		existingModuleIndex === -1
+			? [...project.modules, moduleToInsert]
+			: project.modules.with(existingModuleIndex, moduleToInsert)
 
-	return newProject({ ...project, files })
+	return newProject({ ...project, modules })
 }
 
 export function getSuiteByPath(
 	project: Project,
 	suitePath: SuitePath,
 ): Suite | null {
-	const [fileId, topLevelSuiteId, ...remainingPath] = suitePath
+	const [moduleId, topLevelSuiteId, ...remainingPath] = suitePath
 
-	const parentFile = getFileById(project, fileId)
+	const parentModule = getModuleById(project, moduleId)
 
-	if (parentFile === null) {
+	if (parentModule === null) {
 		return null
 	}
 
-	const topLevelSuite = getTopLevelSuiteById(parentFile, topLevelSuiteId)
+	const topLevelSuite = getTopLevelSuiteById(parentModule, topLevelSuiteId)
 
 	return !hasNestedSuites(remainingPath) || topLevelSuite === null
 		? topLevelSuite
@@ -110,19 +119,19 @@ export function getSuiteByPath(
 }
 
 export function putSuite(project: Project, suiteToInsert: Suite): Project {
-	const [fileId, topLevelSuiteId, ...remainingPath] = suiteToInsert.path
+	const [moduleId, topLevelSuiteId, ...remainingPath] = suiteToInsert.path
 
-	const parentFile = getFileById(project, fileId)
+	const parentModule = getModuleById(project, moduleId)
 
-	if (parentFile === null) {
+	if (parentModule === null) {
 		return project
 	}
 	if (!hasNestedSuites(remainingPath)) {
-		const updatedFile = putTopLevelSuiteOrTest(parentFile, suiteToInsert)
-		return putFile(project, updatedFile)
+		const updatedModule = putTopLevelSuiteOrTest(parentModule, suiteToInsert)
+		return putModule(project, updatedModule)
 	}
 
-	const topLevelSuite = getTopLevelSuiteById(parentFile, topLevelSuiteId)
+	const topLevelSuite = getTopLevelSuiteById(parentModule, topLevelSuiteId)
 
 	if (topLevelSuite === null) {
 		return project
@@ -134,30 +143,33 @@ export function putSuite(project: Project, suiteToInsert: Suite): Project {
 		suiteToInsert,
 	)
 
-	const updatedFile = putTopLevelSuiteOrTest(parentFile, updatedTopLevelSuite)
-	return putFile(project, updatedFile)
+	const updatedModule = putTopLevelSuiteOrTest(
+		parentModule,
+		updatedTopLevelSuite,
+	)
+	return putModule(project, updatedModule)
 }
 
 export function getTestByPath(
 	project: Project,
 	testPath: TestPath,
 ): Test | null {
-	const [fileId, ...suiteAndTestIds] = testPath
+	const [moduleId, ...suiteAndTestIds] = testPath
 	const testId = suiteAndTestIds.pop() as TestId
 	const suiteIds = suiteAndTestIds as SuiteIds
 
-	const parentFile = getFileById(project, fileId)
+	const parentModule = getModuleById(project, moduleId)
 
-	if (parentFile === null) {
+	if (parentModule === null) {
 		return null
 	}
 	if (!hasNestedSuites(suiteIds)) {
-		return getTopLevelTestById(parentFile, testId)
+		return getTopLevelTestById(parentModule, testId)
 	}
 
 	const [topLevelSuiteId, ...remainingPath] = suiteIds
 
-	const topLevelSuite = getTopLevelSuiteById(parentFile, topLevelSuiteId)
+	const topLevelSuite = getTopLevelSuiteById(parentModule, topLevelSuiteId)
 	const parentSuite =
 		!hasNestedSuites(remainingPath) || topLevelSuite === null
 			? topLevelSuite
@@ -171,22 +183,22 @@ export function getTestByPath(
 }
 
 export function putTest(project: Project, testToInsert: Test): Project {
-	const [fileId, ...suiteAndTestIds] = testToInsert.path
+	const [moduleId, ...suiteAndTestIds] = testToInsert.path
 	suiteAndTestIds.pop()
 	const suiteIds = suiteAndTestIds as SuiteIds
 
-	const parentFile = getFileById(project, fileId)
+	const parentModule = getModuleById(project, moduleId)
 
-	if (parentFile === null) {
+	if (parentModule === null) {
 		return project
 	}
 	if (!hasNestedSuites(suiteIds)) {
-		const updatedFile = putTopLevelSuiteOrTest(parentFile, testToInsert)
-		return putFile(project, updatedFile)
+		const updatedModule = putTopLevelSuiteOrTest(parentModule, testToInsert)
+		return putModule(project, updatedModule)
 	}
 
 	const [topLevelSuiteId, ...remainingPath] = suiteIds
-	const topLevelSuite = getTopLevelSuiteById(parentFile, topLevelSuiteId)
+	const topLevelSuite = getTopLevelSuiteById(parentModule, topLevelSuiteId)
 
 	if (topLevelSuite === null) {
 		return project
@@ -196,8 +208,11 @@ export function putTest(project: Project, testToInsert: Test): Project {
 		? putDeeplyNestedSuiteOrTest(topLevelSuite, remainingPath, testToInsert)
 		: putNestedSuiteOrTest(topLevelSuite, testToInsert)
 
-	const updatedFile = putTopLevelSuiteOrTest(parentFile, updatedTopLevelSuite)
-	return putFile(project, updatedFile)
+	const updatedModule = putTopLevelSuiteOrTest(
+		parentModule,
+		updatedTopLevelSuite,
+	)
+	return putModule(project, updatedModule)
 }
 
 export function assertDummyProject(
@@ -226,20 +241,20 @@ export function assertDummyProject(
 	}
 }
 
-export function assertDummyFiles(
+export function assertDummyModules(
 	project: Project,
-	expectations: Partial<Record<DummyFileId, { totalChildCount: number }>>,
+	expectations: Partial<Record<DummyModuleId, { totalChildCount: number }>>,
 ): void {
-	for (const [fileId, fileExpectations] of Object.entries(expectations)) {
-		const file = getFileById(project, fileId as DummyFileId)
-		assertNotNullish(file)
+	for (const [moduleId, moduleExpectations] of Object.entries(expectations)) {
+		const module = getModuleById(project, moduleId as DummyModuleId)
+		assertNotNullish(module)
 
-		const actualChildCount = countFileChildren(file)
-		const expectedChildCount = fileExpectations.totalChildCount
+		const actualChildCount = countModuleChildren(module)
+		const expectedChildCount = moduleExpectations.totalChildCount
 
 		if (actualChildCount !== expectedChildCount) {
 			throw new Error(
-				`Expected the file '${fileId}' to have ${count(expectedChildCount, "child", "children")}, but got ${count(actualChildCount, "child", "children")}: ${getFileChildIds(file).join(", ")}`,
+				`Expected the module '${moduleId}' to have ${count(expectedChildCount, "child", "children")}, but got ${count(actualChildCount, "child", "children")}: ${getModuleChildIds(module).join(", ")}`,
 			)
 		}
 	}
@@ -267,7 +282,7 @@ export function assertDummySuites(
 
 export function mapVitestToProject(vitest: Vitest): Project {
 	return newProject({
-		files: vitest.state.getTestModules().map(mapVitestToFile),
+		modules: vitest.state.getTestModules().map(mapVitestToModule),
 		isConnected: true,
 		rootPath: vitest.config.root,
 	})

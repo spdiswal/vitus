@@ -1,8 +1,8 @@
 import { NavigationTreeNode } from "+explorer/navigation/NavigationTreeNode"
-import type { File } from "+models/File"
+import type { Module } from "+models/Module"
 import type { Renderable } from "+types/Renderable"
 
-export function NavigationTreeFileNode(props: File): Renderable {
+export function NavigationTreeModuleNode(props: Module): Renderable {
 	return (
 		<NavigationTreeNode
 			duration={props.duration}

@@ -1,4 +1,4 @@
-import { type DummyFileId, dummyVitestModule } from "+models/File.fixtures"
+import { type DummyModuleId, dummyVitestModule } from "+models/Module.fixtures"
 import { type Suite, newSuite } from "+models/Suite"
 import type { SuitePath } from "+models/SuitePath"
 import type { Test } from "+models/Test"
@@ -29,7 +29,7 @@ export function dummyVitestSuite(
 ): TestSuite {
 	const path = getDummySuitePath(id)
 
-	const parentModule = dummyVitestModule(path[0] as DummyFileId)
+	const parentModule = dummyVitestModule(path[0] as DummyModuleId)
 	const parentSuite =
 		path.length > 2 ? dummyVitestSuite(path.at(-2) as DummySuiteId) : null
 
@@ -44,11 +44,11 @@ export function dummyVitestSuite(
 }
 
 export type DummySuiteId =
-	| `${DummyFileId}_${EvenDigit}` // Top-level suite.
-	| `${DummyFileId}_${EvenDigit}_${EvenDigit}` // Nested suite (level 1).
-	| `${DummyFileId}_${EvenDigit}_${EvenDigit}_${EvenDigit}` // Nested suite (level 2).
+	| `${DummyModuleId}_${EvenDigit}` // Top-level suite.
+	| `${DummyModuleId}_${EvenDigit}_${EvenDigit}` // Nested suite (level 1).
+	| `${DummyModuleId}_${EvenDigit}_${EvenDigit}_${EvenDigit}` // Nested suite (level 2).
 
-const dummyNamesById: Record<DummyFileId, Record<EvenDigit, string>> = {
+const dummyNamesById: Record<DummyModuleId, Record<EvenDigit, string>> = {
 	"15b021ef72": {
 		0: "the fruit basket has no apples",
 		2: "the spring break is over",
@@ -87,9 +87,9 @@ export function getDummySuitePath(id: DummySuiteId): SuitePath {
 }
 
 export function getDummySuiteName(path: SuitePath): string {
-	const fileId = path[0] as DummyFileId
+	const moduleId = path[0] as DummyModuleId
 	const suiteId = path.at(-1) as DummySuiteId
 	const lastDigit = Number.parseInt(suiteId.slice(-1)) as EvenDigit
 
-	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[fileId][lastDigit]}`
+	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[moduleId][lastDigit]}`
 }

@@ -1,5 +1,5 @@
 import { useProject } from "+explorer/UseProject"
-import { NavigationTreeFileNode } from "+explorer/navigation/NavigationTreeFileNode"
+import { NavigationTreeModuleNode } from "+explorer/navigation/NavigationTreeModuleNode"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { useMemo } from "preact/hooks"
@@ -8,12 +8,12 @@ export function NavigationTree(props: {
 	class?: ClassString
 }): Renderable {
 	const project = useProject()
-	const memoisedFiles = useMemo(
+	const memoisedModules = useMemo(
 		() =>
-			project.files.map((file) => (
-				<NavigationTreeFileNode key={file.id} {...file} />
+			project.modules.map((module) => (
+				<NavigationTreeModuleNode key={module.id} {...module} />
 			)),
-		[project.files],
+		[project.modules],
 	)
 
 	return (
@@ -30,7 +30,7 @@ export function NavigationTree(props: {
 					placeholder="Search"
 				/>
 			</div>
-			<ul class="pl-2 flex flex-col">{memoisedFiles}</ul>
+			<ul class="pl-2 flex flex-col">{memoisedModules}</ul>
 		</nav>
 	)
 }

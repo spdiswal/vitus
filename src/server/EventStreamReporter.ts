@@ -1,9 +1,9 @@
 import type { EventStream } from "+events/EventStream"
-import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
-import { fileFailedEvent } from "+events/file/FileFailedEvent"
-import { filePassedEvent } from "+events/file/FilePassedEvent"
-import { fileSkippedEvent } from "+events/file/FileSkippedEvent"
-import { fileStartedEvent } from "+events/file/FileStartedEvent"
+import { moduleDeletedEvent } from "+events/module/ModuleDeletedEvent"
+import { moduleFailedEvent } from "+events/module/ModuleFailedEvent"
+import { modulePassedEvent } from "+events/module/ModulePassedEvent"
+import { moduleSkippedEvent } from "+events/module/ModuleSkippedEvent"
+import { moduleStartedEvent } from "+events/module/ModuleStartedEvent"
 import { runCompletedEvent } from "+events/run/RunCompletedEvent"
 import { runStartedEvent } from "+events/run/RunStartedEvent"
 import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
@@ -42,15 +42,15 @@ export function newEventStreamReporter(
 			eventStream.send(serverRestartedEvent())
 		},
 		onTestRunStart(specifications): void {
-			const invalidatedFileIds = specifications
+			const invalidatedModuleIds = specifications
 				.map((specification) => specification.testModule?.id)
 				.filter(notNullish)
 
-			eventStream.send(runStartedEvent({ invalidatedFileIds }))
+			eventStream.send(runStartedEvent({ invalidatedModuleIds }))
 		},
 		onTestModuleStart(module): void {
 			eventStream.send(
-				fileStartedEvent({ id: module.id, path: module.moduleId }),
+				moduleStartedEvent({ id: module.id, path: module.moduleId }),
 			)
 		},
 		onTestSuiteReady(suite): void {
@@ -104,15 +104,15 @@ export function newEventStreamReporter(
 
 			switch (module.state()) {
 				case "failed": {
-					eventStream.send(fileFailedEvent({ duration, id }))
+					eventStream.send(moduleFailedEvent({ duration, id }))
 					break
 				}
 				case "passed": {
-					eventStream.send(filePassedEvent({ duration, id }))
+					eventStream.send(modulePassedEvent({ duration, id }))
 					break
 				}
 				case "skipped": {
-					eventStream.send(fileSkippedEvent({ duration, id }))
+					eventStream.send(moduleSkippedEvent({ duration, id }))
 					break
 				}
 			}
@@ -122,7 +122,7 @@ export function newEventStreamReporter(
 		},
 		onTestRemoved(moduleId): void {
 			if (moduleId !== undefined) {
-				eventStream.send(fileDeletedEvent({ path: moduleId }))
+				eventStream.send(moduleDeletedEvent({ path: moduleId }))
 			}
 		},
 	}

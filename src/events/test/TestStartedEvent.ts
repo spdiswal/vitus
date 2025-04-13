@@ -1,6 +1,6 @@
 import {
 	type Project,
-	getFileById,
+	getModuleById,
 	getTestByPath,
 	putTest,
 } from "+models/Project"
@@ -39,22 +39,22 @@ export function logTestStartedEvent(
 	project: Project,
 	event: TestStartedEvent,
 ): void {
-	const { files, ...loggableProject } = project
+	const { modules, ...loggableProject } = project
 
-	const file = getFileById(project, event.path[0])
-	assertNotNullish(file)
+	const module = getModuleById(project, event.path[0])
+	assertNotNullish(module)
 
 	const test = getTestByPath(project, event.path)
 	assertNotNullish(test)
 
-	const { suitesAndTests, ...loggableFile } = file
+	const { suitesAndTests, ...loggableModule } = module
 
 	logDebug(
 		{
 			label: "Test started",
 			labelColour: "#b45309",
-			message: `${file.filename} > ${event.path.length > 2 ? "... > " : ""}${test.name}`,
+			message: `${module.filename} > ${event.path.length > 2 ? "... > " : ""}${test.name}`,
 		},
-		{ event, test, file: loggableFile, project: loggableProject },
+		{ event, test, module: loggableModule, project: loggableProject },
 	)
 }

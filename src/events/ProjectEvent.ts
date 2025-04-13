@@ -1,28 +1,28 @@
 import {
-	type FileDeletedEvent,
-	applyFileDeletedEvent,
-	logFileDeletedEvent,
-} from "+events/file/FileDeletedEvent"
+	type ModuleDeletedEvent,
+	applyModuleDeletedEvent,
+	logModuleDeletedEvent,
+} from "+events/module/ModuleDeletedEvent"
 import {
-	type FileFailedEvent,
-	applyFileFailedEvent,
-	logFileFailedEvent,
-} from "+events/file/FileFailedEvent"
+	type ModuleFailedEvent,
+	applyModuleFailedEvent,
+	logModuleFailedEvent,
+} from "+events/module/ModuleFailedEvent"
 import {
-	type FilePassedEvent,
-	applyFilePassedEvent,
-	logFilePassedEvent,
-} from "+events/file/FilePassedEvent"
+	type ModulePassedEvent,
+	applyModulePassedEvent,
+	logModulePassedEvent,
+} from "+events/module/ModulePassedEvent"
 import {
-	type FileSkippedEvent,
-	applyFileSkippedEvent,
-	logFileSkippedEvent,
-} from "+events/file/FileSkippedEvent"
+	type ModuleSkippedEvent,
+	applyModuleSkippedEvent,
+	logModuleSkippedEvent,
+} from "+events/module/ModuleSkippedEvent"
 import {
-	type FileStartedEvent,
-	applyFileStartedEvent,
-	logFileStartedEvent,
-} from "+events/file/FileStartedEvent"
+	type ModuleStartedEvent,
+	applyModuleStartedEvent,
+	logModuleStartedEvent,
+} from "+events/module/ModuleStartedEvent"
 import {
 	type RunCompletedEvent,
 	applyRunCompletedEvent,
@@ -86,11 +86,11 @@ import {
 import type { Project } from "+models/Project"
 
 export type ProjectEvent =
-	| FileDeletedEvent
-	| FileFailedEvent
-	| FilePassedEvent
-	| FileSkippedEvent
-	| FileStartedEvent
+	| ModuleDeletedEvent
+	| ModuleFailedEvent
+	| ModulePassedEvent
+	| ModuleSkippedEvent
+	| ModuleStartedEvent
 	| RunCompletedEvent
 	| RunStartedEvent
 	| ServerDisconnectedEvent
@@ -118,20 +118,20 @@ export function applyProjectEvent(
 	event: ProjectEvent,
 ): Project {
 	switch (event.type) {
-		case "file-deleted": {
-			return applyFileDeletedEvent(project, event)
+		case "module-deleted": {
+			return applyModuleDeletedEvent(project, event)
 		}
-		case "file-failed": {
-			return applyFileFailedEvent(project, event)
+		case "module-failed": {
+			return applyModuleFailedEvent(project, event)
 		}
-		case "file-passed": {
-			return applyFilePassedEvent(project, event)
+		case "module-passed": {
+			return applyModulePassedEvent(project, event)
 		}
-		case "file-skipped": {
-			return applyFileSkippedEvent(project, event)
+		case "module-skipped": {
+			return applyModuleSkippedEvent(project, event)
 		}
-		case "file-started": {
-			return applyFileStartedEvent(project, event)
+		case "module-started": {
+			return applyModuleStartedEvent(project, event)
 		}
 		case "run-completed": {
 			return applyRunCompletedEvent(project)
@@ -183,24 +183,24 @@ export function logProjectEvents(
 
 export function logProjectEvent(project: Project, event: ProjectEvent): void {
 	switch (event.type) {
-		case "file-deleted": {
-			logFileDeletedEvent(project, event)
+		case "module-deleted": {
+			logModuleDeletedEvent(project, event)
 			break
 		}
-		case "file-failed": {
-			logFileFailedEvent(project, event)
+		case "module-failed": {
+			logModuleFailedEvent(project, event)
 			break
 		}
-		case "file-passed": {
-			logFilePassedEvent(project, event)
+		case "module-passed": {
+			logModulePassedEvent(project, event)
 			break
 		}
-		case "file-skipped": {
-			logFileSkippedEvent(project, event)
+		case "module-skipped": {
+			logModuleSkippedEvent(project, event)
 			break
 		}
-		case "file-started": {
-			logFileStartedEvent(project, event)
+		case "module-started": {
+			logModuleStartedEvent(project, event)
 			break
 		}
 		case "run-completed": {

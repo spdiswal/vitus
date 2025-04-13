@@ -1,4 +1,7 @@
-import { dropUnfinishedFileChildren, hasNotFileStatus } from "+models/File"
+import {
+	dropUnfinishedModuleChildren,
+	hasNotModuleStatus,
+} from "+models/Module"
 import { type Project, newProject } from "+models/Project"
 import { logDebug } from "+utilities/Logging"
 
@@ -13,9 +16,9 @@ export function serverDisconnectedEvent(): ServerDisconnectedEvent {
 export function applyServerDisconnectedEvent(project: Project): Project {
 	return newProject({
 		...project,
-		files: project.files
-			.filter(hasNotFileStatus("running"))
-			.map(dropUnfinishedFileChildren),
+		modules: project.modules
+			.filter(hasNotModuleStatus("running"))
+			.map(dropUnfinishedModuleChildren),
 		isConnected: false,
 	})
 }
@@ -24,7 +27,7 @@ export function logServerDisconnectedEvent(
 	project: Project,
 	event: ServerDisconnectedEvent,
 ): void {
-	const { files, ...loggableProject } = project
+	const { modules, ...loggableProject } = project
 
 	logDebug(
 		{

@@ -1,19 +1,19 @@
-import type { Files } from "+models/File"
-import type { DummyFileId } from "+models/File.fixtures"
+import type { Modules } from "+models/Module"
+import type { DummyModuleId } from "+models/Module.fixtures"
 import { type Project, newProject } from "+models/Project"
 import type { DummySuiteId } from "+models/Suite.fixtures"
 import type { DummyTestId } from "+models/Test.fixtures"
 
-export type DummyIds = Array<DummyFileId | DummySuiteId | DummyTestId>
+export type DummyIds = Array<DummyModuleId | DummySuiteId | DummyTestId>
 
 export function dummyProject(
 	overrides?: Partial<Project>,
-	files?: Files,
+	modules?: Modules,
 ): Project {
 	return newProject({
 		isConnected: true,
 		rootPath: "/Users/sdi/repositories/plantations/",
-		files: files ?? [],
+		modules: modules ?? [],
 		...overrides,
 	})
 }

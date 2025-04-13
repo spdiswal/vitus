@@ -1,7 +1,7 @@
 import { useProject } from "+explorer/UseProject"
 import { Breadcrumbs } from "+explorer/routes/results/Breadcrumbs"
 import { DiffLegend } from "+explorer/routes/results/DiffLegend"
-import { getFileById, getSuiteByPath, getTestByPath } from "+models/Project"
+import { getModuleById, getSuiteByPath, getTestByPath } from "+models/Project"
 import type { SuiteIds } from "+models/Suite"
 import type { SuitePath } from "+models/SuitePath"
 import type { TestPath } from "+models/TestPath"
@@ -19,32 +19,32 @@ export function ResultsPage(): Renderable {
 	const project = useProject()
 	const testPath = segments as TestPath
 
-	const [fileId, ...suiteAndTestIds] = testPath
+	const [moduleId, ...suiteAndTestIds] = testPath
 	suiteAndTestIds.pop()
 	const suiteIds = suiteAndTestIds as SuiteIds
 
-	const file = getFileById(project, fileId)
+	const module = getModuleById(project, moduleId)
 
 	const suites = suiteIds
-		.map((_, index) => [fileId, ...suiteIds.slice(0, index + 1)] as SuitePath)
+		.map((_, index) => [moduleId, ...suiteIds.slice(0, index + 1)] as SuitePath)
 		.map((suitePath) => getSuiteByPath(project, suitePath))
 
 	const test = getTestByPath(project, testPath)
 
 	useEffect(() => {
-		if (file !== null) {
-			document.title = `${file.filename} – Vitest – Vitus`
+		if (module !== null) {
+			document.title = `${module.filename} – Vitest – Vitus`
 		}
-	}, [file?.path])
+	}, [module?.path])
 
-	if (file === null || suites.includes(null) || test === null) {
+	if (module === null || suites.includes(null) || test === null) {
 		return null
 	}
 
 	return (
 		<main class="flex flex-col transition">
 			<Breadcrumbs
-				filePath={file.path.substring(project.rootPath.length + 1)}
+				modulePath={module.path.substring(project.rootPath.length + 1)}
 				suiteNames={suites.filter(notNullish).map((suite) => suite.name)}
 				testName={test.name}
 			/>

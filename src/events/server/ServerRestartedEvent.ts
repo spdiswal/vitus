@@ -10,14 +10,14 @@ export function serverRestartedEvent(): ServerRestartedEvent {
 }
 
 export function applyServerRestartedEvent(project: Project): Project {
-	return newProject({ ...project, files: [], isConnected: true })
+	return newProject({ ...project, modules: [], isConnected: true })
 }
 
 export function logServerRestartedEvent(
 	project: Project,
 	event: ServerRestartedEvent,
 ): void {
-	const { files, ...loggableProject } = project
+	const { modules, ...loggableProject } = project
 
 	logDebug(
 		{

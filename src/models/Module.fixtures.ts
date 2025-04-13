@@ -1,4 +1,4 @@
-import { type File, newFile } from "+models/File"
+import { type Module, newModule } from "+models/Module"
 import type { Suite } from "+models/Suite"
 import type { Test } from "+models/Test"
 import type { Duration } from "+types/Duration"
@@ -9,15 +9,15 @@ import type {
 	TestSpecification,
 } from "vitest/node"
 
-export function dummyFile(
-	fileId: DummyFileId,
-	overrides?: Partial<File>,
+export function dummyModule(
+	moduleId: DummyModuleId,
+	overrides?: Partial<Module>,
 	suitesAndTests?: Array<Suite | Test>,
-): File {
-	return newFile({
-		id: fileId,
+): Module {
+	return newModule({
+		id: moduleId,
 		duration: 0,
-		path: getDummyFilePath(fileId),
+		path: getDummyModulePath(moduleId),
 		status: "passed",
 		suitesAndTests: suitesAndTests ?? [],
 		...overrides,
@@ -25,18 +25,18 @@ export function dummyFile(
 }
 
 export function dummyVitestSpecification(
-	fileId: DummyFileId,
+	moduleId: DummyModuleId,
 ): TestSpecification {
 	return {
-		moduleId: dummyPathsById[fileId],
+		moduleId: dummyPathsById[moduleId],
 		get testModule(): TestModule {
-			return dummyVitestModule(fileId)
+			return dummyVitestModule(moduleId)
 		},
 	} as TestSpecification
 }
 
 export function dummyVitestModule(
-	fileId: DummyFileId,
+	moduleId: DummyModuleId,
 	overrides?: Partial<{
 		duration: Duration
 		status: TestModuleState
@@ -45,19 +45,19 @@ export function dummyVitestModule(
 	return {
 		type: "module",
 		diagnostic: () => ({ duration: overrides?.duration ?? 0 }),
-		id: fileId,
-		moduleId: getDummyFilePath(fileId),
+		id: moduleId,
+		moduleId: getDummyModulePath(moduleId),
 		state: () => overrides?.status ?? "pending",
 	} as TestModule
 }
 
-export type DummyFileId =
+export type DummyModuleId =
 	| "15b021ef72"
 	| "a3fdd8b6c3"
 	| "-1730f876b4"
 	| "-e45b128829"
 
-const dummyPathsById: Record<DummyFileId, Path> = {
+const dummyPathsById: Record<DummyModuleId, Path> = {
 	"15b021ef72":
 		"/Users/sdi/repositories/plantation/src/orchard/Apples.tests.ts",
 	a3fdd8b6c3:
@@ -68,6 +68,6 @@ const dummyPathsById: Record<DummyFileId, Path> = {
 		"/Users/sdi/repositories/plantation/src/supermarket/Peaches.tests.ts",
 }
 
-export function getDummyFilePath(fileId: DummyFileId): Path {
-	return dummyPathsById[fileId]
+export function getDummyModulePath(moduleId: DummyModuleId): Path {
+	return dummyPathsById[moduleId]
 }

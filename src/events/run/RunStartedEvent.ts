@@ -1,10 +1,10 @@
-import { type FileIds, newFile } from "+models/File"
+import { type ModuleIds, newModule } from "+models/Module"
 import { type Project, newProject } from "+models/Project"
 import { logDebug } from "+utilities/Logging"
 
 export type RunStartedEvent = {
 	type: "run-started"
-	invalidatedFileIds: FileIds
+	invalidatedModuleIds: ModuleIds
 }
 
 export function runStartedEvent(
@@ -19,10 +19,10 @@ export function applyRunStartedEvent(
 ): Project {
 	return newProject({
 		...project,
-		files: project.files.map((file) =>
-			event.invalidatedFileIds.includes(file.id)
-				? newFile({ ...file, duration: 0, status: "running" })
-				: file,
+		modules: project.modules.map((module) =>
+			event.invalidatedModuleIds.includes(module.id)
+				? newModule({ ...module, duration: 0, status: "running" })
+				: module,
 		),
 	})
 }
@@ -31,7 +31,7 @@ export function logRunStartedEvent(
 	project: Project,
 	event: RunStartedEvent,
 ): void {
-	const { files, ...loggableProject } = project
+	const { modules, ...loggableProject } = project
 
 	logDebug(
 		{
