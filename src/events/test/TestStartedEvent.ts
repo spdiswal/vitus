@@ -26,7 +26,6 @@ export function applyTestStartedEvent(
 	event: TestStartedEvent,
 ): Project {
 	const updatedTest = newTest({
-		duration: 0,
 		name: event.name,
 		path: event.path,
 		status: "running",

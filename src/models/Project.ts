@@ -26,15 +26,12 @@ import type { Test, TestId } from "+models/Test"
 import type { TestPath } from "+models/TestPath"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
-import type { Duration } from "+types/Duration"
 import type { Path } from "+types/Path"
-import { toSum } from "+utilities/Arrays"
 import { assertNotNullish } from "+utilities/Assertions"
 import { count } from "+utilities/Strings"
 import type { Vitest } from "vitest/node"
 
 export type Project = {
-	duration: Computed<Duration>
 	modules: Modules
 	isConnected: boolean
 	rootPath: Path
@@ -52,7 +49,6 @@ export function newProject(props: PickNonComputed<Project>): Project {
 	return {
 		...props,
 		modules,
-		duration: modules.map((module) => module.duration).reduce(toSum, 0),
 		status: modules.some(hasModuleStatus("running"))
 			? "running"
 			: modules.some(hasModuleStatus("failed"))
@@ -217,20 +213,8 @@ export function putTest(project: Project, testToInsert: Test): Project {
 
 export function assertDummyProject(
 	project: Project,
-	expectations: {
-		duration: Duration
-		status: ProjectStatus
-	},
+	expectations: { status: ProjectStatus },
 ): void {
-	const actualDuration = project.duration
-	const expectedDuration = expectations.duration
-
-	if (actualDuration !== expectedDuration) {
-		throw new Error(
-			`Expected the project to have a duration of ${expectedDuration} ms, but was ${actualDuration} ms`,
-		)
-	}
-
 	const actualStatus = project.status
 	const expectedStatus = expectations.status
 
@@ -262,21 +246,12 @@ export function assertDummyModules(
 
 export function assertDummySuites(
 	project: Project,
-	expectations: Partial<Record<DummySuiteId, { duration: Duration }>>,
+	expectations: Partial<Record<DummySuiteId, Record<string, never>>>,
 ): void {
-	for (const [suiteId, suiteExpectations] of Object.entries(expectations)) {
+	for (const [suiteId] of Object.entries(expectations)) {
 		const path = getDummySuitePath(suiteId as DummySuiteId)
 		const suite = getSuiteByPath(project, path)
 		assertNotNullish(suite)
-
-		const actualDuration = suite.duration
-		const expectedDuration = suiteExpectations.duration
-
-		if (actualDuration !== expectedDuration) {
-			throw new Error(
-				`Expected the suite '${suiteId}' to have a duration of ${expectedDuration} ms, but was ${actualDuration} ms`,
-			)
-		}
 	}
 }
 

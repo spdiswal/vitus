@@ -1,12 +1,10 @@
 import { type ModuleId, newModule } from "+models/Module"
 import { type Project, getModuleById, putModule } from "+models/Project"
-import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { logDebug } from "+utilities/Logging"
 
 export type ModuleFailedEvent = {
 	type: "module-failed"
-	duration: Duration
 	id: ModuleId
 }
 
@@ -28,7 +26,6 @@ export function applyModuleFailedEvent(
 
 	const updatedModule = newModule({
 		...existingModule,
-		duration: event.duration,
 		status: "failed",
 	})
 

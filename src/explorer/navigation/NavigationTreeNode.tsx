@@ -4,12 +4,10 @@ import { NavigationTreeTestNode } from "+explorer/navigation/NavigationTreeTestN
 import { type Suite, isSuite } from "+models/Suite"
 import type { Test } from "+models/Test"
 import { cn, cx } from "+types/ClassString"
-import { type Duration, formatDuration } from "+types/Duration"
 import type { Renderable } from "+types/Renderable"
 import { useMemo, useState } from "preact/hooks"
 
 export function NavigationTreeNode(props: {
-	duration: Duration
 	name: string
 	status: "failed" | "passed" | "running" | "skipped"
 	suitesAndTests: Array<Suite | Test>
@@ -65,11 +63,6 @@ export function NavigationTreeNode(props: {
 				/>
 				<span class="text-gray-950 dark:text-gray-50 transition">
 					{props.name}
-					{props.duration > 0 ? (
-						<span class="ml-2 text-xs/1 font-light text-gray-500 whitespace-nowrap">
-							in {formatDuration(props.duration)}
-						</span>
-					) : null}
 				</span>
 			</button>
 			{memoisedSuitesAndTests}

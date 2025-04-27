@@ -6,13 +6,11 @@ import {
 } from "+models/Project"
 import { newTest } from "+models/Test"
 import type { TestPath } from "+models/TestPath"
-import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { logDebug } from "+utilities/Logging"
 
 export type TestFailedEvent = {
 	type: "test-failed"
-	duration: Duration
 	path: TestPath
 }
 
@@ -34,7 +32,6 @@ export function applyTestFailedEvent(
 
 	const updatedTest = newTest({
 		...existingTest,
-		duration: event.duration,
 		status: "failed",
 	})
 

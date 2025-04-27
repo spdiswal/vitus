@@ -3,14 +3,12 @@ import { type DummySuiteId, dummyVitestSuite } from "+models/Suite.fixtures"
 import { type Test, newTest } from "+models/Test"
 import type { TestPath } from "+models/TestPath"
 import type { OddDigit } from "+types/Digit"
-import type { Duration } from "+types/Duration"
 import type { TestCase, TestState } from "vitest/node"
 
 export function dummyTest(id: DummyTestId, overrides?: Partial<Test>): Test {
 	const path = getDummyTestPath(id)
 
 	return newTest({
-		duration: 0,
 		name: getDummyTestName(path),
 		path,
 		status: "passed",
@@ -22,7 +20,6 @@ export function dummyVitestTest(
 	id: DummyTestId,
 	overrides?: Partial<{
 		status: TestState
-		duration: Duration
 	}>,
 ): TestCase {
 	const path = getDummyTestPath(id)
@@ -38,7 +35,7 @@ export function dummyVitestTest(
 		id,
 		name: getDummyTestName(path),
 		result: () => ({ state: overrides?.status ?? "pending" }),
-		diagnostic: () => ({ duration: overrides?.duration ?? 0 }),
+		diagnostic: () => ({ duration: 0 }),
 	} as TestCase
 }
 

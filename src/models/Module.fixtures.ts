@@ -1,7 +1,6 @@
 import { type Module, newModule } from "+models/Module"
 import type { Suite } from "+models/Suite"
 import type { Test } from "+models/Test"
-import type { Duration } from "+types/Duration"
 import type { Path } from "+types/Path"
 import type {
 	TestModule,
@@ -16,7 +15,6 @@ export function dummyModule(
 ): Module {
 	return newModule({
 		id: moduleId,
-		duration: 0,
 		path: getDummyModulePath(moduleId),
 		status: "passed",
 		suitesAndTests: suitesAndTests ?? [],
@@ -38,13 +36,12 @@ export function dummyVitestSpecification(
 export function dummyVitestModule(
 	moduleId: DummyModuleId,
 	overrides?: Partial<{
-		duration: Duration
 		status: TestModuleState
 	}>,
 ): TestModule {
 	return {
 		type: "module",
-		diagnostic: () => ({ duration: overrides?.duration ?? 0 }),
+		diagnostic: () => ({ duration: 0 }),
 		id: moduleId,
 		moduleId: getDummyModulePath(moduleId),
 		state: () => overrides?.status ?? "pending",

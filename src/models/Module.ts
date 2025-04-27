@@ -11,14 +11,12 @@ import {
 import { type Test, type TestId, isTest } from "+models/Test"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
-import type { Duration } from "+types/Duration"
 import { type Path, getFilenameFromPath } from "+types/Path"
 import { toSum } from "+utilities/Arrays"
 import type { TestModule, TestModuleState } from "vitest/node"
 
 export type Module = {
 	id: ModuleId
-	duration: Duration
 	filename: Computed<string>
 	path: Path
 	status: ModuleStatus
@@ -139,7 +137,6 @@ const statusMap: Record<TestModuleState, ModuleStatus> = {
 export function mapVitestToModule(module: TestModule): Module {
 	return newModule({
 		id: module.id,
-		duration: module.diagnostic().duration,
 		path: module.moduleId,
 		status: statusMap[module.state()],
 		suitesAndTests: module.children.array().map(mapVitestToSuiteOrTest),

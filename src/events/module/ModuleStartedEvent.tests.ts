@@ -18,24 +18,23 @@ import {
 import { dummyProject } from "+models/Project.fixtures"
 import { dummySuite } from "+models/Suite.fixtures"
 import { dummyTest } from "+models/Test.fixtures"
-import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { duration: 10, status: "passed" }, [
+	dummyModule("15b021ef72", { status: "passed" }, [
 		dummySuite("15b021ef72_0", { status: "passed" }, [
 			dummyTest("15b021ef72_0_1", { status: "failed" }),
 		]),
 		dummyTest("15b021ef72_3", { status: "failed" }),
 		dummyTest("15b021ef72_5", { status: "failed" }),
 	]),
-	dummyModule("a3fdd8b6c3", { duration: 20, status: "failed" }, [
+	dummyModule("a3fdd8b6c3", { status: "failed" }, [
 		dummyTest("a3fdd8b6c3_1", { status: "passed" }),
 		dummyTest("a3fdd8b6c3_3", { status: "passed" }),
 		dummyTest("a3fdd8b6c3_5", { status: "failed" }),
 	]),
-	dummyModule("-1730f876b4", { duration: 40, status: "passed" }, [
+	dummyModule("-1730f876b4", { status: "passed" }, [
 		dummySuite("-1730f876b4_0", { status: "passed" }, [
 			dummyTest("-1730f876b4_0_1", { status: "failed" }),
 			dummyTest("-1730f876b4_0_3", { status: "passed" }),
@@ -43,7 +42,7 @@ const initialProject = dummyProject({}, [
 		]),
 		dummyTest("-1730f876b4_7", { status: "passed" }),
 	]),
-	dummyModule("-e45b128829", { duration: 80, status: "passed" }, [
+	dummyModule("-e45b128829", { status: "passed" }, [
 		dummySuite("-e45b128829_0", { status: "failed" }, [
 			dummyTest("-e45b128829_0_1", { status: "failed" }),
 			dummyTest("-e45b128829_0_3", { status: "passed" }),
@@ -57,7 +56,7 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertDummyProject(initialProject, { duration: 150, status: "failed" })
+	assertDummyProject(initialProject, { status: "failed" })
 	assertDummyModules(initialProject, {
 		"15b021ef72": { totalChildCount: 4 },
 		a3fdd8b6c3: { totalChildCount: 3 },
@@ -102,10 +101,6 @@ describe.each`
 			expect(actualModule.status).toBe<ModuleStatus>("running")
 		})
 
-		it("clears the module duration", () => {
-			expect(actualModule.duration).toBe(0)
-		})
-
 		it("clears the suites and tests in the module", () => {
 			expect(actualModule.suitesAndTests).toHaveLength(0)
 		})
@@ -123,10 +118,6 @@ describe.each`
 			)
 		})
 
-		it("does not affect the project duration", () => {
-			expect(actualProject.duration).toBe(10 + 20 + 40 + 80)
-		})
-
 		it("updates the project status based on the latest set of modules", () => {
 			expect(actualProject.status).toBe<ProjectStatus>("running")
 		})
@@ -134,17 +125,16 @@ describe.each`
 )
 
 describe.each`
-	id               | filename              | expectedProjectDuration
-	${"15b021ef72"}  | ${"Apples.tests.ts"}  | ${/**/ 20 + 40 + 80}
-	${"a3fdd8b6c3"}  | ${"Bananas.tests.ts"} | ${10 + /**/ 40 + 80}
-	${"-1730f876b4"} | ${"Oranges.tests.ts"} | ${10 + 20 + /**/ 80}
-	${"-e45b128829"} | ${"Peaches.tests.ts"} | ${10 + 20 + 40 /**/}
+	id               | filename
+	${"15b021ef72"}  | ${"Apples.tests.ts"}
+	${"a3fdd8b6c3"}  | ${"Bananas.tests.ts"}
+	${"-1730f876b4"} | ${"Oranges.tests.ts"}
+	${"-e45b128829"} | ${"Peaches.tests.ts"}
 `(
 	"when an existing module named $filename with id $id has started running",
 	(props: {
 		id: ModuleId
 		filename: string
-		expectedProjectDuration: Duration
 	}) => {
 		const initialModule = getModuleById(initialProject, props.id)
 		assertNotNullish(initialModule)
@@ -170,10 +160,6 @@ describe.each`
 			expect(actualModule.status).toBe<ModuleStatus>("running")
 		})
 
-		it("clears the module duration", () => {
-			expect(actualModule.duration).toBe(0)
-		})
-
 		it("does not affect the number of suites and tests in the module", () => {
 			expect(countModuleChildren(actualModule)).toBe(
 				countModuleChildren(initialModule),
@@ -188,10 +174,6 @@ describe.each`
 			expect(getOtherModules(actualProject, props.id)).toEqual(
 				getOtherModules(initialProject, props.id),
 			)
-		})
-
-		it("updates the project duration based on the latest set of modules", () => {
-			expect(actualProject.duration).toBe(props.expectedProjectDuration)
 		})
 
 		it("updates the project status based on the latest set of modules", () => {

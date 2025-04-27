@@ -1,6 +1,5 @@
 import type { Test } from "+models/Test"
 import { cn, cx } from "+types/ClassString"
-import { formatDuration } from "+types/Duration"
 import type { Renderable } from "+types/Renderable"
 import { Link } from "wouter-preact"
 
@@ -31,11 +30,6 @@ export function NavigationTreeTestNode(props: Test): Renderable {
 				/>
 				<span class="text-gray-950 dark:text-gray-50 transition">
 					{props.name}
-					{props.duration > 0 ? (
-						<span class="ml-2 text-xs/1 font-light text-gray-500 whitespace-nowrap">
-							in {formatDuration(props.duration)}
-						</span>
-					) : null}
 				</span>
 			</Link>
 		</li>

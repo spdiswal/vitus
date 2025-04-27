@@ -14,7 +14,7 @@ import { dummyTest } from "+models/Test.fixtures"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { duration: 10, status: "running" }, [
+	dummyModule("15b021ef72", { status: "running" }, [
 		dummySuite("15b021ef72_0", { status: "failed" }, [
 			dummyTest("15b021ef72_0_1", { status: "failed" }),
 		]),
@@ -27,7 +27,7 @@ const initialProject = dummyProject({}, [
 			]),
 		]),
 	]),
-	dummyModule("a3fdd8b6c3", { duration: 20, status: "passed" }, [
+	dummyModule("a3fdd8b6c3", { status: "passed" }, [
 		dummySuite("a3fdd8b6c3_0", { status: "running" }, [
 			dummyTest("a3fdd8b6c3_0_1", { status: "running" }),
 			dummyTest("a3fdd8b6c3_0_3", { status: "failed" }),
@@ -52,7 +52,7 @@ const initialProject = dummyProject({}, [
 			dummyTest("a3fdd8b6c3_4_5", { status: "running" }),
 		]),
 	]),
-	dummyModule("-1730f876b4", { duration: 40, status: "passed" }, [
+	dummyModule("-1730f876b4", { status: "passed" }, [
 		dummySuite("-1730f876b4_0", { status: "passed" }, [
 			dummyTest("-1730f876b4_0_1", { status: "running" }),
 			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
@@ -63,7 +63,7 @@ const initialProject = dummyProject({}, [
 		dummyTest("-1730f876b4_7", { status: "skipped" }),
 		dummyTest("-1730f876b4_9", { status: "running" }),
 	]),
-	dummyModule("-e45b128829", { duration: 80, status: "running" }, [
+	dummyModule("-e45b128829", { status: "running" }, [
 		dummySuite("-e45b128829_2", { status: "failed" }, [
 			dummyTest("-e45b128829_2_1", { status: "running" }),
 		]),
@@ -79,7 +79,7 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertDummyProject(initialProject, { duration: 150, status: "running" })
+	assertDummyProject(initialProject, { status: "running" })
 	assertDummyModules(initialProject, {
 		"15b021ef72": { totalChildCount: 8 },
 		a3fdd8b6c3: { totalChildCount: 17 },
@@ -117,10 +117,6 @@ describe("when the server has disconnected", () => {
 			"-1730f876b4_0_3",
 			"-1730f876b4_7",
 		])
-	})
-
-	it("updates the project duration based on the latest set of modules", () => {
-		expect(actualProject.duration).toBe(20 + 40)
 	})
 
 	it("updates the project status based on the latest set of modules", () => {

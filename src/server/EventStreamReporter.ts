@@ -62,20 +62,19 @@ export function newEventStreamReporter(
 			eventStream.send(testStartedEvent({ name: test.name, path }))
 		},
 		onTestCaseResult(test): void {
-			const duration = test.diagnostic()?.duration ?? 0
 			const path = mapVitestToTestPath(test)
 
 			switch (test.result().state) {
 				case "failed": {
-					eventStream.send(testFailedEvent({ duration, path }))
+					eventStream.send(testFailedEvent({ path }))
 					break
 				}
 				case "passed": {
-					eventStream.send(testPassedEvent({ duration, path }))
+					eventStream.send(testPassedEvent({ path }))
 					break
 				}
 				case "skipped": {
-					eventStream.send(testSkippedEvent({ duration, path }))
+					eventStream.send(testSkippedEvent({ path }))
 					break
 				}
 			}
@@ -99,20 +98,19 @@ export function newEventStreamReporter(
 			}
 		},
 		onTestModuleEnd(module): void {
-			const duration = module.diagnostic().duration
 			const id = module.id
 
 			switch (module.state()) {
 				case "failed": {
-					eventStream.send(moduleFailedEvent({ duration, id }))
+					eventStream.send(moduleFailedEvent({ id }))
 					break
 				}
 				case "passed": {
-					eventStream.send(modulePassedEvent({ duration, id }))
+					eventStream.send(modulePassedEvent({ id }))
 					break
 				}
 				case "skipped": {
-					eventStream.send(moduleSkippedEvent({ duration, id }))
+					eventStream.send(moduleSkippedEvent({ id }))
 					break
 				}
 			}

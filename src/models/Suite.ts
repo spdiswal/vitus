@@ -8,13 +8,11 @@ import {
 } from "+models/Test"
 import type { Comparator } from "+types/Comparator"
 import type { Computed, PickNonComputed } from "+types/Computed"
-import type { Duration } from "+types/Duration"
 import { toSum } from "+utilities/Arrays"
 import type { TestCase, TestSuite, TestSuiteState } from "vitest/node"
 
 export type Suite = {
 	id: Computed<SuiteId>
-	duration: Computed<Duration>
 	name: string
 	path: SuitePath
 	status: SuiteStatus
@@ -31,9 +29,6 @@ const bySuiteOrTestId: Comparator<Suite | Test> = (a, b) =>
 export function newSuite(props: PickNonComputed<Suite>): Suite {
 	return {
 		...props,
-		duration: props.suitesAndTests
-			.map((suiteOrTest) => suiteOrTest.duration)
-			.reduce(toSum, 0),
 		id: getSuiteIdFromSuitePath(props.path),
 		suitesAndTests: props.suitesAndTests.toSorted(bySuiteOrTestId),
 	}

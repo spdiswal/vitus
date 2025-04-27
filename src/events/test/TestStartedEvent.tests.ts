@@ -12,7 +12,6 @@ import {
 	assertDummyProject,
 	assertDummySuites,
 	getModuleById,
-	getSuiteByPath,
 	getTestByPath,
 } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
@@ -23,70 +22,68 @@ import {
 	dummyTest,
 	getDummyTestPath,
 } from "+models/Test.fixtures"
-import { getParentSuitePath } from "+models/TestPath"
-import type { Duration } from "+types/Duration"
 import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { duration: 14, status: "failed" }, [
+	dummyModule("15b021ef72", { status: "failed" }, [
 		dummySuite("15b021ef72_0", { status: "failed" }, [
-			dummyTest("15b021ef72_0_1", { duration: 1, status: "failed" }),
+			dummyTest("15b021ef72_0_1", { status: "failed" }),
 		]),
-		dummyTest("15b021ef72_1", { duration: 2, status: "passed" }),
+		dummyTest("15b021ef72_1", { status: "passed" }),
 		dummySuite("15b021ef72_2", { status: "passed" }, [
-			dummyTest("15b021ef72_2_3", { duration: 3, status: "skipped" }),
+			dummyTest("15b021ef72_2_3", { status: "skipped" }),
 			dummySuite("15b021ef72_2_6", { status: "passed" }, [
-				dummyTest("15b021ef72_2_6_7", { duration: 2, status: "passed" }),
-				dummyTest("15b021ef72_2_6_9", { duration: 4, status: "skipped" }),
+				dummyTest("15b021ef72_2_6_7", { status: "passed" }),
+				dummyTest("15b021ef72_2_6_9", { status: "skipped" }),
 			]),
 		]),
 	]),
-	dummyModule("a3fdd8b6c3", { duration: 6, status: "failed" }, [
+	dummyModule("a3fdd8b6c3", { status: "failed" }, [
 		dummySuite("a3fdd8b6c3_0", { status: "failed" }, [
-			dummyTest("a3fdd8b6c3_0_1", { duration: 1, status: "passed" }),
-			dummyTest("a3fdd8b6c3_0_3", { duration: 7, status: "failed" }),
+			dummyTest("a3fdd8b6c3_0_1", { status: "passed" }),
+			dummyTest("a3fdd8b6c3_0_3", { status: "failed" }),
 		]),
-		dummyTest("a3fdd8b6c3_1", { duration: 6, status: "skipped" }),
+		dummyTest("a3fdd8b6c3_1", { status: "skipped" }),
 		dummySuite("a3fdd8b6c3_2", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_2_5", { duration: 8, status: "failed" }),
+			dummyTest("a3fdd8b6c3_2_5", { status: "failed" }),
 			dummySuite("a3fdd8b6c3_2_6", { status: "failed" }, [
-				dummyTest("a3fdd8b6c3_2_6_7", { duration: 5, status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_6_9", { duration: 7, status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_6_7", { status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_6_9", { status: "passed" }),
 			]),
 			dummySuite("a3fdd8b6c3_2_8", { status: "passed" }, [
-				dummyTest("a3fdd8b6c3_2_8_1", { duration: 10, status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_8_3", { duration: 2, status: "skipped" }),
+				dummyTest("a3fdd8b6c3_2_8_1", { status: "passed" }),
+				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
 				dummySuite("a3fdd8b6c3_2_8_4", { status: "skipped" }, [
-					dummyTest("a3fdd8b6c3_2_8_4_1", { duration: 3, status: "failed" }),
+					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "failed" }),
 				]),
 			]),
 		]),
-		dummyTest("a3fdd8b6c3_3", { duration: 4, status: "failed" }),
+		dummyTest("a3fdd8b6c3_3", { status: "failed" }),
 		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_4_5", { duration: 8, status: "skipped" }),
+			dummyTest("a3fdd8b6c3_4_5", { status: "skipped" }),
 		]),
 	]),
-	dummyModule("-1730f876b4", { duration: 9, status: "passed" }, [
+	dummyModule("-1730f876b4", { status: "passed" }, [
 		dummySuite("-1730f876b4_0", { status: "passed" }, [
-			dummyTest("-1730f876b4_0_1", { duration: 29, status: "failed" }),
-			dummyTest("-1730f876b4_0_3", { duration: 11, status: "skipped" }),
+			dummyTest("-1730f876b4_0_1", { status: "failed" }),
+			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
 			dummySuite("-1730f876b4_0_4", { status: "passed" }, [
-				dummyTest("-1730f876b4_0_4_5", { duration: 18, status: "skipped" }),
+				dummyTest("-1730f876b4_0_4_5", { status: "skipped" }),
 			]),
 		]),
-		dummyTest("-1730f876b4_7", { duration: 14, status: "skipped" }),
-		dummyTest("-1730f876b4_9", { duration: 19, status: "failed" }),
+		dummyTest("-1730f876b4_7", { status: "skipped" }),
+		dummyTest("-1730f876b4_9", { status: "failed" }),
 	]),
-	dummyModule("-e45b128829", { duration: 11, status: "skipped" }, [
+	dummyModule("-e45b128829", { status: "skipped" }, [
 		dummySuite("-e45b128829_2", { status: "failed" }, [
-			dummyTest("-e45b128829_2_1", { duration: 9, status: "failed" }),
+			dummyTest("-e45b128829_2_1", { status: "failed" }),
 		]),
 		dummySuite("-e45b128829_4", { status: "passed" }, [
 			dummySuite("-e45b128829_4_4", { status: "passed" }, [
-				dummyTest("-e45b128829_4_4_3", { duration: 15, status: "passed" }),
+				dummyTest("-e45b128829_4_4_3", { status: "passed" }),
 				dummySuite("-e45b128829_4_4_6", { status: "skipped" }, [
-					dummyTest("-e45b128829_4_4_6_5", { duration: 6, status: "failed" }),
+					dummyTest("-e45b128829_4_4_6_5", { status: "failed" }),
 				]),
 			]),
 		]),
@@ -94,7 +91,7 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertDummyProject(initialProject, { duration: 40, status: "failed" })
+	assertDummyProject(initialProject, { status: "failed" })
 	assertDummyModules(initialProject, {
 		"15b021ef72": { totalChildCount: 8 },
 		a3fdd8b6c3: { totalChildCount: 17 },
@@ -102,21 +99,21 @@ beforeAll(() => {
 		"-e45b128829": { totalChildCount: 7 },
 	})
 	assertDummySuites(initialProject, {
-		"15b021ef72_0": { duration: 1 },
-		"15b021ef72_2": { duration: 9 },
-		"15b021ef72_2_6": { duration: 6 },
-		a3fdd8b6c3_0: { duration: 8 },
-		a3fdd8b6c3_2: { duration: 35 },
-		a3fdd8b6c3_2_6: { duration: 12 },
-		a3fdd8b6c3_2_8: { duration: 15 },
-		a3fdd8b6c3_2_8_4: { duration: 3 },
-		a3fdd8b6c3_4: { duration: 8 },
-		"-1730f876b4_0": { duration: 58 },
-		"-1730f876b4_0_4": { duration: 18 },
-		"-e45b128829_2": { duration: 9 },
-		"-e45b128829_4": { duration: 21 },
-		"-e45b128829_4_4": { duration: 21 },
-		"-e45b128829_4_4_6": { duration: 6 },
+		"15b021ef72_0": {},
+		"15b021ef72_2": {},
+		"15b021ef72_2_6": {},
+		a3fdd8b6c3_0: {},
+		a3fdd8b6c3_2: {},
+		a3fdd8b6c3_2_6: {},
+		a3fdd8b6c3_2_8: {},
+		a3fdd8b6c3_2_8_4: {},
+		a3fdd8b6c3_4: {},
+		"-1730f876b4_0": {},
+		"-1730f876b4_0_4": {},
+		"-e45b128829_2": {},
+		"-e45b128829_4": {},
+		"-e45b128829_4_4": {},
+		"-e45b128829_4_4_6": {},
 	})
 })
 
@@ -149,8 +146,6 @@ describe.each`
 		const path = getDummyTestPath(props.testId)
 		const [moduleId] = path
 
-		const suitePath = getParentSuitePath(path)
-
 		const initialModule = getModuleById(initialProject, moduleId)
 		assertNotNullish(initialModule)
 
@@ -177,30 +172,10 @@ describe.each`
 			expect(actualTest.status).toBe<TestStatus>("running")
 		})
 
-		it("clears the test duration", () => {
-			expect(actualTest.duration).toBe(0)
-		})
-
 		it("adds the test to the module and sorts the suites and tests by their id", () => {
 			expect(getModuleChildIds(actualModule)).toEqual(
 				props.expectedChildIdOrder,
 			)
-		})
-
-		if (suitePath !== null) {
-			it("does not affect the parent suite duration", () => {
-				const initialParentSuite = getSuiteByPath(initialProject, suitePath)
-				assertNotNullish(initialParentSuite)
-
-				const actualParentSuite = getSuiteByPath(actualProject, suitePath)
-				assertNotNullish(actualParentSuite)
-
-				expect(actualParentSuite.duration).toBe(initialParentSuite.duration)
-			})
-		}
-
-		it("does not affect the module duration", () => {
-			expect(actualModule.duration).toBe(initialModule.duration)
 		})
 
 		it("does not affect the module status", () => {
@@ -210,33 +185,30 @@ describe.each`
 )
 
 describe.each`
-	testId                   | name                                       | expectedSuiteDuration
-	${"15b021ef72_1"}        | ${"pours a cup of apple juice"}            | ${null}
-	${"15b021ef72_2_3"}      | ${"changes the batteries"}                 | ${6}
-	${"15b021ef72_2_6_7"}    | ${"turns the ceiling lights on"}           | ${4}
-	${"a3fdd8b6c3_3"}        | ${"recharges the smartphone"}              | ${null}
-	${"a3fdd8b6c3_2_5"}      | ${"refills the basket with fresh bananas"} | ${27}
-	${"a3fdd8b6c3_2_6_7"}    | ${"turns the floor lamps on"}              | ${7}
-	${"a3fdd8b6c3_2_8_4_1"}  | ${"pours a cup of banana smoothie"}        | ${0}
-	${"-1730f876b4_7"}       | ${"turns the outdoor lights on"}           | ${null}
-	${"-1730f876b4_9"}       | ${"moves one tile to the south"}           | ${null}
-	${"-1730f876b4_0_1"}     | ${"pours a cup of orange juice"}           | ${29}
-	${"-1730f876b4_0_3"}     | ${"plugs in the power cord"}               | ${47}
-	${"-1730f876b4_0_4_5"}   | ${"refills the basket with fresh oranges"} | ${0}
-	${"-e45b128829_2_1"}     | ${"pours a cup of peach smoothie"}         | ${0}
-	${"-e45b128829_4_4_3"}   | ${"amplifies the signal"}                  | ${6}
-	${"-e45b128829_4_4_6_5"} | ${"refills the basket with fresh peaches"} | ${0}
+	testId                   | name
+	${"15b021ef72_1"}        | ${"pours a cup of apple juice"}
+	${"15b021ef72_2_3"}      | ${"changes the batteries"}
+	${"15b021ef72_2_6_7"}    | ${"turns the ceiling lights on"}
+	${"a3fdd8b6c3_3"}        | ${"recharges the smartphone"}
+	${"a3fdd8b6c3_2_5"}      | ${"refills the basket with fresh bananas"}
+	${"a3fdd8b6c3_2_6_7"}    | ${"turns the floor lamps on"}
+	${"a3fdd8b6c3_2_8_4_1"}  | ${"pours a cup of banana smoothie"}
+	${"-1730f876b4_7"}       | ${"turns the outdoor lights on"}
+	${"-1730f876b4_9"}       | ${"moves one tile to the south"}
+	${"-1730f876b4_0_1"}     | ${"pours a cup of orange juice"}
+	${"-1730f876b4_0_3"}     | ${"plugs in the power cord"}
+	${"-1730f876b4_0_4_5"}   | ${"refills the basket with fresh oranges"}
+	${"-e45b128829_2_1"}     | ${"pours a cup of peach smoothie"}
+	${"-e45b128829_4_4_3"}   | ${"amplifies the signal"}
+	${"-e45b128829_4_4_6_5"} | ${"refills the basket with fresh peaches"}
 `(
 	"when an existing test with id $testId has started running",
 	(props: {
 		testId: DummyTestId
 		name: string
-		expectedSuiteDuration: Duration | null
 	}) => {
 		const path = getDummyTestPath(props.testId)
 		const [moduleId] = path
-
-		const suitePath = getParentSuitePath(path)
 
 		const initialModule = getModuleById(initialProject, moduleId)
 		assertNotNullish(initialModule)
@@ -264,27 +236,10 @@ describe.each`
 			expect(actualTest.status).toBe<TestStatus>("running")
 		})
 
-		it("clears the test duration", () => {
-			expect(actualTest.duration).toBe(0)
-		})
-
 		it("does not affect the number of suites and tests in the module", () => {
 			expect(countModuleChildren(actualModule)).toBe(
 				countModuleChildren(initialModule),
 			)
-		})
-
-		if (suitePath !== null) {
-			it("updates the parent suite duration", () => {
-				const actualParentSuite = getSuiteByPath(actualProject, suitePath)
-				assertNotNullish(actualParentSuite)
-
-				expect(actualParentSuite.duration).toBe(props.expectedSuiteDuration)
-			})
-		}
-
-		it("does not affect the module duration", () => {
-			expect(actualModule.duration).toBe(initialModule.duration)
 		})
 
 		it("does not affect the module status", () => {

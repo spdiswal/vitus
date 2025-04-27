@@ -1,12 +1,10 @@
 import { type Suite, isSuite, mapVitestToSuitePath } from "+models/Suite"
 import { type TestPath, getTestIdFromTestPath } from "+models/TestPath"
 import type { Computed, PickNonComputed } from "+types/Computed"
-import type { Duration } from "+types/Duration"
 import type { TestCase, TestState } from "vitest/node"
 
 export type Test = {
 	id: Computed<TestId>
-	duration: Duration
 	name: string
 	path: TestPath
 	status: TestStatus
@@ -32,7 +30,6 @@ const statusMap: Record<TestState, TestStatus> = {
 
 export function mapVitestToTest(test: TestCase): Test {
 	return newTest({
-		duration: test.diagnostic()?.duration ?? 0,
 		name: test.name,
 		path: mapVitestToTestPath(test),
 		status: statusMap[test.result().state],

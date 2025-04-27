@@ -10,14 +10,14 @@ import { dummyProject } from "+models/Project.fixtures"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { duration: 10, status: "failed" }),
-	dummyModule("a3fdd8b6c3", { duration: 20, status: "passed" }),
-	dummyModule("-1730f876b4", { duration: 40, status: "passed" }),
-	dummyModule("-e45b128829", { duration: 80, status: "failed" }),
+	dummyModule("15b021ef72", { status: "failed" }),
+	dummyModule("a3fdd8b6c3", { status: "passed" }),
+	dummyModule("-1730f876b4", { status: "passed" }),
+	dummyModule("-e45b128829", { status: "failed" }),
 ])
 
 beforeAll(() => {
-	assertDummyProject(initialProject, { duration: 150, status: "failed" })
+	assertDummyProject(initialProject, { status: "failed" })
 })
 
 describe("when the server has restarted", () => {
@@ -37,10 +37,6 @@ describe("when the server has restarted", () => {
 
 	it("clears all modules", () => {
 		expect(actualProject.modules).toHaveLength(0)
-	})
-
-	it("updates the project duration based on the latest set of modules", () => {
-		expect(actualProject.duration).toBe(0)
 	})
 
 	it("updates the project status based on the latest set of modules", () => {

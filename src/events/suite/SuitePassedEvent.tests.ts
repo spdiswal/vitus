@@ -23,64 +23,64 @@ import { assertNotNullish } from "+utilities/Assertions"
 import { beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { duration: 14, status: "skipped" }, [
+	dummyModule("15b021ef72", { status: "skipped" }, [
 		dummySuite("15b021ef72_0", { status: "failed" }, [
-			dummyTest("15b021ef72_0_1", { duration: 1, status: "failed" }),
+			dummyTest("15b021ef72_0_1", { status: "failed" }),
 		]),
-		dummyTest("15b021ef72_1", { duration: 2, status: "skipped" }),
+		dummyTest("15b021ef72_1", { status: "skipped" }),
 		dummySuite("15b021ef72_2", { status: "skipped" }, [
-			dummyTest("15b021ef72_2_3", { duration: 3, status: "failed" }),
+			dummyTest("15b021ef72_2_3", { status: "failed" }),
 			dummySuite("15b021ef72_2_6", { status: "failed" }, [
-				dummyTest("15b021ef72_2_6_7", { duration: 2, status: "failed" }),
-				dummyTest("15b021ef72_2_6_9", { duration: 4, status: "skipped" }),
+				dummyTest("15b021ef72_2_6_7", { status: "failed" }),
+				dummyTest("15b021ef72_2_6_9", { status: "skipped" }),
 			]),
 		]),
 	]),
-	dummyModule("a3fdd8b6c3", { duration: 6, status: "failed" }, [
+	dummyModule("a3fdd8b6c3", { status: "failed" }, [
 		dummySuite("a3fdd8b6c3_0", { status: "failed" }, [
-			dummyTest("a3fdd8b6c3_0_1", { duration: 1, status: "skipped" }),
-			dummyTest("a3fdd8b6c3_0_3", { duration: 7, status: "failed" }),
+			dummyTest("a3fdd8b6c3_0_1", { status: "skipped" }),
+			dummyTest("a3fdd8b6c3_0_3", { status: "failed" }),
 		]),
-		dummyTest("a3fdd8b6c3_1", { duration: 6, status: "failed" }),
+		dummyTest("a3fdd8b6c3_1", { status: "failed" }),
 		dummySuite("a3fdd8b6c3_2", { status: "failed" }, [
-			dummyTest("a3fdd8b6c3_2_5", { duration: 8, status: "failed" }),
+			dummyTest("a3fdd8b6c3_2_5", { status: "failed" }),
 			dummySuite("a3fdd8b6c3_2_6", { status: "skipped" }, [
-				dummyTest("a3fdd8b6c3_2_6_7", { duration: 5, status: "skipped" }),
-				dummyTest("a3fdd8b6c3_2_6_9", { duration: 7, status: "skipped" }),
+				dummyTest("a3fdd8b6c3_2_6_7", { status: "skipped" }),
+				dummyTest("a3fdd8b6c3_2_6_9", { status: "skipped" }),
 			]),
 			dummySuite("a3fdd8b6c3_2_8", { status: "failed" }, [
-				dummyTest("a3fdd8b6c3_2_8_1", { duration: 10, status: "failed" }),
-				dummyTest("a3fdd8b6c3_2_8_3", { duration: 2, status: "skipped" }),
+				dummyTest("a3fdd8b6c3_2_8_1", { status: "failed" }),
+				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
 				dummySuite("a3fdd8b6c3_2_8_4", { status: "failed" }, [
-					dummyTest("a3fdd8b6c3_2_8_4_1", { duration: 3, status: "failed" }),
+					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "failed" }),
 				]),
 			]),
 		]),
-		dummyTest("a3fdd8b6c3_3", { duration: 4, status: "skipped" }),
+		dummyTest("a3fdd8b6c3_3", { status: "skipped" }),
 		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_4_5", { duration: 8, status: "skipped" }),
+			dummyTest("a3fdd8b6c3_4_5", { status: "skipped" }),
 		]),
 	]),
-	dummyModule("-1730f876b4", { duration: 9, status: "failed" }, [
+	dummyModule("-1730f876b4", { status: "failed" }, [
 		dummySuite("-1730f876b4_0", { status: "failed" }, [
-			dummyTest("-1730f876b4_0_1", { duration: 29, status: "failed" }),
-			dummyTest("-1730f876b4_0_3", { duration: 11, status: "skipped" }),
+			dummyTest("-1730f876b4_0_1", { status: "failed" }),
+			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
 			dummySuite("-1730f876b4_0_4", { status: "skipped" }, [
-				dummyTest("-1730f876b4_0_4_5", { duration: 18, status: "failed" }),
+				dummyTest("-1730f876b4_0_4_5", { status: "failed" }),
 			]),
 		]),
-		dummyTest("-1730f876b4_7", { duration: 14, status: "failed" }),
-		dummyTest("-1730f876b4_9", { duration: 19, status: "failed" }),
+		dummyTest("-1730f876b4_7", { status: "failed" }),
+		dummyTest("-1730f876b4_9", { status: "failed" }),
 	]),
-	dummyModule("-e45b128829", { duration: 11, status: "skipped" }, [
+	dummyModule("-e45b128829", { status: "skipped" }, [
 		dummySuite("-e45b128829_2", { status: "failed" }, [
-			dummyTest("-e45b128829_2_1", { duration: 9, status: "failed" }),
+			dummyTest("-e45b128829_2_1", { status: "failed" }),
 		]),
 		dummySuite("-e45b128829_4", { status: "skipped" }, [
 			dummySuite("-e45b128829_4_4", { status: "failed" }, [
-				dummyTest("-e45b128829_4_4_3", { duration: 15, status: "skipped" }),
+				dummyTest("-e45b128829_4_4_3", { status: "skipped" }),
 				dummySuite("-e45b128829_4_4_6", { status: "skipped" }, [
-					dummyTest("-e45b128829_4_4_6_5", { duration: 6, status: "failed" }),
+					dummyTest("-e45b128829_4_4_6_5", { status: "failed" }),
 				]),
 			]),
 		]),
@@ -88,7 +88,7 @@ const initialProject = dummyProject({}, [
 ])
 
 beforeAll(() => {
-	assertDummyProject(initialProject, { duration: 40, status: "failed" })
+	assertDummyProject(initialProject, { status: "failed" })
 	assertDummyModules(initialProject, {
 		"15b021ef72": { totalChildCount: 8 },
 		a3fdd8b6c3: { totalChildCount: 17 },
@@ -96,21 +96,21 @@ beforeAll(() => {
 		"-e45b128829": { totalChildCount: 7 },
 	})
 	assertDummySuites(initialProject, {
-		"15b021ef72_0": { duration: 1 },
-		"15b021ef72_2": { duration: 9 },
-		"15b021ef72_2_6": { duration: 6 },
-		a3fdd8b6c3_0: { duration: 8 },
-		a3fdd8b6c3_2: { duration: 35 },
-		a3fdd8b6c3_2_6: { duration: 12 },
-		a3fdd8b6c3_2_8: { duration: 15 },
-		a3fdd8b6c3_2_8_4: { duration: 3 },
-		a3fdd8b6c3_4: { duration: 8 },
-		"-1730f876b4_0": { duration: 58 },
-		"-1730f876b4_0_4": { duration: 18 },
-		"-e45b128829_2": { duration: 9 },
-		"-e45b128829_4": { duration: 21 },
-		"-e45b128829_4_4": { duration: 21 },
-		"-e45b128829_4_4_6": { duration: 6 },
+		"15b021ef72_0": {},
+		"15b021ef72_2": {},
+		"15b021ef72_2_6": {},
+		a3fdd8b6c3_0: {},
+		a3fdd8b6c3_2: {},
+		a3fdd8b6c3_2_6: {},
+		a3fdd8b6c3_2_8: {},
+		a3fdd8b6c3_2_8_4: {},
+		a3fdd8b6c3_4: {},
+		"-1730f876b4_0": {},
+		"-1730f876b4_0_4": {},
+		"-e45b128829_2": {},
+		"-e45b128829_4": {},
+		"-e45b128829_4_4": {},
+		"-e45b128829_4_4_6": {},
 	})
 })
 
@@ -168,10 +168,6 @@ describe.each`
 			expect(countModuleChildren(actualModule)).toBe(
 				countModuleChildren(initialModule),
 			)
-		})
-
-		it("does not affect the suite duration", () => {
-			expect(actualSuite.duration).toBe(initialSuite.duration)
 		})
 
 		it("does not affect the other modules in the project", () => {

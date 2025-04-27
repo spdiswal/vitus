@@ -34,7 +34,6 @@ import {
 	getDummyTestPath,
 } from "+models/Test.fixtures"
 import { newEventStreamReporter } from "+server/EventStreamReporter"
-import type { Duration } from "+types/Duration"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const eventStream = newEventStream()
@@ -78,7 +77,7 @@ describe.each`
 
 		describe("when a run has completed", () => {
 			const modules = moduleProps.ids.map((moduleId) =>
-				dummyVitestModule(moduleId, { duration: 1, status: "passed" }),
+				dummyVitestModule(moduleId, { status: "passed" }),
 			)
 
 			beforeEach(() => {
@@ -93,541 +92,510 @@ describe.each`
 )
 
 describe.each`
-	id               | duration
-	${"15b021ef72"}  | ${5}
-	${"a3fdd8b6c3"}  | ${11}
-	${"-1730f876b4"} | ${21}
-	${"-e45b128829"} | ${30}
-`(
-	"given a module $id",
-	(moduleProps: { id: DummyModuleId; duration: Duration }) => {
-		const moduleId = moduleProps.id
-		const modulePath = getDummyModulePath(moduleId)
-		const moduleDuration = moduleProps.duration
+	id
+	${"15b021ef72"}
+	${"a3fdd8b6c3"}
+	${"-1730f876b4"}
+	${"-e45b128829"}
+`("given a module $id", (moduleProps: { id: DummyModuleId }) => {
+	const moduleId = moduleProps.id
+	const modulePath = getDummyModulePath(moduleId)
 
-		describe("when the module starts running", () => {
-			const module = dummyVitestModule(moduleId, {
-				status: "pending",
-			})
-
-			beforeEach(() => {
-				reporter.onTestModuleStart(module)
-			})
-
-			it("sends a 'module-started' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(
-					moduleStartedEvent({ id: moduleId, path: modulePath }),
-				)
-			})
+	describe("when the module starts running", () => {
+		const module = dummyVitestModule(moduleId, {
+			status: "pending",
 		})
 
-		describe("when the module has failed", () => {
-			const module = dummyVitestModule(moduleId, {
-				duration: moduleDuration,
-				status: "failed",
-			})
-
-			beforeEach(() => {
-				reporter.onTestModuleEnd(module)
-			})
-
-			it("sends a 'module-failed' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(
-					moduleFailedEvent({ id: moduleId, duration: moduleDuration }),
-				)
-			})
+		beforeEach(() => {
+			reporter.onTestModuleStart(module)
 		})
 
-		describe("when the module has passed", () => {
-			const module = dummyVitestModule(moduleId, {
-				duration: moduleDuration,
-				status: "passed",
-			})
+		it("sends a 'module-started' event", () => {
+			expect(spy).toHaveBeenCalledExactlyOnceWith(
+				moduleStartedEvent({ id: moduleId, path: modulePath }),
+			)
+		})
+	})
 
-			beforeEach(() => {
-				reporter.onTestModuleEnd(module)
-			})
-
-			it("sends a 'module-passed' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(
-					modulePassedEvent({ id: moduleId, duration: moduleDuration }),
-				)
-			})
+	describe("when the module has failed", () => {
+		const module = dummyVitestModule(moduleId, {
+			status: "failed",
 		})
 
-		describe("when the module has been skipped", () => {
-			const module = dummyVitestModule(moduleId, {
-				duration: moduleDuration,
-				status: "skipped",
-			})
-
-			beforeEach(() => {
-				reporter.onTestModuleEnd(module)
-			})
-
-			it("sends a 'module-skipped' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(
-					moduleSkippedEvent({ id: moduleId, duration: moduleDuration }),
-				)
-			})
+		beforeEach(() => {
+			reporter.onTestModuleEnd(module)
 		})
 
-		describe("when the module has been deleted", () => {
-			beforeEach(() => {
-				reporter.onTestRemoved(modulePath)
-			})
+		it("sends a 'module-failed' event", () => {
+			expect(spy).toHaveBeenCalledExactlyOnceWith(
+				moduleFailedEvent({ id: moduleId }),
+			)
+		})
+	})
 
-			it("sends a 'module-deleted' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(
-					moduleDeletedEvent({ path: modulePath }),
-				)
-			})
+	describe("when the module has passed", () => {
+		const module = dummyVitestModule(moduleId, {
+			status: "passed",
 		})
 
-		describe.each`
-			id
-			${`${moduleId}_0`}
-			${`${moduleId}_2`}
-			${`${moduleId}_4`}
-		`(
-			"and given a top-level suite $id",
-			(topLevelSuiteProps: { id: DummySuiteId }) => {
-				const topLevelSuiteId = topLevelSuiteProps.id
-				const topLevelSuitePath = getDummySuitePath(topLevelSuiteId)
-				const topLevelSuiteName = getDummySuiteName(topLevelSuitePath)
+		beforeEach(() => {
+			reporter.onTestModuleEnd(module)
+		})
 
-				describe("when the suite starts running", () => {
-					const suite = dummyVitestSuite(topLevelSuiteId, { status: "pending" })
+		it("sends a 'module-passed' event", () => {
+			expect(spy).toHaveBeenCalledExactlyOnceWith(
+				modulePassedEvent({ id: moduleId }),
+			)
+		})
+	})
 
-					beforeEach(() => {
-						reporter.onTestSuiteReady(suite)
-					})
+	describe("when the module has been skipped", () => {
+		const module = dummyVitestModule(moduleId, {
+			status: "skipped",
+		})
 
-					it("sends a 'suite-started' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							suiteStartedEvent({
-								name: topLevelSuiteName,
-								path: topLevelSuitePath,
-							}),
-						)
-					})
+		beforeEach(() => {
+			reporter.onTestModuleEnd(module)
+		})
+
+		it("sends a 'module-skipped' event", () => {
+			expect(spy).toHaveBeenCalledExactlyOnceWith(
+				moduleSkippedEvent({ id: moduleId }),
+			)
+		})
+	})
+
+	describe("when the module has been deleted", () => {
+		beforeEach(() => {
+			reporter.onTestRemoved(modulePath)
+		})
+
+		it("sends a 'module-deleted' event", () => {
+			expect(spy).toHaveBeenCalledExactlyOnceWith(
+				moduleDeletedEvent({ path: modulePath }),
+			)
+		})
+	})
+
+	describe.each`
+		id
+		${`${moduleId}_0`}
+		${`${moduleId}_2`}
+		${`${moduleId}_4`}
+	`(
+		"and given a top-level suite $id",
+		(topLevelSuiteProps: { id: DummySuiteId }) => {
+			const topLevelSuiteId = topLevelSuiteProps.id
+			const topLevelSuitePath = getDummySuitePath(topLevelSuiteId)
+			const topLevelSuiteName = getDummySuiteName(topLevelSuitePath)
+
+			describe("when the suite starts running", () => {
+				const suite = dummyVitestSuite(topLevelSuiteId, { status: "pending" })
+
+				beforeEach(() => {
+					reporter.onTestSuiteReady(suite)
 				})
 
-				describe("when the suite has failed", () => {
-					const suite = dummyVitestSuite(topLevelSuiteId, { status: "failed" })
+				it("sends a 'suite-started' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						suiteStartedEvent({
+							name: topLevelSuiteName,
+							path: topLevelSuitePath,
+						}),
+					)
+				})
+			})
 
-					beforeEach(() => {
-						reporter.onTestSuiteResult(suite)
-					})
+			describe("when the suite has failed", () => {
+				const suite = dummyVitestSuite(topLevelSuiteId, { status: "failed" })
 
-					it("sends a 'suite-failed' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							suiteFailedEvent({ path: topLevelSuitePath }),
-						)
-					})
+				beforeEach(() => {
+					reporter.onTestSuiteResult(suite)
 				})
 
-				describe("when the suite has passed", () => {
-					const suite = dummyVitestSuite(topLevelSuiteId, { status: "passed" })
+				it("sends a 'suite-failed' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						suiteFailedEvent({ path: topLevelSuitePath }),
+					)
+				})
+			})
 
-					beforeEach(() => {
-						reporter.onTestSuiteResult(suite)
-					})
+			describe("when the suite has passed", () => {
+				const suite = dummyVitestSuite(topLevelSuiteId, { status: "passed" })
 
-					it("sends a 'suite-passed' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							suitePassedEvent({ path: topLevelSuitePath }),
-						)
-					})
+				beforeEach(() => {
+					reporter.onTestSuiteResult(suite)
 				})
 
-				describe("when the suite has been skipped", () => {
-					const suite = dummyVitestSuite(topLevelSuiteId, { status: "skipped" })
+				it("sends a 'suite-passed' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						suitePassedEvent({ path: topLevelSuitePath }),
+					)
+				})
+			})
 
-					beforeEach(() => {
-						reporter.onTestSuiteResult(suite)
-					})
+			describe("when the suite has been skipped", () => {
+				const suite = dummyVitestSuite(topLevelSuiteId, { status: "skipped" })
 
-					it("sends a 'suite-skipped' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							suiteSkippedEvent({ path: topLevelSuitePath }),
-						)
-					})
+				beforeEach(() => {
+					reporter.onTestSuiteResult(suite)
 				})
 
-				describe.each`
-					id                              | duration
-					${`${topLevelSuiteProps.id}_1`} | ${1}
-					${`${topLevelSuiteProps.id}_3`} | ${6}
-					${`${topLevelSuiteProps.id}_5`} | ${10}
-				`(
-					"and given a nested test $id",
-					(nestedTestProps: {
-						id: DummyTestId
-						duration: Duration
-					}) => {
-						const nestedTestId = nestedTestProps.id
-						const nestedTestPath = getDummyTestPath(nestedTestId)
-						const nestedTestName = getDummyTestName(nestedTestPath)
-						const nestedTestDuration = nestedTestProps.duration
+				it("sends a 'suite-skipped' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						suiteSkippedEvent({ path: topLevelSuitePath }),
+					)
+				})
+			})
 
-						describe("when the test starts running", () => {
-							const test = dummyVitestTest(nestedTestId, {
-								status: "pending",
-							})
+			describe.each`
+				id
+				${`${topLevelSuiteProps.id}_1`}
+				${`${topLevelSuiteProps.id}_3`}
+				${`${topLevelSuiteProps.id}_5`}
+			`(
+				"and given a nested test $id",
+				(nestedTestProps: {
+					id: DummyTestId
+				}) => {
+					const nestedTestId = nestedTestProps.id
+					const nestedTestPath = getDummyTestPath(nestedTestId)
+					const nestedTestName = getDummyTestName(nestedTestPath)
 
-							beforeEach(() => {
-								reporter.onTestCaseReady(test)
-							})
-
-							it("sends a 'test-started' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									testStartedEvent({
-										name: nestedTestName,
-										path: nestedTestPath,
-									}),
-								)
-							})
+					describe("when the test starts running", () => {
+						const test = dummyVitestTest(nestedTestId, {
+							status: "pending",
 						})
 
-						describe("when the test has failed", () => {
-							const test = dummyVitestTest(nestedTestId, {
-								duration: nestedTestDuration,
-								status: "failed",
-							})
-
-							beforeEach(() => {
-								reporter.onTestCaseResult(test)
-							})
-
-							it("sends a 'test-failed' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									testFailedEvent({
-										duration: nestedTestDuration,
-										path: nestedTestPath,
-									}),
-								)
-							})
+						beforeEach(() => {
+							reporter.onTestCaseReady(test)
 						})
 
-						describe("when the test has passed", () => {
-							const test = dummyVitestTest(nestedTestId, {
-								duration: nestedTestDuration,
-								status: "passed",
-							})
+						it("sends a 'test-started' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								testStartedEvent({
+									name: nestedTestName,
+									path: nestedTestPath,
+								}),
+							)
+						})
+					})
 
-							beforeEach(() => {
-								reporter.onTestCaseResult(test)
-							})
-
-							it("sends a 'test-passed' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									testPassedEvent({
-										duration: nestedTestDuration,
-										path: nestedTestPath,
-									}),
-								)
-							})
+					describe("when the test has failed", () => {
+						const test = dummyVitestTest(nestedTestId, {
+							status: "failed",
 						})
 
-						describe("when the test has been skipped", () => {
-							const test = dummyVitestTest(nestedTestId, {
-								duration: nestedTestDuration,
-								status: "skipped",
-							})
-
-							beforeEach(() => {
-								reporter.onTestCaseResult(test)
-							})
-
-							it("sends a 'test-skipped' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									testSkippedEvent({
-										duration: nestedTestDuration,
-										path: nestedTestPath,
-									}),
-								)
-							})
-						})
-					},
-				)
-
-				describe.each`
-					id
-					${`${topLevelSuiteProps.id}_6`}
-					${`${topLevelSuiteProps.id}_8`}
-				`(
-					"and given a nested suite $id",
-					(nestedSuiteProps: { id: DummySuiteId }) => {
-						const nestedSuiteId = nestedSuiteProps.id
-						const nestedSuitePath = getDummySuitePath(nestedSuiteId)
-						const nestedSuiteName = getDummySuiteName(nestedSuitePath)
-
-						describe("when the suite starts running", () => {
-							const suite = dummyVitestSuite(nestedSuiteId, {
-								status: "pending",
-							})
-
-							beforeEach(() => {
-								reporter.onTestSuiteReady(suite)
-							})
-
-							it("sends a 'suite-started' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									suiteStartedEvent({
-										name: nestedSuiteName,
-										path: nestedSuitePath,
-									}),
-								)
-							})
+						beforeEach(() => {
+							reporter.onTestCaseResult(test)
 						})
 
-						describe("when the suite has failed", () => {
-							const suite = dummyVitestSuite(nestedSuiteId, {
-								status: "failed",
-							})
+						it("sends a 'test-failed' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								testFailedEvent({
+									path: nestedTestPath,
+								}),
+							)
+						})
+					})
 
-							beforeEach(() => {
-								reporter.onTestSuiteResult(suite)
-							})
-
-							it("sends a 'suite-failed' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									suiteFailedEvent({ path: nestedSuitePath }),
-								)
-							})
+					describe("when the test has passed", () => {
+						const test = dummyVitestTest(nestedTestId, {
+							status: "passed",
 						})
 
-						describe("when the suite has passed", () => {
-							const suite = dummyVitestSuite(nestedSuiteId, {
-								status: "passed",
-							})
-
-							beforeEach(() => {
-								reporter.onTestSuiteResult(suite)
-							})
-
-							it("sends a 'suite-passed' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									suitePassedEvent({ path: nestedSuitePath }),
-								)
-							})
+						beforeEach(() => {
+							reporter.onTestCaseResult(test)
 						})
 
-						describe("when the suite has been skipped", () => {
-							const suite = dummyVitestSuite(nestedSuiteId, {
-								status: "skipped",
-							})
+						it("sends a 'test-passed' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								testPassedEvent({
+									path: nestedTestPath,
+								}),
+							)
+						})
+					})
 
-							beforeEach(() => {
-								reporter.onTestSuiteResult(suite)
-							})
-
-							it("sends a 'suite-skipped' event", () => {
-								expect(spy).toHaveBeenCalledExactlyOnceWith(
-									suiteSkippedEvent({ path: nestedSuitePath }),
-								)
-							})
+					describe("when the test has been skipped", () => {
+						const test = dummyVitestTest(nestedTestId, {
+							status: "skipped",
 						})
 
-						describe.each`
-							id                            | duration
-							${`${nestedSuiteProps.id}_7`} | ${3}
-							${`${nestedSuiteProps.id}_9`} | ${12}
-						`(
-							"and given a nested test $id",
-							(nestedTestProps: {
-								id: DummyTestId
-								duration: Duration
-							}) => {
-								const nestedTestId = nestedTestProps.id
-								const nestedTestPath = getDummyTestPath(nestedTestId)
-								const nestedTestName = getDummyTestName(nestedTestPath)
-								const nestedTestDuration = nestedTestProps.duration
+						beforeEach(() => {
+							reporter.onTestCaseResult(test)
+						})
 
-								describe("when the test starts running", () => {
-									const test = dummyVitestTest(nestedTestId, {
-										status: "pending",
-									})
+						it("sends a 'test-skipped' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								testSkippedEvent({
+									path: nestedTestPath,
+								}),
+							)
+						})
+					})
+				},
+			)
 
-									beforeEach(() => {
-										reporter.onTestCaseReady(test)
-									})
+			describe.each`
+				id
+				${`${topLevelSuiteProps.id}_6`}
+				${`${topLevelSuiteProps.id}_8`}
+			`(
+				"and given a nested suite $id",
+				(nestedSuiteProps: { id: DummySuiteId }) => {
+					const nestedSuiteId = nestedSuiteProps.id
+					const nestedSuitePath = getDummySuitePath(nestedSuiteId)
+					const nestedSuiteName = getDummySuiteName(nestedSuitePath)
 
-									it("sends a 'test-started' event", () => {
-										expect(spy).toHaveBeenCalledExactlyOnceWith(
-											testStartedEvent({
-												name: nestedTestName,
-												path: nestedTestPath,
-											}),
-										)
-									})
+					describe("when the suite starts running", () => {
+						const suite = dummyVitestSuite(nestedSuiteId, {
+							status: "pending",
+						})
+
+						beforeEach(() => {
+							reporter.onTestSuiteReady(suite)
+						})
+
+						it("sends a 'suite-started' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								suiteStartedEvent({
+									name: nestedSuiteName,
+									path: nestedSuitePath,
+								}),
+							)
+						})
+					})
+
+					describe("when the suite has failed", () => {
+						const suite = dummyVitestSuite(nestedSuiteId, {
+							status: "failed",
+						})
+
+						beforeEach(() => {
+							reporter.onTestSuiteResult(suite)
+						})
+
+						it("sends a 'suite-failed' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								suiteFailedEvent({ path: nestedSuitePath }),
+							)
+						})
+					})
+
+					describe("when the suite has passed", () => {
+						const suite = dummyVitestSuite(nestedSuiteId, {
+							status: "passed",
+						})
+
+						beforeEach(() => {
+							reporter.onTestSuiteResult(suite)
+						})
+
+						it("sends a 'suite-passed' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								suitePassedEvent({ path: nestedSuitePath }),
+							)
+						})
+					})
+
+					describe("when the suite has been skipped", () => {
+						const suite = dummyVitestSuite(nestedSuiteId, {
+							status: "skipped",
+						})
+
+						beforeEach(() => {
+							reporter.onTestSuiteResult(suite)
+						})
+
+						it("sends a 'suite-skipped' event", () => {
+							expect(spy).toHaveBeenCalledExactlyOnceWith(
+								suiteSkippedEvent({ path: nestedSuitePath }),
+							)
+						})
+					})
+
+					describe.each`
+						id
+						${`${nestedSuiteProps.id}_7`}
+						${`${nestedSuiteProps.id}_9`}
+					`(
+						"and given a nested test $id",
+						(nestedTestProps: {
+							id: DummyTestId
+						}) => {
+							const nestedTestId = nestedTestProps.id
+							const nestedTestPath = getDummyTestPath(nestedTestId)
+							const nestedTestName = getDummyTestName(nestedTestPath)
+
+							describe("when the test starts running", () => {
+								const test = dummyVitestTest(nestedTestId, {
+									status: "pending",
 								})
 
-								describe("when the test has failed", () => {
-									const test = dummyVitestTest(nestedTestId, {
-										duration: nestedTestDuration,
-										status: "failed",
-									})
-
-									beforeEach(() => {
-										reporter.onTestCaseResult(test)
-									})
-
-									it("sends a 'test-failed' event", () => {
-										expect(spy).toHaveBeenCalledExactlyOnceWith(
-											testFailedEvent({
-												duration: nestedTestDuration,
-												path: nestedTestPath,
-											}),
-										)
-									})
+								beforeEach(() => {
+									reporter.onTestCaseReady(test)
 								})
 
-								describe("when the test has passed", () => {
-									const test = dummyVitestTest(nestedTestId, {
-										duration: nestedTestDuration,
-										status: "passed",
-									})
+								it("sends a 'test-started' event", () => {
+									expect(spy).toHaveBeenCalledExactlyOnceWith(
+										testStartedEvent({
+											name: nestedTestName,
+											path: nestedTestPath,
+										}),
+									)
+								})
+							})
 
-									beforeEach(() => {
-										reporter.onTestCaseResult(test)
-									})
-
-									it("sends a 'test-passed' event", () => {
-										expect(spy).toHaveBeenCalledExactlyOnceWith(
-											testPassedEvent({
-												duration: nestedTestDuration,
-												path: nestedTestPath,
-											}),
-										)
-									})
+							describe("when the test has failed", () => {
+								const test = dummyVitestTest(nestedTestId, {
+									status: "failed",
 								})
 
-								describe("when the test has been skipped", () => {
-									const test = dummyVitestTest(nestedTestId, {
-										duration: nestedTestDuration,
-										status: "skipped",
-									})
-
-									beforeEach(() => {
-										reporter.onTestCaseResult(test)
-									})
-
-									it("sends a 'test-skipped' event", () => {
-										expect(spy).toHaveBeenCalledExactlyOnceWith(
-											testSkippedEvent({
-												duration: nestedTestDuration,
-												path: nestedTestPath,
-											}),
-										)
-									})
+								beforeEach(() => {
+									reporter.onTestCaseResult(test)
 								})
-							},
-						)
-					},
-				)
-			},
-		)
 
-		describe.each`
-			id                 | duration
-			${`${moduleId}_1`} | ${7}
-			${`${moduleId}_3`} | ${19}
-			${`${moduleId}_5`} | ${19}
-		`(
-			"and given a top-level test $id",
-			(topLevelTestProps: {
-				id: DummyTestId
-				duration: Duration
-			}) => {
-				const topLevelTestId = topLevelTestProps.id
-				const topLevelTestPath = getDummyTestPath(topLevelTestId)
-				const topLevelTestName = getDummyTestName(topLevelTestPath)
-				const topLevelTestDuration = topLevelTestProps.duration
+								it("sends a 'test-failed' event", () => {
+									expect(spy).toHaveBeenCalledExactlyOnceWith(
+										testFailedEvent({
+											path: nestedTestPath,
+										}),
+									)
+								})
+							})
 
-				describe("when the test starts running", () => {
-					const test = dummyVitestTest(topLevelTestId, {
-						status: "pending",
-					})
+							describe("when the test has passed", () => {
+								const test = dummyVitestTest(nestedTestId, {
+									status: "passed",
+								})
 
-					beforeEach(() => {
-						reporter.onTestCaseReady(test)
-					})
+								beforeEach(() => {
+									reporter.onTestCaseResult(test)
+								})
 
-					it("sends a 'test-started' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							testStartedEvent({
-								name: topLevelTestName,
-								path: topLevelTestPath,
-							}),
-						)
-					})
+								it("sends a 'test-passed' event", () => {
+									expect(spy).toHaveBeenCalledExactlyOnceWith(
+										testPassedEvent({
+											path: nestedTestPath,
+										}),
+									)
+								})
+							})
+
+							describe("when the test has been skipped", () => {
+								const test = dummyVitestTest(nestedTestId, {
+									status: "skipped",
+								})
+
+								beforeEach(() => {
+									reporter.onTestCaseResult(test)
+								})
+
+								it("sends a 'test-skipped' event", () => {
+									expect(spy).toHaveBeenCalledExactlyOnceWith(
+										testSkippedEvent({
+											path: nestedTestPath,
+										}),
+									)
+								})
+							})
+						},
+					)
+				},
+			)
+		},
+	)
+
+	describe.each`
+		id
+		${`${moduleId}_1`}
+		${`${moduleId}_3`}
+		${`${moduleId}_5`}
+	`(
+		"and given a top-level test $id",
+		(topLevelTestProps: {
+			id: DummyTestId
+		}) => {
+			const topLevelTestId = topLevelTestProps.id
+			const topLevelTestPath = getDummyTestPath(topLevelTestId)
+			const topLevelTestName = getDummyTestName(topLevelTestPath)
+
+			describe("when the test starts running", () => {
+				const test = dummyVitestTest(topLevelTestId, {
+					status: "pending",
 				})
 
-				describe("when the test has failed", () => {
-					const test = dummyVitestTest(topLevelTestId, {
-						status: "failed",
-						duration: topLevelTestDuration,
-					})
-
-					beforeEach(() => {
-						reporter.onTestCaseResult(test)
-					})
-
-					it("sends a 'test-failed' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							testFailedEvent({
-								duration: topLevelTestDuration,
-								path: topLevelTestPath,
-							}),
-						)
-					})
+				beforeEach(() => {
+					reporter.onTestCaseReady(test)
 				})
 
-				describe("when the test has passed", () => {
-					const test = dummyVitestTest(topLevelTestId, {
-						status: "passed",
-						duration: topLevelTestDuration,
-					})
+				it("sends a 'test-started' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						testStartedEvent({
+							name: topLevelTestName,
+							path: topLevelTestPath,
+						}),
+					)
+				})
+			})
 
-					beforeEach(() => {
-						reporter.onTestCaseResult(test)
-					})
-
-					it("sends a 'test-passed' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							testPassedEvent({
-								duration: topLevelTestDuration,
-								path: topLevelTestPath,
-							}),
-						)
-					})
+			describe("when the test has failed", () => {
+				const test = dummyVitestTest(topLevelTestId, {
+					status: "failed",
 				})
 
-				describe("when the test has been skipped", () => {
-					const test = dummyVitestTest(topLevelTestId, {
-						status: "skipped",
-						duration: topLevelTestDuration,
-					})
-
-					beforeEach(() => {
-						reporter.onTestCaseResult(test)
-					})
-
-					it("sends a 'test-skipped' event", () => {
-						expect(spy).toHaveBeenCalledExactlyOnceWith(
-							testSkippedEvent({
-								duration: topLevelTestDuration,
-								path: topLevelTestPath,
-							}),
-						)
-					})
+				beforeEach(() => {
+					reporter.onTestCaseResult(test)
 				})
-			},
-		)
-	},
-)
+
+				it("sends a 'test-failed' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						testFailedEvent({
+							path: topLevelTestPath,
+						}),
+					)
+				})
+			})
+
+			describe("when the test has passed", () => {
+				const test = dummyVitestTest(topLevelTestId, {
+					status: "passed",
+				})
+
+				beforeEach(() => {
+					reporter.onTestCaseResult(test)
+				})
+
+				it("sends a 'test-passed' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						testPassedEvent({
+							path: topLevelTestPath,
+						}),
+					)
+				})
+			})
+
+			describe("when the test has been skipped", () => {
+				const test = dummyVitestTest(topLevelTestId, {
+					status: "skipped",
+				})
+
+				beforeEach(() => {
+					reporter.onTestCaseResult(test)
+				})
+
+				it("sends a 'test-skipped' event", () => {
+					expect(spy).toHaveBeenCalledExactlyOnceWith(
+						testSkippedEvent({
+							path: topLevelTestPath,
+						}),
+					)
+				})
+			})
+		},
+	)
+})
 
 describe("when an unknown module has been deleted", () => {
 	beforeEach(() => {

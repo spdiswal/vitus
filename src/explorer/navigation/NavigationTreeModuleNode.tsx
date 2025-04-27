@@ -5,7 +5,6 @@ import type { Renderable } from "+types/Renderable"
 export function NavigationTreeModuleNode(props: Module): Renderable {
 	return (
 		<NavigationTreeNode
-			duration={props.duration}
 			name={props.filename}
 			status={props.status}
 			suitesAndTests={props.suitesAndTests}

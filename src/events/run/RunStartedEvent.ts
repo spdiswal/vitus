@@ -21,7 +21,7 @@ export function applyRunStartedEvent(
 		...project,
 		modules: project.modules.map((module) =>
 			event.invalidatedModuleIds.includes(module.id)
-				? newModule({ ...module, duration: 0, status: "running" })
+				? newModule({ ...module, status: "running" })
 				: module,
 		),
 	})

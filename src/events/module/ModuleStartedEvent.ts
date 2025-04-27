@@ -24,7 +24,6 @@ export function applyModuleStartedEvent(
 
 	const updatedModule = newModule({
 		id: event.id,
-		duration: 0,
 		path: event.path,
 		status: "running",
 		suitesAndTests: existingModule?.suitesAndTests ?? [],
