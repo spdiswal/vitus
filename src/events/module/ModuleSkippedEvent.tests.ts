@@ -15,15 +15,15 @@ const initialProject = dummyProject({
 		"15b021ef72": { status: "passed" },
 		"3afdd8b6c3": { status: "passed" },
 		"-1730f876b4": { status: "passed" },
-		"-e45b128829": { status: "running" },
+		"-e45b128829": { status: "started" },
 	},
 })
 
 describe.each`
 	id               | expectedProjectStatus
-	${"15b021ef72"}  | ${"running"}
-	${"3afdd8b6c3"}  | ${"running"}
-	${"-1730f876b4"} | ${"running"}
+	${"15b021ef72"}  | ${"started"}
+	${"3afdd8b6c3"}  | ${"started"}
+	${"-1730f876b4"} | ${"started"}
 	${"-e45b128829"} | ${"passed"}
 `(
 	"when an existing module with id $id has been skipped",

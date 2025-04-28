@@ -18,10 +18,10 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 	return {
 		isConnected: true,
 		rootPath: "/Users/spdiswal/repositories/plantations/",
-		status: "running",
+		status: "started",
 		modulesById: {
 			"15b021ef72": dummyModule("15b021ef72", {
-				status: "running",
+				status: "started",
 				...modulesById?.["15b021ef72"],
 			}),
 			"3afdd8b6c3": dummyModule("3afdd8b6c3", {
@@ -33,7 +33,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...modulesById?.["-1730f876b4"],
 			}),
 			"-e45b128829": dummyModule("-e45b128829", {
-				status: "running",
+				status: "started",
 				...modulesById?.["-e45b128829"],
 			}),
 		},
@@ -47,7 +47,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["15b021ef72_0_1"],
 			}),
 			"15b021ef72_1": dummyTest("15b021ef72_1", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["15b021ef72_1"],
 			}),
 			"15b021ef72_2": dummySuite("15b021ef72_2", {
@@ -59,7 +59,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["15b021ef72_2_3"],
 			}),
 			"15b021ef72_2_6": dummySuite("15b021ef72_2_6", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["15b021ef72_2_6"],
 			}),
 			"15b021ef72_2_6_7": dummyTest("15b021ef72_2_6_7", {
@@ -67,16 +67,16 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["15b021ef72_2_6_7"],
 			}),
 			"15b021ef72_2_6_9": dummyTest("15b021ef72_2_6_9", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["15b021ef72_2_6_9"],
 			}),
 			//
 			"3afdd8b6c3_0": dummySuite("3afdd8b6c3_0", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_0"],
 			}),
 			"3afdd8b6c3_0_1": dummyTest("3afdd8b6c3_0_1", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_0_1"],
 			}),
 			"3afdd8b6c3_0_3": dummyTest("3afdd8b6c3_0_3", {
@@ -84,7 +84,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["3afdd8b6c3_0_3"],
 			}),
 			"3afdd8b6c3_1": dummyTest("3afdd8b6c3_1", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_1"],
 			}),
 			"3afdd8b6c3_2": dummySuite("3afdd8b6c3_2", {
@@ -100,7 +100,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["3afdd8b6c3_2_6"],
 			}),
 			"3afdd8b6c3_2_6_7": dummyTest("3afdd8b6c3_2_6_7", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_2_6_7"],
 			}),
 			"3afdd8b6c3_2_6_9": dummyTest("3afdd8b6c3_2_6_9", {
@@ -108,11 +108,11 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["3afdd8b6c3_2_6_9"],
 			}),
 			"3afdd8b6c3_2_8": dummySuite("3afdd8b6c3_2_8", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_2_8"],
 			}),
 			"3afdd8b6c3_2_8_1": dummyTest("3afdd8b6c3_2_8_1", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_2_8_1"],
 			}),
 			"3afdd8b6c3_2_8_3": dummyTest("3afdd8b6c3_2_8_3", {
@@ -124,7 +124,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["3afdd8b6c3_2_8_4"],
 			}),
 			"3afdd8b6c3_2_8_4_1": dummyTest("3afdd8b6c3_2_8_4_1", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_2_8_4_1"],
 			}),
 			"3afdd8b6c3_3": dummyTest("3afdd8b6c3_3", {
@@ -136,7 +136,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["3afdd8b6c3_4"],
 			}),
 			"3afdd8b6c3_4_5": dummyTest("3afdd8b6c3_4_5", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["3afdd8b6c3_4_5"],
 			}),
 			//
@@ -145,7 +145,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["-1730f876b4_0"],
 			}),
 			"-1730f876b4_0_1": dummyTest("-1730f876b4_0_1", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["-1730f876b4_0_1"],
 			}),
 			"-1730f876b4_0_3": dummyTest("-1730f876b4_0_3", {
@@ -153,11 +153,11 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["-1730f876b4_0_3"],
 			}),
 			"-1730f876b4_0_4": dummySuite("-1730f876b4_0_4", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["-1730f876b4_0_4"],
 			}),
 			"-1730f876b4_0_4_5": dummyTest("-1730f876b4_0_4_5", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["-1730f876b4_0_4_5"],
 			}),
 			"-1730f876b4_7": dummyTest("-1730f876b4_7", {
@@ -165,7 +165,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["-1730f876b4_7"],
 			}),
 			"-1730f876b4_9": dummyTest("-1730f876b4_9", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["-1730f876b4_9"],
 			}),
 			//
@@ -174,7 +174,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["-e45b128829_2"],
 			}),
 			"-e45b128829_2_1": dummyTest("-e45b128829_2_1", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["-e45b128829_2_1"],
 			}),
 			"-e45b128829_4": dummySuite("-e45b128829_4", {
@@ -182,7 +182,7 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 				...subtasksById?.["-e45b128829_4"],
 			}),
 			"-e45b128829_4_4": dummySuite("-e45b128829_4_4", {
-				status: "running",
+				status: "started",
 				...subtasksById?.["-e45b128829_4_4"],
 			}),
 			"-e45b128829_4_4_3": dummyTest("-e45b128829_4_4_3", {

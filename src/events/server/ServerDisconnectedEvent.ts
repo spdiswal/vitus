@@ -14,8 +14,8 @@ export function serverDisconnectedEvent(): ServerDisconnectedEvent {
 export function applyServerDisconnectedEvent(project: Project): Project {
 	return {
 		...removeModulesByStatus(
-			removeSubtasksByStatus(project, "running"),
-			"running",
+			removeSubtasksByStatus(project, "started"),
+			"started",
 		),
 		isConnected: false,
 	}

@@ -21,7 +21,7 @@ export function mapVitestToSuite(suite: TestSuite): Suite {
 		parentId: suite.parent.id,
 		parentModuleId: suite.module.id,
 		name: suite.name,
-		status: status === "pending" ? "running" : status,
+		status: status === "pending" ? "started" : status,
 	}
 }
 

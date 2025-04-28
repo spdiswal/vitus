@@ -1,1 +1,1 @@
-export type TaskStatus = "failed" | "passed" | "running" | "skipped"
+export type TaskStatus = "failed" | "passed" | "skipped" | "started"

@@ -21,7 +21,7 @@ export function mapVitestToTest(test: TestCase): Test {
 		parentId: test.parent.id,
 		parentModuleId: test.module.id,
 		name: test.name,
-		status: status === "pending" ? "running" : status,
+		status: status === "pending" ? "started" : status,
 	}
 }
 

@@ -39,14 +39,14 @@ describe.each`
 			actualModules = [moduleA, moduleB]
 		})
 
-		it("sets the module statuses to 'running'", () => {
-			expect(actualModules[0].status).toBe<TaskStatus>("running")
-			expect(actualModules[1].status).toBe<TaskStatus>("running")
+		it("sets the module statuses to 'started'", () => {
+			expect(actualModules[0].status).toBe<TaskStatus>("started")
+			expect(actualModules[1].status).toBe<TaskStatus>("started")
 		})
 
-		it.todo("sets the module subtask statuses to 'running'", () => {
-			// expect(actualModules[0].status).toBe<TaskStatus>("running")
-			// expect(actualModules[1].status).toBe<TaskStatus>("running")
+		it.todo("sets the module subtask statuses to 'started'", () => {
+			// expect(actualModules[0].status).toBe<TaskStatus>("started")
+			// expect(actualModules[1].status).toBe<TaskStatus>("started")
 		})
 
 		it("does not affect the set of suites and tests in the project", () => {
@@ -64,7 +64,7 @@ describe.each`
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
-			expect(actualProject.status).toBe<ProjectStatus>("running")
+			expect(actualProject.status).toBe<ProjectStatus>("started")
 		})
 	},
 )

@@ -6,21 +6,21 @@ import { dummyProject } from "+models/Project.fixtures"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({
-	status: "running",
+	status: "started",
 	modulesById: {
 		"15b021ef72": { status: "passed" },
 		"3afdd8b6c3": { status: "passed" },
-		"-1730f876b4": { status: "running" },
+		"-1730f876b4": { status: "started" },
 		"-e45b128829": { status: "passed" },
 	},
 })
 
 describe.each`
 	id               | expectedProjectStatus
-	${"15b021ef72"}  | ${"running"}
-	${"3afdd8b6c3"}  | ${"running"}
+	${"15b021ef72"}  | ${"started"}
+	${"3afdd8b6c3"}  | ${"started"}
 	${"-1730f876b4"} | ${"passed"}
-	${"-e45b128829"} | ${"running"}
+	${"-e45b128829"} | ${"started"}
 `(
 	"when an existing module $id has been deleted",
 	(props: {

@@ -100,7 +100,7 @@ describe.each`
 	const moduleId = moduleProps.id
 	const modulePath = dummyModulePath(moduleId)
 
-	describe("when the module starts running", () => {
+	describe("when the module starts", () => {
 		const module = dummyVitestModule(moduleId, {
 			status: "pending",
 		})
@@ -116,7 +116,7 @@ describe.each`
 					id: moduleId,
 					path: modulePath,
 					filename: getFilenameFromPath(modulePath),
-					status: "running",
+					status: "started",
 				}),
 			)
 		})
@@ -211,7 +211,7 @@ describe.each`
 			const topLevelSuiteId = topLevelSuiteProps.id
 			const topLevelSuiteName = dummySuiteName(topLevelSuiteId)
 
-			describe("when the suite starts running", () => {
+			describe("when the suite starts", () => {
 				const suite = dummyVitestSuite(topLevelSuiteId, { status: "pending" })
 
 				beforeEach(() => {
@@ -226,7 +226,7 @@ describe.each`
 							parentId: moduleId,
 							parentModuleId: moduleId,
 							name: topLevelSuiteName,
-							status: "running",
+							status: "started",
 						}),
 					)
 				})
@@ -308,7 +308,7 @@ describe.each`
 					const nestedTestId = nestedTestProps.id
 					const nestedTestName = dummyTestName(nestedTestId)
 
-					describe("when the test starts running", () => {
+					describe("when the test starts", () => {
 						const test = dummyVitestTest(nestedTestId, {
 							status: "pending",
 						})
@@ -325,7 +325,7 @@ describe.each`
 									parentId: topLevelSuiteId,
 									parentModuleId: moduleId,
 									name: nestedTestName,
-									status: "running",
+									status: "started",
 								}),
 							)
 						})
@@ -412,7 +412,7 @@ describe.each`
 					const nestedSuiteId = nestedSuiteProps.id
 					const nestedSuiteName = dummySuiteName(nestedSuiteId)
 
-					describe("when the suite starts running", () => {
+					describe("when the suite starts", () => {
 						const suite = dummyVitestSuite(nestedSuiteId, {
 							status: "pending",
 						})
@@ -429,7 +429,7 @@ describe.each`
 									parentId: topLevelSuiteId,
 									parentModuleId: moduleId,
 									name: nestedSuiteName,
-									status: "running",
+									status: "started",
 								}),
 							)
 						})
@@ -516,7 +516,7 @@ describe.each`
 							const nestedTestId = nestedTestProps.id
 							const nestedTestName = dummyTestName(nestedTestId)
 
-							describe("when the test starts running", () => {
+							describe("when the test starts", () => {
 								const test = dummyVitestTest(nestedTestId, {
 									status: "pending",
 								})
@@ -533,7 +533,7 @@ describe.each`
 											parentId: nestedSuiteId,
 											parentModuleId: moduleId,
 											name: nestedTestName,
-											status: "running",
+											status: "started",
 										}),
 									)
 								})
@@ -627,7 +627,7 @@ describe.each`
 			const topLevelTestId = topLevelTestProps.id
 			const topLevelTestName = dummyTestName(topLevelTestId)
 
-			describe("when the test starts running", () => {
+			describe("when the test starts", () => {
 				const test = dummyVitestTest(topLevelTestId, {
 					status: "pending",
 				})
@@ -644,7 +644,7 @@ describe.each`
 							parentId: moduleId,
 							parentModuleId: moduleId,
 							name: topLevelTestName,
-							status: "running",
+							status: "started",
 						}),
 					)
 				})

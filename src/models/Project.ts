@@ -13,13 +13,13 @@ export type Project = {
 	subtasksById: Record<TaskId, Suite | Test> // Suites and tests use a shared id namespace in Vitest (i.e. it is impossible to determine from an id alone whether it is a suite or test).
 }
 
-export type ProjectStatus = "failed" | "passed" | "running"
+export type ProjectStatus = "failed" | "passed" | "started"
 
 export function newProject(project: Project): Project {
 	const modules = Object.values(project.modulesById)
 
-	const status = modules.some((module) => module.status === "running")
-		? "running"
+	const status = modules.some((module) => module.status === "started")
+		? "started"
 		: modules.some((module) => module.status === "failed")
 			? "failed"
 			: "passed"
@@ -54,7 +54,7 @@ export function mapVitestToProject(vitest: Vitest): Project {
 	return newProject({
 		rootPath: vitest.config.root,
 		isConnected: true,
-		status: "running",
+		status: "started",
 		modulesById,
 		subtasksById,
 	})

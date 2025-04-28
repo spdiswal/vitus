@@ -26,7 +26,7 @@ describe.each`
 	${"6ab50b9861"}  | ${"Cherries.tests.ts"}     | ${["Apples.tests.ts", "Bananas.tests.ts", "Cherries.tests.ts", "Oranges.tests.ts", "Peaches.tests.ts"]}
 	${"44bc1aaa4d"}  | ${"apples.tests.ts"}       | ${["apples.tests.ts", "Apples.tests.ts", "Bananas.tests.ts", "Oranges.tests.ts", "Peaches.tests.ts"]}
 `(
-	"when a new module named $filename with id $id has started running",
+	"when a new module named $filename with id $id has started",
 	(props: {
 		id: TaskId
 		filename: string
@@ -45,7 +45,7 @@ describe.each`
 					id: moduleId,
 					path: initialProject.rootPath + props.filename,
 					filename: props.filename,
-					status: "running",
+					status: "started",
 				}),
 			)
 
@@ -54,8 +54,8 @@ describe.each`
 			actualModule = module
 		})
 
-		it("sets the module status to 'running'", () => {
-			expect(actualModule.status).toBe<TaskStatus>("running")
+		it("sets the module status to 'started'", () => {
+			expect(actualModule.status).toBe<TaskStatus>("started")
 		})
 
 		it("adds the module to the project", () => {
@@ -67,7 +67,7 @@ describe.each`
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
-			expect(actualProject.status).toBe<ProjectStatus>("running")
+			expect(actualProject.status).toBe<ProjectStatus>("started")
 		})
 	},
 )
@@ -79,7 +79,7 @@ describe.each`
 	${"-1730f876b4"}
 	${"-e45b128829"}
 `(
-	"when an existing module named $filename with id $id has started running",
+	"when an existing module named $filename with id $id has started",
 	(props: {
 		id: TaskId
 	}) => {
@@ -92,7 +92,7 @@ describe.each`
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				moduleStartedEvent({ ...initialModule, status: "running" }),
+				moduleStartedEvent({ ...initialModule, status: "started" }),
 			)
 
 			const module = getModuleById(actualProject, props.id)
@@ -100,8 +100,8 @@ describe.each`
 			actualModule = module
 		})
 
-		it("sets the module status to 'running'", () => {
-			expect(actualModule.status).toBe<TaskStatus>("running")
+		it("sets the module status to 'started'", () => {
+			expect(actualModule.status).toBe<TaskStatus>("started")
 		})
 
 		it("does not affect the set of suites and tests in the project", () => {
@@ -129,7 +129,7 @@ describe.each`
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
-			expect(actualProject.status).toBe<ProjectStatus>("running")
+			expect(actualProject.status).toBe<ProjectStatus>("started")
 		})
 	},
 )

@@ -30,7 +30,7 @@ describe.each`
 	${"-e45b128829_2_0"}     | ${"when ordering a medium meal with extra salad"} | ${["-e45b128829_2", "-e45b128829_2_0", "-e45b128829_2_1", "-e45b128829_4", "-e45b128829_4_4", "-e45b128829_4_4_3", "-e45b128829_4_4_6", "-e45b128829_4_4_6_5"]}
 	${"-e45b128829_4_4_6_8"} | ${"when ordering a small meal with extra sauce"}  | ${["-e45b128829_2", "-e45b128829_2_1", "-e45b128829_4", "-e45b128829_4_4", "-e45b128829_4_4_3", "-e45b128829_4_4_6", "-e45b128829_4_4_6_5", "-e45b128829_4_4_6_8"]}
 `(
-	"when a new suite with id $suiteId has started running",
+	"when a new suite with id $suiteId has started",
 	(props: {
 		suiteId: DummySuiteId
 		name: string
@@ -55,7 +55,7 @@ describe.each`
 					parentId: parentSuiteId ?? moduleId,
 					parentModuleId: moduleId,
 					name: props.name,
-					status: "running",
+					status: "started",
 				}),
 			)
 
@@ -69,8 +69,8 @@ describe.each`
 			actualSuite = suite
 		})
 
-		it("sets the suite status to 'running'", () => {
-			expect(actualSuite.status).toBe<TaskStatus>("running")
+		it("sets the suite status to 'started'", () => {
+			expect(actualSuite.status).toBe<TaskStatus>("started")
 		})
 
 		it("adds the suite to the module", () => {
@@ -102,7 +102,7 @@ describe.each`
 	${"-e45b128829_4_4"}   | ${"and the movie stops playing"}
 	${"-e45b128829_4_4_6"} | ${"and the fridge is out of peach smoothies"}
 `(
-	"when an existing suite with id $suiteId has started running",
+	"when an existing suite with id $suiteId has started",
 	(props: {
 		suiteId: DummySuiteId
 		name: string
@@ -124,7 +124,7 @@ describe.each`
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				suiteStartedEvent({ ...initialSuite, status: "running" }),
+				suiteStartedEvent({ ...initialSuite, status: "started" }),
 			)
 
 			const module = getModuleById(actualProject, moduleId)
@@ -137,8 +137,8 @@ describe.each`
 			actualSuite = suite
 		})
 
-		it("sets the suite status to 'running'", () => {
-			expect(actualSuite.status).toBe<TaskStatus>("running")
+		it("sets the suite status to 'started'", () => {
+			expect(actualSuite.status).toBe<TaskStatus>("started")
 		})
 
 		it("does not affect the set of suites and tests in the project", () => {
@@ -161,7 +161,7 @@ describe.each`
 	${"f9bb9e8bc0_0"}     | ${"when the fruit basket has no pears"}
 	${"f9bb9e8bc0_0_0"}   | ${"when the fruit basket has no strawberries"}
 `(
-	"when a suite with id $suiteId in a non-existing parent has started running",
+	"when a suite with id $suiteId in a non-existing parent has started",
 	(props: {
 		suiteId: DummySuiteId
 		name: string
@@ -180,7 +180,7 @@ describe.each`
 					parentId: parentSuiteId ?? moduleId,
 					parentModuleId: moduleId,
 					name: "dummy suite",
-					status: "running",
+					status: "started",
 				}),
 			)
 		})

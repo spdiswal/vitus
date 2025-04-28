@@ -59,6 +59,6 @@ export function mapVitestToModule(module: TestModule): Module {
 		id: module.id,
 		path: module.moduleId,
 		filename: getFilenameFromPath(module.moduleId),
-		status: status === "queued" || status === "pending" ? "running" : status,
+		status: status === "queued" || status === "pending" ? "started" : status,
 	}
 }

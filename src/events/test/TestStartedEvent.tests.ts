@@ -33,7 +33,7 @@ describe.each`
 	${"-e45b128829_4_4_7"}   | ${"decrypts the messages"}       | ${["-e45b128829_2", "-e45b128829_2_1", "-e45b128829_4", "-e45b128829_4_4", "-e45b128829_4_4_3", "-e45b128829_4_4_6", "-e45b128829_4_4_6_5", "-e45b128829_4_4_7"]}
 	${"-e45b128829_4_4_6_1"} | ${"finds the treasure"}          | ${["-e45b128829_2", "-e45b128829_2_1", "-e45b128829_4", "-e45b128829_4_4", "-e45b128829_4_4_3", "-e45b128829_4_4_6", "-e45b128829_4_4_6_1", "-e45b128829_4_4_6_5"]}
 `(
-	"when a new test with id $testId has started running",
+	"when a new test with id $testId has started",
 	(props: {
 		testId: DummyTestId
 		name: string
@@ -58,7 +58,7 @@ describe.each`
 					parentId: suiteId ?? moduleId,
 					parentModuleId: moduleId,
 					name: props.name,
-					status: "running",
+					status: "started",
 				}),
 			)
 
@@ -72,8 +72,8 @@ describe.each`
 			actualTest = test
 		})
 
-		it("sets the test status to 'running'", () => {
-			expect(actualTest.status).toBe<TaskStatus>("running")
+		it("sets the test status to 'started'", () => {
+			expect(actualTest.status).toBe<TaskStatus>("started")
 		})
 
 		it("adds the suite to the module", () => {
@@ -108,7 +108,7 @@ describe.each`
 	${"-e45b128829_4_4_3"}   | ${"amplifies the signal"}
 	${"-e45b128829_4_4_6_5"} | ${"refills the basket with fresh peaches"}
 `(
-	"when an existing test with id $testId has started running",
+	"when an existing test with id $testId has started",
 	(props: {
 		testId: DummyTestId
 		name: string
@@ -133,7 +133,7 @@ describe.each`
 				testStartedEvent({
 					...initialTest,
 					name: props.name,
-					status: "running",
+					status: "started",
 				}),
 			)
 
@@ -147,8 +147,8 @@ describe.each`
 			actualTest = test
 		})
 
-		it("sets the test status to 'running'", () => {
-			expect(actualTest.status).toBe<TaskStatus>("running")
+		it("sets the test status to 'started'", () => {
+			expect(actualTest.status).toBe<TaskStatus>("started")
 		})
 
 		it("does not affect the set of suites and tests in the project", () => {
@@ -171,7 +171,7 @@ describe.each`
 	${"f9bb9e8bc0_1"}     | ${"makes a pear smoothie"}
 	${"f9bb9e8bc0_0_1"}   | ${"makes a strawberry smoothie"}
 `(
-	"when a test with id $testId in a non-existing parent has started running",
+	"when a test with id $testId in a non-existing parent has started",
 	(props: {
 		testId: DummyTestId
 		name: string
@@ -190,7 +190,7 @@ describe.each`
 					parentId: suiteId ?? moduleId,
 					parentModuleId: moduleId,
 					name: props.name,
-					status: "running",
+					status: "started",
 				}),
 			)
 		})

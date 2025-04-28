@@ -23,7 +23,7 @@ export function applyRunStartedEvent(
 		Object.entries(project.modulesById).map(([moduleId, module]) => [
 			moduleId,
 			event.invalidatedModuleIds.includes(module.id)
-				? { ...module, status: "running" }
+				? { ...module, status: "started" }
 				: module,
 		]),
 	)
@@ -32,7 +32,7 @@ export function applyRunStartedEvent(
 		Object.entries(project.subtasksById).map(([subtaskId, subtask]) => [
 			subtaskId,
 			event.invalidatedModuleIds.includes(subtask.parentModuleId)
-				? { ...subtask, status: "running" }
+				? { ...subtask, status: "started" }
 				: subtask,
 		]),
 	)

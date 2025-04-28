@@ -13,8 +13,8 @@ export function runCompletedEvent(): RunCompletedEvent {
 
 export function applyRunCompletedEvent(project: Project): Project {
 	return removeModulesByStatus(
-		removeSubtasksByStatus(project, "running"),
-		"running",
+		removeSubtasksByStatus(project, "started"),
+		"started",
 	)
 }
 

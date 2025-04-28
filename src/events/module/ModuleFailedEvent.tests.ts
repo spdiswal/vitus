@@ -13,7 +13,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 const initialProject = dummyProject({
 	modulesById: {
 		"15b021ef72": { status: "passed" },
-		"3afdd8b6c3": { status: "running" },
+		"3afdd8b6c3": { status: "started" },
 		"-1730f876b4": { status: "passed" },
 		"-e45b128829": { status: "passed" },
 	},
@@ -21,10 +21,10 @@ const initialProject = dummyProject({
 
 describe.each`
 	id               | expectedProjectStatus
-	${"15b021ef72"}  | ${"running"}
+	${"15b021ef72"}  | ${"started"}
 	${"3afdd8b6c3"}  | ${"failed"}
-	${"-1730f876b4"} | ${"running"}
-	${"-e45b128829"} | ${"running"}
+	${"-1730f876b4"} | ${"started"}
+	${"-e45b128829"} | ${"started"}
 `(
 	"when an existing module with id $id has failed",
 	(props: {
