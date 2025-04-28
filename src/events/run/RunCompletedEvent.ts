@@ -1,8 +1,6 @@
-import {
-	dropUnfinishedModuleChildren,
-	hasNotModuleStatus,
-} from "+models/Module"
-import { type Project, newProject } from "+models/Project"
+import { removeModulesByStatus } from "+models/Module"
+import type { Project } from "+models/Project"
+import { removeSubtasksByStatus } from "+models/Subtask"
 import { logDebug } from "+utilities/Logging"
 
 export type RunCompletedEvent = {
@@ -14,26 +12,19 @@ export function runCompletedEvent(): RunCompletedEvent {
 }
 
 export function applyRunCompletedEvent(project: Project): Project {
-	return newProject({
-		...project,
-		modules: project.modules
-			.filter(hasNotModuleStatus("running"))
-			.map(dropUnfinishedModuleChildren),
-	})
+	return removeModulesByStatus(
+		removeSubtasksByStatus(project, "running"),
+		"running",
+	)
 }
 
-export function logRunCompletedEvent(
-	project: Project,
-	event: RunCompletedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
+export function logRunCompletedEvent(event: RunCompletedEvent): void {
 	logDebug(
 		{
 			label: "Run completed",
 			labelColour: "#1d4ed8",
-			message: `Project ${project.status}`,
+			message: "",
 		},
-		{ event, project: loggableProject },
+		{ event },
 	)
 }

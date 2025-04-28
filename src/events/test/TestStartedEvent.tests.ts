@@ -1,121 +1,17 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { testStartedEvent } from "+events/test/TestStartedEvent"
-import {
-	type Module,
-	countModuleChildren,
-	getModuleChildIds,
-} from "+models/Module"
-import { dummyModule } from "+models/Module.fixtures"
-import {
-	type Project,
-	assertDummyModules,
-	assertDummyProject,
-	assertDummySuites,
-	getModuleById,
-	getTestByPath,
-} from "+models/Project"
+import { type Module, getModuleById } from "+models/Module"
+import { dummyParentIds } from "+models/Module.fixtures"
+import type { Project } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
-import { dummySuite } from "+models/Suite.fixtures"
-import type { Test, TestStatus } from "+models/Test"
-import {
-	type DummyTestId,
-	dummyTest,
-	getDummyTestPath,
-} from "+models/Test.fixtures"
+import { getSubtaskById } from "+models/Subtask"
+import type { TaskStatus } from "+models/TaskStatus"
+import { type Test, assertTest } from "+models/Test"
+import type { DummyTestId } from "+models/Test.fixtures"
 import { assertNotNullish } from "+utilities/Assertions"
-import { beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { status: "failed" }, [
-		dummySuite("15b021ef72_0", { status: "failed" }, [
-			dummyTest("15b021ef72_0_1", { status: "failed" }),
-		]),
-		dummyTest("15b021ef72_1", { status: "passed" }),
-		dummySuite("15b021ef72_2", { status: "passed" }, [
-			dummyTest("15b021ef72_2_3", { status: "skipped" }),
-			dummySuite("15b021ef72_2_6", { status: "passed" }, [
-				dummyTest("15b021ef72_2_6_7", { status: "passed" }),
-				dummyTest("15b021ef72_2_6_9", { status: "skipped" }),
-			]),
-		]),
-	]),
-	dummyModule("a3fdd8b6c3", { status: "failed" }, [
-		dummySuite("a3fdd8b6c3_0", { status: "failed" }, [
-			dummyTest("a3fdd8b6c3_0_1", { status: "passed" }),
-			dummyTest("a3fdd8b6c3_0_3", { status: "failed" }),
-		]),
-		dummyTest("a3fdd8b6c3_1", { status: "skipped" }),
-		dummySuite("a3fdd8b6c3_2", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_2_5", { status: "failed" }),
-			dummySuite("a3fdd8b6c3_2_6", { status: "failed" }, [
-				dummyTest("a3fdd8b6c3_2_6_7", { status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_6_9", { status: "passed" }),
-			]),
-			dummySuite("a3fdd8b6c3_2_8", { status: "passed" }, [
-				dummyTest("a3fdd8b6c3_2_8_1", { status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_8_3", { status: "skipped" }),
-				dummySuite("a3fdd8b6c3_2_8_4", { status: "skipped" }, [
-					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "failed" }),
-				]),
-			]),
-		]),
-		dummyTest("a3fdd8b6c3_3", { status: "failed" }),
-		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_4_5", { status: "skipped" }),
-		]),
-	]),
-	dummyModule("-1730f876b4", { status: "passed" }, [
-		dummySuite("-1730f876b4_0", { status: "passed" }, [
-			dummyTest("-1730f876b4_0_1", { status: "failed" }),
-			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
-			dummySuite("-1730f876b4_0_4", { status: "passed" }, [
-				dummyTest("-1730f876b4_0_4_5", { status: "skipped" }),
-			]),
-		]),
-		dummyTest("-1730f876b4_7", { status: "skipped" }),
-		dummyTest("-1730f876b4_9", { status: "failed" }),
-	]),
-	dummyModule("-e45b128829", { status: "skipped" }, [
-		dummySuite("-e45b128829_2", { status: "failed" }, [
-			dummyTest("-e45b128829_2_1", { status: "failed" }),
-		]),
-		dummySuite("-e45b128829_4", { status: "passed" }, [
-			dummySuite("-e45b128829_4_4", { status: "passed" }, [
-				dummyTest("-e45b128829_4_4_3", { status: "passed" }),
-				dummySuite("-e45b128829_4_4_6", { status: "skipped" }, [
-					dummyTest("-e45b128829_4_4_6_5", { status: "failed" }),
-				]),
-			]),
-		]),
-	]),
-])
-
-beforeAll(() => {
-	assertDummyProject(initialProject, { status: "failed" })
-	assertDummyModules(initialProject, {
-		"15b021ef72": { totalChildCount: 8 },
-		a3fdd8b6c3: { totalChildCount: 17 },
-		"-1730f876b4": { totalChildCount: 7 },
-		"-e45b128829": { totalChildCount: 7 },
-	})
-	assertDummySuites(initialProject, {
-		"15b021ef72_0": {},
-		"15b021ef72_2": {},
-		"15b021ef72_2_6": {},
-		a3fdd8b6c3_0: {},
-		a3fdd8b6c3_2: {},
-		a3fdd8b6c3_2_6: {},
-		a3fdd8b6c3_2_8: {},
-		a3fdd8b6c3_2_8_4: {},
-		a3fdd8b6c3_4: {},
-		"-1730f876b4_0": {},
-		"-1730f876b4_0_4": {},
-		"-e45b128829_2": {},
-		"-e45b128829_4": {},
-		"-e45b128829_4_4": {},
-		"-e45b128829_4_4_6": {},
-	})
-})
+const initialProject = dummyProject()
 
 describe.each`
 	testId                   | name                             | expectedChildIdOrder
@@ -123,10 +19,10 @@ describe.each`
 	${"15b021ef72_0_3"}      | ${"finds the hidden door"}       | ${["15b021ef72_0", "15b021ef72_0_1", "15b021ef72_0_3", "15b021ef72_1", "15b021ef72_2", "15b021ef72_2_3", "15b021ef72_2_6", "15b021ef72_2_6_7", "15b021ef72_2_6_9"]}
 	${"15b021ef72_2_1"}      | ${"navigates the labyrinth"}     | ${["15b021ef72_0", "15b021ef72_0_1", "15b021ef72_1", "15b021ef72_2", "15b021ef72_2_1", "15b021ef72_2_3", "15b021ef72_2_6", "15b021ef72_2_6_7", "15b021ef72_2_6_9"]}
 	${"15b021ef72_2_6_13"}   | ${"explores the unknown"}        | ${["15b021ef72_0", "15b021ef72_0_1", "15b021ef72_1", "15b021ef72_2", "15b021ef72_2_3", "15b021ef72_2_6", "15b021ef72_2_6_7", "15b021ef72_2_6_9", "15b021ef72_2_6_13"]}
-	${"a3fdd8b6c3_5"}        | ${"jumps over the lazy dog"}     | ${["a3fdd8b6c3_0", "a3fdd8b6c3_0_1", "a3fdd8b6c3_0_3", "a3fdd8b6c3_1", "a3fdd8b6c3_2", "a3fdd8b6c3_2_5", "a3fdd8b6c3_2_6", "a3fdd8b6c3_2_6_7", "a3fdd8b6c3_2_6_9", "a3fdd8b6c3_2_8", "a3fdd8b6c3_2_8_1", "a3fdd8b6c3_2_8_3", "a3fdd8b6c3_2_8_4", "a3fdd8b6c3_2_8_4_1", "a3fdd8b6c3_3", "a3fdd8b6c3_4", "a3fdd8b6c3_4_5", "a3fdd8b6c3_5"]}
-	${"a3fdd8b6c3_0_7"}      | ${"climbs the highest mountain"} | ${["a3fdd8b6c3_0", "a3fdd8b6c3_0_1", "a3fdd8b6c3_0_3", "a3fdd8b6c3_0_7", "a3fdd8b6c3_1", "a3fdd8b6c3_2", "a3fdd8b6c3_2_5", "a3fdd8b6c3_2_6", "a3fdd8b6c3_2_6_7", "a3fdd8b6c3_2_6_9", "a3fdd8b6c3_2_8", "a3fdd8b6c3_2_8_1", "a3fdd8b6c3_2_8_3", "a3fdd8b6c3_2_8_4", "a3fdd8b6c3_2_8_4_1", "a3fdd8b6c3_3", "a3fdd8b6c3_4", "a3fdd8b6c3_4_5"]}
-	${"a3fdd8b6c3_2_6_13"}   | ${"dives into the trench"}       | ${["a3fdd8b6c3_0", "a3fdd8b6c3_0_1", "a3fdd8b6c3_0_3", "a3fdd8b6c3_1", "a3fdd8b6c3_2", "a3fdd8b6c3_2_5", "a3fdd8b6c3_2_6", "a3fdd8b6c3_2_6_7", "a3fdd8b6c3_2_6_9", "a3fdd8b6c3_2_6_13", "a3fdd8b6c3_2_8", "a3fdd8b6c3_2_8_1", "a3fdd8b6c3_2_8_3", "a3fdd8b6c3_2_8_4", "a3fdd8b6c3_2_8_4_1", "a3fdd8b6c3_3", "a3fdd8b6c3_4", "a3fdd8b6c3_4_5"]}
-	${"a3fdd8b6c3_2_8_4_3"}  | ${"solves the puzzle"}           | ${["a3fdd8b6c3_0", "a3fdd8b6c3_0_1", "a3fdd8b6c3_0_3", "a3fdd8b6c3_1", "a3fdd8b6c3_2", "a3fdd8b6c3_2_5", "a3fdd8b6c3_2_6", "a3fdd8b6c3_2_6_7", "a3fdd8b6c3_2_6_9", "a3fdd8b6c3_2_8", "a3fdd8b6c3_2_8_1", "a3fdd8b6c3_2_8_3", "a3fdd8b6c3_2_8_4", "a3fdd8b6c3_2_8_4_1", "a3fdd8b6c3_2_8_4_3", "a3fdd8b6c3_3", "a3fdd8b6c3_4", "a3fdd8b6c3_4_5"]}
+	${"3afdd8b6c3_5"}        | ${"jumps over the lazy dog"}     | ${["3afdd8b6c3_0", "3afdd8b6c3_0_1", "3afdd8b6c3_0_3", "3afdd8b6c3_1", "3afdd8b6c3_2", "3afdd8b6c3_2_5", "3afdd8b6c3_2_6", "3afdd8b6c3_2_6_7", "3afdd8b6c3_2_6_9", "3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1", "3afdd8b6c3_3", "3afdd8b6c3_4", "3afdd8b6c3_4_5", "3afdd8b6c3_5"]}
+	${"3afdd8b6c3_0_7"}      | ${"climbs the highest mountain"} | ${["3afdd8b6c3_0", "3afdd8b6c3_0_1", "3afdd8b6c3_0_3", "3afdd8b6c3_0_7", "3afdd8b6c3_1", "3afdd8b6c3_2", "3afdd8b6c3_2_5", "3afdd8b6c3_2_6", "3afdd8b6c3_2_6_7", "3afdd8b6c3_2_6_9", "3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1", "3afdd8b6c3_3", "3afdd8b6c3_4", "3afdd8b6c3_4_5"]}
+	${"3afdd8b6c3_2_6_13"}   | ${"dives into the trench"}       | ${["3afdd8b6c3_0", "3afdd8b6c3_0_1", "3afdd8b6c3_0_3", "3afdd8b6c3_1", "3afdd8b6c3_2", "3afdd8b6c3_2_5", "3afdd8b6c3_2_6", "3afdd8b6c3_2_6_7", "3afdd8b6c3_2_6_9", "3afdd8b6c3_2_6_13", "3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1", "3afdd8b6c3_3", "3afdd8b6c3_4", "3afdd8b6c3_4_5"]}
+	${"3afdd8b6c3_2_8_4_3"}  | ${"solves the puzzle"}           | ${["3afdd8b6c3_0", "3afdd8b6c3_0_1", "3afdd8b6c3_0_3", "3afdd8b6c3_1", "3afdd8b6c3_2", "3afdd8b6c3_2_5", "3afdd8b6c3_2_6", "3afdd8b6c3_2_6_7", "3afdd8b6c3_2_6_9", "3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1", "3afdd8b6c3_2_8_4_3", "3afdd8b6c3_3", "3afdd8b6c3_4", "3afdd8b6c3_4_5"]}
 	${"-1730f876b4_1"}       | ${"empties the swimming pool"}   | ${["-1730f876b4_0", "-1730f876b4_0_1", "-1730f876b4_0_3", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_1", "-1730f876b4_7", "-1730f876b4_9"]}
 	${"-1730f876b4_53"}      | ${"makes a wish list"}           | ${["-1730f876b4_0", "-1730f876b4_0_1", "-1730f876b4_0_3", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_7", "-1730f876b4_9", "-1730f876b4_53"]}
 	${"-1730f876b4_0_5"}     | ${"replaces the broken faucet"}  | ${["-1730f876b4_0", "-1730f876b4_0_1", "-1730f876b4_0_3", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_0_5", "-1730f876b4_7", "-1730f876b4_9"]}
@@ -143,8 +39,8 @@ describe.each`
 		name: string
 		expectedChildIdOrder: Array<string>
 	}) => {
-		const path = getDummyTestPath(props.testId)
-		const [moduleId] = path
+		const testId = props.testId
+		const [moduleId, suiteId] = dummyParentIds(testId)
 
 		const initialModule = getModuleById(initialProject, moduleId)
 		assertNotNullish(initialModule)
@@ -156,26 +52,36 @@ describe.each`
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				testStartedEvent({ name: props.name, path }),
+				testStartedEvent({
+					type: "test",
+					id: testId,
+					parentId: suiteId ?? moduleId,
+					parentModuleId: moduleId,
+					name: props.name,
+					status: "running",
+				}),
 			)
 
 			const module = getModuleById(actualProject, moduleId)
 			assertNotNullish(module)
 			actualModule = module
 
-			const test = getTestByPath(actualProject, path)
+			const test = getSubtaskById(actualProject, testId)
 			assertNotNullish(test)
+			assertTest(test)
 			actualTest = test
 		})
 
 		it("sets the test status to 'running'", () => {
-			expect(actualTest.status).toBe<TestStatus>("running")
+			expect(actualTest.status).toBe<TaskStatus>("running")
 		})
 
-		it("adds the test to the module and sorts the suites and tests by their id", () => {
-			expect(getModuleChildIds(actualModule)).toEqual(
-				props.expectedChildIdOrder,
-			)
+		it("adds the suite to the module", () => {
+			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
+			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
+
+			expect(actualSubtaskIds).toHaveLength(initialSubtaskIds.length + 1)
+			expect(actualSubtaskIds).toContain(testId)
 		})
 
 		it("does not affect the module status", () => {
@@ -189,10 +95,10 @@ describe.each`
 	${"15b021ef72_1"}        | ${"pours a cup of apple juice"}
 	${"15b021ef72_2_3"}      | ${"changes the batteries"}
 	${"15b021ef72_2_6_7"}    | ${"turns the ceiling lights on"}
-	${"a3fdd8b6c3_3"}        | ${"recharges the smartphone"}
-	${"a3fdd8b6c3_2_5"}      | ${"refills the basket with fresh bananas"}
-	${"a3fdd8b6c3_2_6_7"}    | ${"turns the floor lamps on"}
-	${"a3fdd8b6c3_2_8_4_1"}  | ${"pours a cup of banana smoothie"}
+	${"3afdd8b6c3_3"}        | ${"recharges the smartphone"}
+	${"3afdd8b6c3_2_5"}      | ${"refills the basket with fresh bananas"}
+	${"3afdd8b6c3_2_6_7"}    | ${"turns the floor lamps on"}
+	${"3afdd8b6c3_2_8_4_1"}  | ${"pours a cup of banana smoothie"}
 	${"-1730f876b4_7"}       | ${"turns the outdoor lights on"}
 	${"-1730f876b4_9"}       | ${"moves one tile to the south"}
 	${"-1730f876b4_0_1"}     | ${"pours a cup of orange juice"}
@@ -207,11 +113,15 @@ describe.each`
 		testId: DummyTestId
 		name: string
 	}) => {
-		const path = getDummyTestPath(props.testId)
-		const [moduleId] = path
+		const testId = props.testId
+		const [moduleId] = dummyParentIds(testId)
 
 		const initialModule = getModuleById(initialProject, moduleId)
 		assertNotNullish(initialModule)
+
+		const initialTest = getSubtaskById(initialProject, testId)
+		assertNotNullish(initialTest)
+		assertTest(initialTest)
 
 		let actualProject: Project
 		let actualModule: Module
@@ -220,26 +130,32 @@ describe.each`
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				testStartedEvent({ name: props.name, path }),
+				testStartedEvent({
+					...initialTest,
+					name: props.name,
+					status: "running",
+				}),
 			)
 
 			const module = getModuleById(actualProject, moduleId)
 			assertNotNullish(module)
 			actualModule = module
 
-			const test = getTestByPath(actualProject, path)
+			const test = getSubtaskById(actualProject, testId)
 			assertNotNullish(test)
+			assertTest(test)
 			actualTest = test
 		})
 
 		it("sets the test status to 'running'", () => {
-			expect(actualTest.status).toBe<TestStatus>("running")
+			expect(actualTest.status).toBe<TaskStatus>("running")
 		})
 
-		it("does not affect the number of suites and tests in the module", () => {
-			expect(countModuleChildren(actualModule)).toBe(
-				countModuleChildren(initialModule),
-			)
+		it("does not affect the set of suites and tests in the project", () => {
+			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
+			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
+
+			expect(actualSubtaskIds).toEqual(initialSubtaskIds)
 		})
 
 		it("does not affect the module status", () => {
@@ -260,14 +176,22 @@ describe.each`
 		testId: DummyTestId
 		name: string
 	}) => {
-		const path = getDummyTestPath(props.testId)
+		const testId = props.testId
+		const [moduleId, suiteId] = dummyParentIds(testId)
 
 		let actualProject: Project
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				testStartedEvent({ name: props.name, path }),
+				testStartedEvent({
+					type: "test",
+					id: testId,
+					parentId: suiteId ?? moduleId,
+					parentModuleId: moduleId,
+					name: props.name,
+					status: "running",
+				}),
 			)
 		})
 

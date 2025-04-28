@@ -1,4 +1,4 @@
-import { type Project, newProject } from "+models/Project"
+import type { Project } from "+models/Project"
 import { logDebug } from "+utilities/Logging"
 
 export type ServerRestartedEvent = {
@@ -10,21 +10,22 @@ export function serverRestartedEvent(): ServerRestartedEvent {
 }
 
 export function applyServerRestartedEvent(project: Project): Project {
-	return newProject({ ...project, modules: [], isConnected: true })
+	return {
+		rootPath: project.rootPath,
+		isConnected: true,
+		status: "passed",
+		modulesById: {},
+		subtasksById: {},
+	}
 }
 
-export function logServerRestartedEvent(
-	project: Project,
-	event: ServerRestartedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
+export function logServerRestartedEvent(event: ServerRestartedEvent): void {
 	logDebug(
 		{
 			label: "Server restarted",
 			labelColour: "#a21caf",
-			message: `Project ${project.status}`,
+			message: "",
 		},
-		{ event, project: loggableProject },
+		{ event },
 	)
 }

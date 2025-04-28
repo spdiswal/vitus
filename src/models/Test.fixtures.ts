@@ -1,39 +1,43 @@
-import { type DummyModuleId, dummyVitestModule } from "+models/Module.fixtures"
+import {
+	type DummyModuleId,
+	dummyParentIds,
+	dummyVitestModule,
+} from "+models/Module.fixtures"
 import { type DummySuiteId, dummyVitestSuite } from "+models/Suite.fixtures"
-import { type Test, newTest } from "+models/Test"
-import type { TestPath } from "+models/TestPath"
+import type { Test } from "+models/Test"
 import type { OddDigit } from "+types/Digit"
 import type { TestCase, TestState } from "vitest/node"
 
 export function dummyTest(id: DummyTestId, overrides?: Partial<Test>): Test {
-	const path = getDummyTestPath(id)
+	const [parentModuleId, parentSuiteId] = dummyParentIds(id)
 
-	return newTest({
-		name: getDummyTestName(path),
-		path,
+	return {
+		type: "test",
+		id,
+		parentId: parentSuiteId ?? parentModuleId,
+		parentModuleId,
+		name: dummyTestName(id),
 		status: "passed",
 		...overrides,
-	})
+	}
 }
 
 export function dummyVitestTest(
 	id: DummyTestId,
-	overrides?: Partial<{
-		status: TestState
-	}>,
+	overrides?: Partial<{ status: TestState }>,
 ): TestCase {
-	const path = getDummyTestPath(id)
+	const [parentModuleId, parentSuiteId] = dummyParentIds(id)
 
-	const parentModule = dummyVitestModule(path[0] as DummyModuleId)
+	const parentModule = dummyVitestModule(parentModuleId)
 	const parentSuite =
-		path.length > 2 ? dummyVitestSuite(path.at(-2) as DummySuiteId) : null
+		parentSuiteId !== null ? dummyVitestSuite(parentSuiteId) : null
 
 	return {
 		type: "test",
 		module: parentModule,
 		parent: parentSuite ?? parentModule,
 		id,
-		name: getDummyTestName(path),
+		name: dummyTestName(id),
 		result: () => ({ state: overrides?.status ?? "pending" }),
 		diagnostic: () => ({ duration: 0 }),
 	} as TestCase
@@ -51,7 +55,7 @@ const dummyNamesById: Record<DummyModuleId, Record<OddDigit, string>> = {
 		7: "turns the ceiling lights on",
 		9: "moves one tile to the north",
 	},
-	a3fdd8b6c3: {
+	"3afdd8b6c3": {
 		1: "pours a cup of banana smoothie",
 		3: "recharges the smartphone",
 		5: "refills the basket with fresh bananas",
@@ -74,17 +78,9 @@ const dummyNamesById: Record<DummyModuleId, Record<OddDigit, string>> = {
 	},
 }
 
-export function getDummyTestPath(id: DummyTestId): TestPath {
-	const segments = id.split("_")
-	return segments.map(
-		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
-	) as TestPath
-}
+export function dummyTestName(id: DummyTestId): string {
+	const [moduleId] = dummyParentIds(id)
+	const lastDigit = Number.parseInt(id.slice(-1)) as OddDigit
 
-export function getDummyTestName(path: TestPath): string {
-	const moduleId = path[0] as DummyModuleId
-	const testId = path.at(-1) as DummyTestId
-	const lastDigit = Number.parseInt(testId.slice(-1)) as OddDigit
-
-	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[moduleId][lastDigit]}`
+	return dummyNamesById[moduleId][lastDigit]
 }

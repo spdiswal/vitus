@@ -1,129 +1,27 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { testFailedEvent } from "+events/test/TestFailedEvent"
-import { type Module, countModuleChildren } from "+models/Module"
-import { dummyModule } from "+models/Module.fixtures"
-import {
-	type Project,
-	assertDummyModules,
-	assertDummyProject,
-	assertDummySuites,
-	getModuleById,
-	getOtherModules,
-	getTestByPath,
-} from "+models/Project"
+import { dummyParentIds } from "+models/Module.fixtures"
+import type { Project } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
-import { dummySuite } from "+models/Suite.fixtures"
-import type { Test, TestStatus } from "+models/Test"
-import {
-	type DummyTestId,
-	dummyTest,
-	getDummyTestPath,
-} from "+models/Test.fixtures"
+import { getSubtaskById } from "+models/Subtask"
+import type { TaskStatus } from "+models/TaskStatus"
+import { type Test, assertTest } from "+models/Test"
+import type { DummyTestId } from "+models/Test.fixtures"
 import { assertNotNullish } from "+utilities/Assertions"
-import { beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { status: "passed" }, [
-		dummySuite("15b021ef72_0", { status: "passed" }, [
-			dummyTest("15b021ef72_0_1", { status: "passed" }),
-		]),
-		dummyTest("15b021ef72_1", { status: "passed" }),
-		dummySuite("15b021ef72_2", { status: "skipped" }, [
-			dummyTest("15b021ef72_2_3", { status: "passed" }),
-			dummySuite("15b021ef72_2_6", { status: "skipped" }, [
-				dummyTest("15b021ef72_2_6_7", { status: "passed" }),
-				dummyTest("15b021ef72_2_6_9", { status: "passed" }),
-			]),
-		]),
-	]),
-	dummyModule("a3fdd8b6c3", { status: "passed" }, [
-		dummySuite("a3fdd8b6c3_0", { status: "passed" }, [
-			dummyTest("a3fdd8b6c3_0_1", { status: "passed" }),
-			dummyTest("a3fdd8b6c3_0_3", { status: "passed" }),
-		]),
-		dummyTest("a3fdd8b6c3_1", { status: "passed" }),
-		dummySuite("a3fdd8b6c3_2", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_2_5", { status: "passed" }),
-			dummySuite("a3fdd8b6c3_2_6", { status: "skipped" }, [
-				dummyTest("a3fdd8b6c3_2_6_7", { status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_6_9", { status: "passed" }),
-			]),
-			dummySuite("a3fdd8b6c3_2_8", { status: "skipped" }, [
-				dummyTest("a3fdd8b6c3_2_8_1", { status: "passed" }),
-				dummyTest("a3fdd8b6c3_2_8_3", { status: "passed" }),
-				dummySuite("a3fdd8b6c3_2_8_4", { status: "passed" }, [
-					dummyTest("a3fdd8b6c3_2_8_4_1", { status: "skipped" }),
-				]),
-			]),
-		]),
-		dummyTest("a3fdd8b6c3_3", { status: "skipped" }),
-		dummySuite("a3fdd8b6c3_4", { status: "skipped" }, [
-			dummyTest("a3fdd8b6c3_4_5", { status: "skipped" }),
-		]),
-	]),
-	dummyModule("-1730f876b4", { status: "passed" }, [
-		dummySuite("-1730f876b4_0", { status: "passed" }, [
-			dummyTest("-1730f876b4_0_1", { status: "skipped" }),
-			dummyTest("-1730f876b4_0_3", { status: "skipped" }),
-			dummySuite("-1730f876b4_0_4", { status: "passed" }, [
-				dummyTest("-1730f876b4_0_4_5", { status: "skipped" }),
-			]),
-		]),
-		dummyTest("-1730f876b4_7", { status: "skipped" }),
-		dummyTest("-1730f876b4_9", { status: "skipped" }),
-	]),
-	dummyModule("-e45b128829", { status: "passed" }, [
-		dummySuite("-e45b128829_2", { status: "passed" }, [
-			dummyTest("-e45b128829_2_1", { status: "skipped" }),
-		]),
-		dummySuite("-e45b128829_4", { status: "passed" }, [
-			dummySuite("-e45b128829_4_4", { status: "passed" }, [
-				dummyTest("-e45b128829_4_4_3", { status: "skipped" }),
-				dummySuite("-e45b128829_4_4_6", { status: "passed" }, [
-					dummyTest("-e45b128829_4_4_6_5", { status: "passed" }),
-				]),
-			]),
-		]),
-	]),
-])
-
-beforeAll(() => {
-	assertDummyProject(initialProject, { status: "passed" })
-	assertDummyModules(initialProject, {
-		"15b021ef72": { totalChildCount: 8 },
-		a3fdd8b6c3: { totalChildCount: 17 },
-		"-1730f876b4": { totalChildCount: 7 },
-		"-e45b128829": { totalChildCount: 7 },
-	})
-	assertDummySuites(initialProject, {
-		"15b021ef72_0": {},
-		"15b021ef72_2": {},
-		"15b021ef72_2_6": {},
-		a3fdd8b6c3_0: {},
-		a3fdd8b6c3_2: {},
-		a3fdd8b6c3_2_6: {},
-		a3fdd8b6c3_2_8: {},
-		a3fdd8b6c3_2_8_4: {},
-		a3fdd8b6c3_4: {},
-		"-1730f876b4_0": {},
-		"-1730f876b4_0_4": {},
-		"-e45b128829_2": {},
-		"-e45b128829_4": {},
-		"-e45b128829_4_4": {},
-		"-e45b128829_4_4_6": {},
-	})
-})
+const initialProject = dummyProject()
 
 describe.each`
 	testId
 	${"15b021ef72_1"}
 	${"15b021ef72_0_1"}
 	${"15b021ef72_2_6_9"}
-	${"a3fdd8b6c3_1"}
-	${"a3fdd8b6c3_3"}
-	${"a3fdd8b6c3_0_3"}
-	${"a3fdd8b6c3_2_6_7"}
-	${"a3fdd8b6c3_2_8_4_1"}
+	${"3afdd8b6c3_1"}
+	${"3afdd8b6c3_3"}
+	${"3afdd8b6c3_0_3"}
+	${"3afdd8b6c3_2_6_7"}
+	${"3afdd8b6c3_2_8_4_1"}
 	${"-1730f876b4_7"}
 	${"-1730f876b4_9"}
 	${"-1730f876b4_0_1"}
@@ -136,45 +34,47 @@ describe.each`
 	(props: {
 		testId: DummyTestId
 	}) => {
-		const path = getDummyTestPath(props.testId)
-		const [moduleId] = path
+		const testId = props.testId
+		const [moduleId] = dummyParentIds(testId)
 
-		const initialModule = getModuleById(initialProject, moduleId)
-		assertNotNullish(initialModule)
+		const initialTest = getSubtaskById(initialProject, testId)
+		assertNotNullish(initialTest)
+		assertTest(initialTest)
 
 		let actualProject: Project
-		let actualModule: Module
 		let actualTest: Test
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				testFailedEvent({ path }),
+				testFailedEvent({ ...initialTest, status: "failed" }),
 			)
 
-			const module = getModuleById(actualProject, moduleId)
-			assertNotNullish(module)
-			actualModule = module
-
-			const test = getTestByPath(actualProject, path)
+			const test = getSubtaskById(actualProject, testId)
 			assertNotNullish(test)
+			assertTest(test)
 			actualTest = test
 		})
 
 		it("sets the test status to 'failed'", () => {
-			expect(actualTest.status).toBe<TestStatus>("failed")
+			expect(actualTest.status).toBe<TaskStatus>("failed")
 		})
 
-		it("does not affect the number of suites and tests in the module", () => {
-			expect(countModuleChildren(actualModule)).toBe(
-				countModuleChildren(initialModule),
-			)
+		it("does not affect the set of suites and tests in the project", () => {
+			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
+			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
+
+			expect(actualSubtaskIds).toEqual(initialSubtaskIds)
 		})
 
 		it("does not affect the other modules in the project", () => {
-			expect(getOtherModules(actualProject, moduleId)).toEqual(
-				getOtherModules(initialProject, moduleId),
-			)
+			const { [moduleId]: initialUpdatedModule, ...initialOtherModules } =
+				initialProject.modulesById
+
+			const { [moduleId]: actualUpdatedModule, ...actualOtherModules } =
+				actualProject.modulesById
+
+			expect(actualOtherModules).toEqual(initialOtherModules)
 		})
 	},
 )
@@ -190,14 +90,22 @@ describe.each`
 	(props: {
 		testId: DummyTestId
 	}) => {
-		const path = getDummyTestPath(props.testId)
+		const testId = props.testId
+		const [moduleId, suiteId] = dummyParentIds(testId)
 
 		let actualProject: Project
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				testFailedEvent({ path }),
+				testFailedEvent({
+					type: "test",
+					id: testId,
+					parentId: suiteId ?? moduleId,
+					parentModuleId: moduleId,
+					name: "dummy test",
+					status: "failed",
+				}),
 			)
 		})
 

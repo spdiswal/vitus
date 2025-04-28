@@ -1,54 +1,32 @@
-import { type ModuleId, newModule } from "+models/Module"
-import { type Project, getModuleById, putModule } from "+models/Project"
-import { assertNotNullish } from "+utilities/Assertions"
+import { type Module, isExistingModule, putModule } from "+models/Module"
+import type { Project } from "+models/Project"
 import { logDebug } from "+utilities/Logging"
 
 export type ModulePassedEvent = {
 	type: "module-passed"
-	id: ModuleId
+	module: Module
 }
 
-export function modulePassedEvent(
-	props: Omit<ModulePassedEvent, "type">,
-): ModulePassedEvent {
-	return { type: "module-passed", ...props }
+export function modulePassedEvent(module: Module): ModulePassedEvent {
+	return { type: "module-passed", module }
 }
 
 export function applyModulePassedEvent(
 	project: Project,
 	event: ModulePassedEvent,
 ): Project {
-	const existingModule = getModuleById(project, event.id)
-
-	if (existingModule === null) {
-		return project
-	}
-
-	const updatedModule = newModule({
-		...existingModule,
-		status: "passed",
-	})
-
-	return putModule(project, updatedModule)
+	return isExistingModule(project, event.module)
+		? putModule(project, event.module)
+		: project
 }
 
-export function logModulePassedEvent(
-	project: Project,
-	event: ModulePassedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
-	const module = getModuleById(project, event.id)
-	assertNotNullish(module)
-
-	const { suitesAndTests, ...loggableModule } = module
-
+export function logModulePassedEvent(event: ModulePassedEvent): void {
 	logDebug(
 		{
 			label: "Module passed",
 			labelColour: "#15803d",
-			message: module.filename,
+			message: event.module.filename,
 		},
-		{ event, module: loggableModule, project: loggableProject },
+		{ event },
 	)
 }

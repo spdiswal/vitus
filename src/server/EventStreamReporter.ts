@@ -15,8 +15,9 @@ import { testFailedEvent } from "+events/test/TestFailedEvent"
 import { testPassedEvent } from "+events/test/TestPassedEvent"
 import { testSkippedEvent } from "+events/test/TestSkippedEvent"
 import { testStartedEvent } from "+events/test/TestStartedEvent"
-import { mapVitestToSuitePath } from "+models/Suite"
-import { mapVitestToTestPath } from "+models/Test"
+import { mapVitestToModule } from "+models/Module"
+import { mapVitestToSuite } from "+models/Suite"
+import { mapVitestToTest } from "+models/Test"
 import { notNullish } from "+utilities/Arrays"
 import type { Reporter } from "vitest/reporters"
 
@@ -46,71 +47,61 @@ export function newEventStreamReporter(
 				.map((specification) => specification.testModule?.id)
 				.filter(notNullish)
 
-			eventStream.send(runStartedEvent({ invalidatedModuleIds }))
+			eventStream.send(runStartedEvent(invalidatedModuleIds))
 		},
 		onTestModuleStart(module): void {
-			eventStream.send(
-				moduleStartedEvent({ id: module.id, path: module.moduleId }),
-			)
+			eventStream.send(moduleStartedEvent(mapVitestToModule(module)))
 		},
 		onTestSuiteReady(suite): void {
-			const path = mapVitestToSuitePath(suite)
-			eventStream.send(suiteStartedEvent({ name: suite.name, path }))
+			eventStream.send(suiteStartedEvent(mapVitestToSuite(suite)))
 		},
 		onTestCaseReady(test): void {
-			const path = mapVitestToTestPath(test)
-			eventStream.send(testStartedEvent({ name: test.name, path }))
+			eventStream.send(testStartedEvent(mapVitestToTest(test)))
 		},
 		onTestCaseResult(test): void {
-			const path = mapVitestToTestPath(test)
-
 			switch (test.result().state) {
 				case "failed": {
-					eventStream.send(testFailedEvent({ path }))
+					eventStream.send(testFailedEvent(mapVitestToTest(test)))
 					break
 				}
 				case "passed": {
-					eventStream.send(testPassedEvent({ path }))
+					eventStream.send(testPassedEvent(mapVitestToTest(test)))
 					break
 				}
 				case "skipped": {
-					eventStream.send(testSkippedEvent({ path }))
+					eventStream.send(testSkippedEvent(mapVitestToTest(test)))
 					break
 				}
 			}
 		},
 		onTestSuiteResult(suite): void {
-			const path = mapVitestToSuitePath(suite)
-
 			switch (suite.state()) {
 				case "failed": {
-					eventStream.send(suiteFailedEvent({ path }))
+					eventStream.send(suiteFailedEvent(mapVitestToSuite(suite)))
 					break
 				}
 				case "passed": {
-					eventStream.send(suitePassedEvent({ path }))
+					eventStream.send(suitePassedEvent(mapVitestToSuite(suite)))
 					break
 				}
 				case "skipped": {
-					eventStream.send(suiteSkippedEvent({ path }))
+					eventStream.send(suiteSkippedEvent(mapVitestToSuite(suite)))
 					break
 				}
 			}
 		},
 		onTestModuleEnd(module): void {
-			const id = module.id
-
 			switch (module.state()) {
 				case "failed": {
-					eventStream.send(moduleFailedEvent({ id }))
+					eventStream.send(moduleFailedEvent(mapVitestToModule(module)))
 					break
 				}
 				case "passed": {
-					eventStream.send(modulePassedEvent({ id }))
+					eventStream.send(modulePassedEvent(mapVitestToModule(module)))
 					break
 				}
 				case "skipped": {
-					eventStream.send(moduleSkippedEvent({ id }))
+					eventStream.send(moduleSkippedEvent(mapVitestToModule(module)))
 					break
 				}
 			}
@@ -120,7 +111,7 @@ export function newEventStreamReporter(
 		},
 		onTestRemoved(moduleId): void {
 			if (moduleId !== undefined) {
-				eventStream.send(moduleDeletedEvent({ path: moduleId }))
+				eventStream.send(moduleDeletedEvent(moduleId))
 			}
 		},
 	}

@@ -1,54 +1,32 @@
-import { type ModuleId, newModule } from "+models/Module"
-import { type Project, getModuleById, putModule } from "+models/Project"
-import { assertNotNullish } from "+utilities/Assertions"
+import { type Module, isExistingModule, putModule } from "+models/Module"
+import type { Project } from "+models/Project"
 import { logDebug } from "+utilities/Logging"
 
 export type ModuleFailedEvent = {
 	type: "module-failed"
-	id: ModuleId
+	module: Module
 }
 
-export function moduleFailedEvent(
-	props: Omit<ModuleFailedEvent, "type">,
-): ModuleFailedEvent {
-	return { type: "module-failed", ...props }
+export function moduleFailedEvent(module: Module): ModuleFailedEvent {
+	return { type: "module-failed", module }
 }
 
 export function applyModuleFailedEvent(
 	project: Project,
 	event: ModuleFailedEvent,
 ): Project {
-	const existingModule = getModuleById(project, event.id)
-
-	if (existingModule === null) {
-		return project
-	}
-
-	const updatedModule = newModule({
-		...existingModule,
-		status: "failed",
-	})
-
-	return putModule(project, updatedModule)
+	return isExistingModule(project, event.module)
+		? putModule(project, event.module)
+		: project
 }
 
-export function logModuleFailedEvent(
-	project: Project,
-	event: ModuleFailedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
-	const module = getModuleById(project, event.id)
-	assertNotNullish(module)
-
-	const { suitesAndTests, ...loggableModule } = module
-
+export function logModuleFailedEvent(event: ModuleFailedEvent): void {
 	logDebug(
 		{
 			label: "Module failed",
 			labelColour: "#b91c1c",
-			message: module.filename,
+			message: event.module.filename,
 		},
-		{ event, module: loggableModule, project: loggableProject },
+		{ event },
 	)
 }

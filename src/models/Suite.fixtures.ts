@@ -1,24 +1,27 @@
-import { type DummyModuleId, dummyVitestModule } from "+models/Module.fixtures"
-import { type Suite, newSuite } from "+models/Suite"
-import type { SuitePath } from "+models/SuitePath"
-import type { Test } from "+models/Test"
+import {
+	type DummyModuleId,
+	dummyParentIds,
+	dummyVitestModule,
+} from "+models/Module.fixtures"
+import type { Suite } from "+models/Suite"
 import type { EvenDigit } from "+types/Digit"
-import type { TestSuite, TestSuiteState } from "vitest/node"
+import type { TestCase, TestSuite, TestSuiteState } from "vitest/node"
 
 export function dummySuite(
 	id: DummySuiteId,
 	overrides?: Partial<Suite>,
-	suitesAndTests?: Array<Suite | Test>,
 ): Suite {
-	const path = getDummySuitePath(id)
+	const [parentModuleId, parentSuiteId] = dummyParentIds(id)
 
-	return newSuite({
-		name: getDummySuiteName(path),
-		path,
+	return {
+		type: "suite",
+		id,
+		parentId: parentSuiteId ?? parentModuleId,
+		parentModuleId,
+		name: dummySuiteName(id),
 		status: "passed",
-		suitesAndTests: suitesAndTests ?? [],
 		...overrides,
-	})
+	}
 }
 
 export function dummyVitestSuite(
@@ -27,19 +30,24 @@ export function dummyVitestSuite(
 		status: TestSuiteState
 	}>,
 ): TestSuite {
-	const path = getDummySuitePath(id)
+	const [parentModuleId, parentSuiteId] = dummyParentIds(id)
 
-	const parentModule = dummyVitestModule(path[0] as DummyModuleId)
+	const parentModule = dummyVitestModule(parentModuleId)
 	const parentSuite =
-		path.length > 2 ? dummyVitestSuite(path.at(-2) as DummySuiteId) : null
+		parentSuiteId !== null ? dummyVitestSuite(parentSuiteId) : null
 
 	return {
 		type: "suite",
 		module: parentModule,
 		parent: parentSuite ?? parentModule,
 		id,
-		name: getDummySuiteName(path),
+		name: dummySuiteName(id),
 		state: () => overrides?.status ?? "pending",
+		children: {
+			allTests(): Iterable<TestCase> {
+				return []
+			},
+		},
 	} as TestSuite
 }
 
@@ -56,7 +64,7 @@ const dummyNamesById: Record<DummyModuleId, Record<EvenDigit, string>> = {
 		6: "the fridge is out of apple juice",
 		8: "travelling through time",
 	},
-	a3fdd8b6c3: {
+	"3afdd8b6c3": {
 		0: "the fruit basket has no bananas",
 		2: "the summer break is over",
 		4: "the music stops playing",
@@ -79,17 +87,9 @@ const dummyNamesById: Record<DummyModuleId, Record<EvenDigit, string>> = {
 	},
 }
 
-export function getDummySuitePath(id: DummySuiteId): SuitePath {
-	const segments = id.split("_")
-	return segments.map(
-		(_, index) => `${segments.slice(0, index + 1).join("_")}`,
-	) as SuitePath
-}
+export function dummySuiteName(id: DummySuiteId): string {
+	const [moduleId, parentSuiteId] = dummyParentIds(id)
+	const lastDigit = Number.parseInt(id.slice(-1)) as EvenDigit
 
-export function getDummySuiteName(path: SuitePath): string {
-	const moduleId = path[0] as DummyModuleId
-	const suiteId = path.at(-1) as DummySuiteId
-	const lastDigit = Number.parseInt(suiteId.slice(-1)) as EvenDigit
-
-	return `${path.length === 2 ? "when" : "and"} ${dummyNamesById[moduleId][lastDigit]}`
+	return `${parentSuiteId === null ? "when" : "and"} ${dummyNamesById[moduleId][lastDigit]}`
 }

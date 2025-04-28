@@ -1,63 +1,38 @@
+import type { Project } from "+models/Project"
 import {
-	type Project,
-	getModuleById,
-	getTestByPath,
-	putTest,
-} from "+models/Project"
-import { newTest } from "+models/Test"
-import type { TestPath } from "+models/TestPath"
-import { assertNotNullish } from "+utilities/Assertions"
+	hasExistingParents,
+	isExistingSubtask,
+	putSubtask,
+} from "+models/Subtask"
+import type { Test } from "+models/Test"
 import { logDebug } from "+utilities/Logging"
 
 export type TestFailedEvent = {
 	type: "test-failed"
-	path: TestPath
+	test: Test
 }
 
-export function testFailedEvent(
-	props: Omit<TestFailedEvent, "type">,
-): TestFailedEvent {
-	return { type: "test-failed", ...props }
+export function testFailedEvent(test: Test): TestFailedEvent {
+	return { type: "test-failed", test }
 }
 
 export function applyTestFailedEvent(
 	project: Project,
 	event: TestFailedEvent,
 ): Project {
-	const existingTest = getTestByPath(project, event.path)
-
-	if (existingTest === null) {
-		return project
-	}
-
-	const updatedTest = newTest({
-		...existingTest,
-		status: "failed",
-	})
-
-	return putTest(project, updatedTest)
+	return isExistingSubtask(project, event.test) &&
+		hasExistingParents(project, event.test)
+		? putSubtask(project, event.test)
+		: project
 }
 
-export function logTestFailedEvent(
-	project: Project,
-	event: TestFailedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
-	const module = getModuleById(project, event.path[0])
-	assertNotNullish(module)
-
-	const test = getTestByPath(project, event.path)
-	assertNotNullish(test)
-
-	const { suitesAndTests, ...loggableModule } = module
-
+export function logTestFailedEvent(event: TestFailedEvent): void {
 	logDebug(
 		{
 			label: "Test failed",
 			labelColour: "#b91c1c",
-			message: `${module.filename} > ${event.path.length > 2 ? "... > " : ""}${test.name}`,
+			message: event.test.name,
 		},
-		{ event, test, module: loggableModule, project: loggableProject },
+		{ event },
 	)
 }

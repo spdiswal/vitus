@@ -1,38 +1,15 @@
 import { ChevronRightIcon } from "+explorer/icons/ChevronRightIcon"
-import { NavigationTreeSuiteNode } from "+explorer/navigation/NavigationTreeSuiteNode"
-import { NavigationTreeTestNode } from "+explorer/navigation/NavigationTreeTestNode"
-import { type Suite, isSuite } from "+models/Suite"
-import type { Test } from "+models/Test"
+import type { TaskStatus } from "+models/TaskStatus"
 import { cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
-import { useMemo, useState } from "preact/hooks"
+import { useState } from "preact/hooks"
 
 export function NavigationTreeNode(props: {
-	name: string
-	status: "failed" | "passed" | "running" | "skipped"
-	suitesAndTests: Array<Suite | Test>
+	label: string
+	status: TaskStatus
+	children?: Renderable
 }): Renderable {
 	const [expanded, setExpanded] = useState(false)
-
-	const memoisedSuitesAndTests = useMemo(
-		() => (
-			<ul
-				class={cn(
-					"flex flex-col ml-3.5 pl-2.5 border-l border-gray-400 dark:border-gray-700 transition",
-					!expanded && "hidden",
-				)}
-			>
-				{props.suitesAndTests.map((suiteOrTest) =>
-					isSuite(suiteOrTest) ? (
-						<NavigationTreeSuiteNode key={suiteOrTest.id} {...suiteOrTest} />
-					) : (
-						<NavigationTreeTestNode key={suiteOrTest.id} {...suiteOrTest} />
-					),
-				)}
-			</ul>
-		),
-		[props.suitesAndTests, expanded],
-	)
 
 	return (
 		<li class="pt-1 flex flex-col">
@@ -62,10 +39,17 @@ export function NavigationTreeNode(props: {
 					stroke-width="3"
 				/>
 				<span class="text-gray-950 dark:text-gray-50 transition">
-					{props.name}
+					{props.label}
 				</span>
 			</button>
-			{memoisedSuitesAndTests}
+			<ul
+				class={cn(
+					"flex flex-col ml-3.5 pl-2.5 border-l border-gray-400 dark:border-gray-700 transition",
+					!expanded && "hidden",
+				)}
+			>
+				{props.children}
+			</ul>
 		</li>
 	)
 }

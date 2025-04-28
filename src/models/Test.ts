@@ -1,43 +1,34 @@
-import { type Suite, isSuite, mapVitestToSuitePath } from "+models/Suite"
-import { type TestPath, getTestIdFromTestPath } from "+models/TestPath"
-import type { Computed, PickNonComputed } from "+types/Computed"
-import type { TestCase, TestState } from "vitest/node"
+import type { Subtask } from "+models/Subtask"
+import type { TaskId } from "+models/TaskId"
+import type { TaskStatus } from "+models/TaskStatus"
+import type { TestCase } from "vitest/node"
 
 export type Test = {
-	id: Computed<TestId>
+	type: "test"
+	id: TaskId
+	parentId: TaskId
+	parentModuleId: TaskId
 	name: string
-	path: TestPath
-	status: TestStatus
-}
-
-export type TestId = string
-export type TestStatus = "failed" | "passed" | "running" | "skipped"
-
-export function newTest(props: PickNonComputed<Test>): Test {
-	return { ...props, id: getTestIdFromTestPath(props.path) }
-}
-
-export function isTest(suiteOrTest: Suite | Test): suiteOrTest is Test {
-	return !isSuite(suiteOrTest)
-}
-
-const statusMap: Record<TestState, TestStatus> = {
-	failed: "failed",
-	passed: "passed",
-	pending: "running",
-	skipped: "skipped",
+	status: TaskStatus
 }
 
 export function mapVitestToTest(test: TestCase): Test {
-	return newTest({
+	const status = test.result().state
+
+	return {
+		type: "test",
+		id: test.id,
+		parentId: test.parent.id,
+		parentModuleId: test.module.id,
 		name: test.name,
-		path: mapVitestToTestPath(test),
-		status: statusMap[test.result().state],
-	})
+		status: status === "pending" ? "running" : status,
+	}
 }
 
-export function mapVitestToTestPath(test: TestCase): TestPath {
-	return test.parent.type === "module"
-		? [test.parent.id, test.id]
-		: [...mapVitestToSuitePath(test.parent), test.id]
+export function assertTest(subtask: Subtask): asserts subtask is Test {
+	if (subtask.type !== "test") {
+		throw new Error(
+			`Expected the subtask to be a test, but was '${subtask.type}'`,
+		)
+	}
 }

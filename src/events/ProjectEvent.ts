@@ -172,83 +172,80 @@ export function applyProjectEvent(
 	}
 }
 
-export function logProjectEvents(
-	project: Project,
-	events: ProjectEvents,
-): void {
+export function logProjectEvents(events: ProjectEvents): void {
 	for (const event of events) {
-		logProjectEvent(project, event)
+		logProjectEvent(event)
 	}
 }
 
-export function logProjectEvent(project: Project, event: ProjectEvent): void {
+export function logProjectEvent(event: ProjectEvent): void {
 	switch (event.type) {
 		case "module-deleted": {
-			logModuleDeletedEvent(project, event)
+			logModuleDeletedEvent(event)
 			break
 		}
 		case "module-failed": {
-			logModuleFailedEvent(project, event)
+			logModuleFailedEvent(event)
 			break
 		}
 		case "module-passed": {
-			logModulePassedEvent(project, event)
+			logModulePassedEvent(event)
 			break
 		}
 		case "module-skipped": {
-			logModuleSkippedEvent(project, event)
+			logModuleSkippedEvent(event)
 			break
 		}
 		case "module-started": {
-			logModuleStartedEvent(project, event)
+			logModuleStartedEvent(event)
 			break
 		}
 		case "run-completed": {
-			logRunCompletedEvent(project, event)
+			logRunCompletedEvent(event)
 			break
 		}
 		case "run-started": {
-			logRunStartedEvent(project, event)
+			logRunStartedEvent(event)
 			break
 		}
 		case "server-disconnected": {
-			logServerDisconnectedEvent(project, event)
+			logServerDisconnectedEvent(event)
 			break
 		}
 		case "server-restarted": {
-			logServerRestartedEvent(project, event)
+			logServerRestartedEvent(event)
 			break
 		}
 		case "suite-failed": {
-			logSuiteFailedEvent(project, event)
+			logSuiteFailedEvent(event)
 			break
 		}
 		case "suite-passed": {
-			logSuitePassedEvent(project, event)
+			logSuitePassedEvent(event)
 			break
 		}
 		case "suite-skipped": {
-			logSuiteSkippedEvent(project, event)
+			logSuiteSkippedEvent(event)
 			break
 		}
 		case "suite-started": {
-			logSuiteStartedEvent(project, event)
+			logSuiteStartedEvent(event)
 			break
 		}
 		case "test-failed": {
-			logTestFailedEvent(project, event)
+			logTestFailedEvent(event)
 			break
 		}
 		case "test-passed": {
-			logTestPassedEvent(project, event)
+			logTestPassedEvent(event)
 			break
 		}
 		case "test-skipped": {
-			logTestSkippedEvent(project, event)
+			logTestSkippedEvent(event)
 			break
 		}
 		case "test-started": {
-			logTestStartedEvent(project, event)
+			logTestStartedEvent(event)
 			break
 		}
 	}

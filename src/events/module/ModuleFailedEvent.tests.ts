@@ -1,48 +1,46 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { moduleFailedEvent } from "+events/module/ModuleFailedEvent"
-import type { Module, ModuleId, ModuleStatus } from "+models/Module"
-import { dummyModule } from "+models/Module.fixtures"
-import {
-	type Project,
-	type ProjectStatus,
-	assertDummyProject,
-	getModuleById,
-	getOtherModules,
-} from "+models/Project"
+import { type Module, getModuleById } from "+models/Module"
+import { dummyModulePath } from "+models/Module.fixtures"
+import type { Project, ProjectStatus } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
+import type { TaskId } from "+models/TaskId"
+import type { TaskStatus } from "+models/TaskStatus"
+import { getFilenameFromPath } from "+types/Path"
 import { assertNotNullish } from "+utilities/Assertions"
-import { beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { status: "passed" }),
-	dummyModule("a3fdd8b6c3", { status: "running" }),
-	dummyModule("-1730f876b4", { status: "passed" }),
-	dummyModule("-e45b128829", { status: "passed" }),
-])
-
-beforeAll(() => {
-	assertDummyProject(initialProject, { status: "running" })
+const initialProject = dummyProject({
+	modulesById: {
+		"15b021ef72": { status: "passed" },
+		"3afdd8b6c3": { status: "running" },
+		"-1730f876b4": { status: "passed" },
+		"-e45b128829": { status: "passed" },
+	},
 })
 
 describe.each`
 	id               | expectedProjectStatus
 	${"15b021ef72"}  | ${"running"}
-	${"a3fdd8b6c3"}  | ${"failed"}
+	${"3afdd8b6c3"}  | ${"failed"}
 	${"-1730f876b4"} | ${"running"}
 	${"-e45b128829"} | ${"running"}
 `(
 	"when an existing module with id $id has failed",
 	(props: {
-		id: ModuleId
+		id: TaskId
 		expectedProjectStatus: ProjectStatus
 	}) => {
 		let actualProject: Project
 		let actualModule: Module
 
 		beforeEach(() => {
+			const initialModule = getModuleById(initialProject, props.id)
+			assertNotNullish(initialModule)
+
 			actualProject = applyProjectEvent(
 				initialProject,
-				moduleFailedEvent({ id: props.id }),
+				moduleFailedEvent({ ...initialModule, status: "failed" }),
 			)
 
 			const module = getModuleById(actualProject, props.id)
@@ -51,17 +49,24 @@ describe.each`
 		})
 
 		it("sets the module status to 'failed'", () => {
-			expect(actualModule.status).toBe<ModuleStatus>("failed")
+			expect(actualModule.status).toBe<TaskStatus>("failed")
 		})
 
-		it("does not affect the number of modules in the project", () => {
-			expect(actualProject.modules).toHaveLength(initialProject.modules.length)
+		it("does not affect the set of modules in the project", () => {
+			const actualModuleIds = Object.keys(actualProject.modulesById)
+			const initialModuleIds = Object.keys(initialProject.modulesById)
+
+			expect(actualModuleIds).toHaveLength(initialModuleIds.length)
 		})
 
 		it("does not affect the other modules in the project", () => {
-			expect(getOtherModules(actualProject, props.id)).toEqual(
-				getOtherModules(initialProject, props.id),
-			)
+			const { [props.id]: initialUpdatedModule, ...initialOtherModules } =
+				initialProject.modulesById
+
+			const { [props.id]: actualUpdatedModule, ...actualOtherModules } =
+				actualProject.modulesById
+
+			expect(actualOtherModules).toEqual(initialOtherModules)
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
@@ -74,9 +79,17 @@ describe("when a non-existing module has failed", () => {
 	let actualProject: Project
 
 	beforeEach(() => {
+		const path = dummyModulePath("f9bb9e8bc0")
+
 		actualProject = applyProjectEvent(
 			initialProject,
-			moduleFailedEvent({ id: "f9bb9e8bc0" }),
+			moduleFailedEvent({
+				type: "module",
+				id: "f9bb9e8bc0",
+				path,
+				filename: getFilenameFromPath(path),
+				status: "failed",
+			}),
 		)
 	})
 

@@ -1,63 +1,38 @@
+import type { Project } from "+models/Project"
 import {
-	type Project,
-	getModuleById,
-	getTestByPath,
-	putTest,
-} from "+models/Project"
-import { newTest } from "+models/Test"
-import type { TestPath } from "+models/TestPath"
-import { assertNotNullish } from "+utilities/Assertions"
+	hasExistingParents,
+	isExistingSubtask,
+	putSubtask,
+} from "+models/Subtask"
+import type { Test } from "+models/Test"
 import { logDebug } from "+utilities/Logging"
 
 export type TestSkippedEvent = {
 	type: "test-skipped"
-	path: TestPath
+	test: Test
 }
 
-export function testSkippedEvent(
-	props: Omit<TestSkippedEvent, "type">,
-): TestSkippedEvent {
-	return { type: "test-skipped", ...props }
+export function testSkippedEvent(test: Test): TestSkippedEvent {
+	return { type: "test-skipped", test }
 }
 
 export function applyTestSkippedEvent(
 	project: Project,
 	event: TestSkippedEvent,
 ): Project {
-	const existingTest = getTestByPath(project, event.path)
-
-	if (existingTest === null) {
-		return project
-	}
-
-	const updatedTest = newTest({
-		...existingTest,
-		status: "skipped",
-	})
-
-	return putTest(project, updatedTest)
+	return isExistingSubtask(project, event.test) &&
+		hasExistingParents(project, event.test)
+		? putSubtask(project, event.test)
+		: project
 }
 
-export function logTestSkippedEvent(
-	project: Project,
-	event: TestSkippedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
-	const module = getModuleById(project, event.path[0])
-	assertNotNullish(module)
-
-	const test = getTestByPath(project, event.path)
-	assertNotNullish(test)
-
-	const { suitesAndTests, ...loggableModule } = module
-
+export function logTestSkippedEvent(event: TestSkippedEvent): void {
 	logDebug(
 		{
 			label: "Test skipped",
 			labelColour: "#374151",
-			message: `${module.filename} > ${event.path.length > 2 ? "... > " : ""}${test.name}`,
+			message: event.test.name,
 		},
-		{ event, test, module: loggableModule, project: loggableProject },
+		{ event },
 	)
 }

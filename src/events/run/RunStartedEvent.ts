@@ -1,44 +1,52 @@
-import { type ModuleIds, newModule } from "+models/Module"
+import type { Module } from "+models/Module"
 import { type Project, newProject } from "+models/Project"
+import type { Subtask } from "+models/Subtask"
+import type { TaskId, TaskIds } from "+models/TaskId"
 import { logDebug } from "+utilities/Logging"
 
 export type RunStartedEvent = {
 	type: "run-started"
-	invalidatedModuleIds: ModuleIds
+	invalidatedModuleIds: TaskIds
 }
 
 export function runStartedEvent(
-	props: Omit<RunStartedEvent, "type">,
+	invalidatedModuleIds: TaskIds,
 ): RunStartedEvent {
-	return { type: "run-started", ...props }
+	return { type: "run-started", invalidatedModuleIds }
 }
 
 export function applyRunStartedEvent(
 	project: Project,
 	event: RunStartedEvent,
 ): Project {
-	return newProject({
-		...project,
-		modules: project.modules.map((module) =>
+	const modulesById: Record<TaskId, Module> = Object.fromEntries(
+		Object.entries(project.modulesById).map(([moduleId, module]) => [
+			moduleId,
 			event.invalidatedModuleIds.includes(module.id)
-				? newModule({ ...module, status: "running" })
+				? { ...module, status: "running" }
 				: module,
-		),
-	})
+		]),
+	)
+
+	const subtasksById: Record<TaskId, Subtask> = Object.fromEntries(
+		Object.entries(project.subtasksById).map(([subtaskId, subtask]) => [
+			subtaskId,
+			event.invalidatedModuleIds.includes(subtask.parentModuleId)
+				? { ...subtask, status: "running" }
+				: subtask,
+		]),
+	)
+
+	return newProject({ ...project, modulesById, subtasksById })
 }
 
-export function logRunStartedEvent(
-	project: Project,
-	event: RunStartedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
+export function logRunStartedEvent(event: RunStartedEvent): void {
 	logDebug(
 		{
 			label: "Run started",
 			labelColour: "#1d4ed8",
-			message: `Project ${project.status}`,
+			message: "",
 		},
-		{ event, project: loggableProject },
+		{ event },
 	)
 }

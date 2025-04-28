@@ -28,7 +28,7 @@ export function ProjectProvider(props: {
 	const handleEvent = useCallback((events: ProjectEvents) => {
 		setProject((oldProject) => {
 			const updatedProject = applyProjectEvents(oldProject, events)
-			logProjectEvents(updatedProject, events)
+			logProjectEvents(events)
 
 			return updatedProject
 		})

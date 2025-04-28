@@ -17,23 +17,22 @@ import { testSkippedEvent } from "+events/test/TestSkippedEvent"
 import { testStartedEvent } from "+events/test/TestStartedEvent"
 import {
 	type DummyModuleId,
+	dummyModulePath,
 	dummyVitestModule,
 	dummyVitestSpecification,
-	getDummyModulePath,
 } from "+models/Module.fixtures"
 import {
 	type DummySuiteId,
+	dummySuiteName,
 	dummyVitestSuite,
-	getDummySuiteName,
-	getDummySuitePath,
 } from "+models/Suite.fixtures"
 import {
 	type DummyTestId,
+	dummyTestName,
 	dummyVitestTest,
-	getDummyTestName,
-	getDummyTestPath,
 } from "+models/Test.fixtures"
 import { newEventStreamReporter } from "+server/EventStreamReporter"
+import { getFilenameFromPath } from "+types/Path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const eventStream = newEventStream()
@@ -57,7 +56,7 @@ describe("when the server restarts", () => {
 describe.each`
 	ids
 	${["15b021ef72"]}
-	${["a3fdd8b6c3", "-1730f876b4", "-e45b128829"]}
+	${["3afdd8b6c3", "-1730f876b4", "-e45b128829"]}
 `(
 	"given a set of modules $ids",
 	(moduleProps: { ids: Array<DummyModuleId> }) => {
@@ -70,7 +69,7 @@ describe.each`
 
 			it("sends a 'run-started' event", () => {
 				expect(spy).toHaveBeenCalledExactlyOnceWith(
-					runStartedEvent({ invalidatedModuleIds: moduleProps.ids }),
+					runStartedEvent(moduleProps.ids),
 				)
 			})
 		})
@@ -94,12 +93,12 @@ describe.each`
 describe.each`
 	id
 	${"15b021ef72"}
-	${"a3fdd8b6c3"}
+	${"3afdd8b6c3"}
 	${"-1730f876b4"}
 	${"-e45b128829"}
 `("given a module $id", (moduleProps: { id: DummyModuleId }) => {
 	const moduleId = moduleProps.id
-	const modulePath = getDummyModulePath(moduleId)
+	const modulePath = dummyModulePath(moduleId)
 
 	describe("when the module starts running", () => {
 		const module = dummyVitestModule(moduleId, {
@@ -112,7 +111,13 @@ describe.each`
 
 		it("sends a 'module-started' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleStartedEvent({ id: moduleId, path: modulePath }),
+				moduleStartedEvent({
+					type: "module",
+					id: moduleId,
+					path: modulePath,
+					filename: getFilenameFromPath(modulePath),
+					status: "running",
+				}),
 			)
 		})
 	})
@@ -128,7 +133,13 @@ describe.each`
 
 		it("sends a 'module-failed' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleFailedEvent({ id: moduleId }),
+				moduleFailedEvent({
+					type: "module",
+					id: moduleId,
+					path: modulePath,
+					filename: getFilenameFromPath(modulePath),
+					status: "failed",
+				}),
 			)
 		})
 	})
@@ -144,7 +155,13 @@ describe.each`
 
 		it("sends a 'module-passed' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				modulePassedEvent({ id: moduleId }),
+				modulePassedEvent({
+					type: "module",
+					id: moduleId,
+					path: modulePath,
+					filename: getFilenameFromPath(modulePath),
+					status: "passed",
+				}),
 			)
 		})
 	})
@@ -160,7 +177,13 @@ describe.each`
 
 		it("sends a 'module-skipped' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleSkippedEvent({ id: moduleId }),
+				moduleSkippedEvent({
+					type: "module",
+					id: moduleId,
+					path: modulePath,
+					filename: getFilenameFromPath(modulePath),
+					status: "skipped",
+				}),
 			)
 		})
 	})
@@ -172,7 +195,7 @@ describe.each`
 
 		it("sends a 'module-deleted' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleDeletedEvent({ path: modulePath }),
+				moduleDeletedEvent(modulePath),
 			)
 		})
 	})
@@ -186,8 +209,7 @@ describe.each`
 		"and given a top-level suite $id",
 		(topLevelSuiteProps: { id: DummySuiteId }) => {
 			const topLevelSuiteId = topLevelSuiteProps.id
-			const topLevelSuitePath = getDummySuitePath(topLevelSuiteId)
-			const topLevelSuiteName = getDummySuiteName(topLevelSuitePath)
+			const topLevelSuiteName = dummySuiteName(topLevelSuiteId)
 
 			describe("when the suite starts running", () => {
 				const suite = dummyVitestSuite(topLevelSuiteId, { status: "pending" })
@@ -199,8 +221,12 @@ describe.each`
 				it("sends a 'suite-started' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
 						suiteStartedEvent({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
 							name: topLevelSuiteName,
-							path: topLevelSuitePath,
+							status: "running",
 						}),
 					)
 				})
@@ -215,7 +241,14 @@ describe.each`
 
 				it("sends a 'suite-failed' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteFailedEvent({ path: topLevelSuitePath }),
+						suiteFailedEvent({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
+							name: topLevelSuiteName,
+							status: "failed",
+						}),
 					)
 				})
 			})
@@ -229,7 +262,14 @@ describe.each`
 
 				it("sends a 'suite-passed' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suitePassedEvent({ path: topLevelSuitePath }),
+						suitePassedEvent({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
+							name: topLevelSuiteName,
+							status: "passed",
+						}),
 					)
 				})
 			})
@@ -243,7 +283,14 @@ describe.each`
 
 				it("sends a 'suite-skipped' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteSkippedEvent({ path: topLevelSuitePath }),
+						suiteSkippedEvent({
+							type: "suite",
+							id: topLevelSuiteId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
+							name: topLevelSuiteName,
+							status: "skipped",
+						}),
 					)
 				})
 			})
@@ -259,8 +306,7 @@ describe.each`
 					id: DummyTestId
 				}) => {
 					const nestedTestId = nestedTestProps.id
-					const nestedTestPath = getDummyTestPath(nestedTestId)
-					const nestedTestName = getDummyTestName(nestedTestPath)
+					const nestedTestName = dummyTestName(nestedTestId)
 
 					describe("when the test starts running", () => {
 						const test = dummyVitestTest(nestedTestId, {
@@ -274,8 +320,12 @@ describe.each`
 						it("sends a 'test-started' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
 								testStartedEvent({
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
 									name: nestedTestName,
-									path: nestedTestPath,
+									status: "running",
 								}),
 							)
 						})
@@ -293,7 +343,12 @@ describe.each`
 						it("sends a 'test-failed' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
 								testFailedEvent({
-									path: nestedTestPath,
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
+									name: nestedTestName,
+									status: "failed",
 								}),
 							)
 						})
@@ -311,7 +366,12 @@ describe.each`
 						it("sends a 'test-passed' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
 								testPassedEvent({
-									path: nestedTestPath,
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
+									name: nestedTestName,
+									status: "passed",
 								}),
 							)
 						})
@@ -329,7 +389,12 @@ describe.each`
 						it("sends a 'test-skipped' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
 								testSkippedEvent({
-									path: nestedTestPath,
+									type: "test",
+									id: nestedTestId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
+									name: nestedTestName,
+									status: "skipped",
 								}),
 							)
 						})
@@ -345,8 +410,7 @@ describe.each`
 				"and given a nested suite $id",
 				(nestedSuiteProps: { id: DummySuiteId }) => {
 					const nestedSuiteId = nestedSuiteProps.id
-					const nestedSuitePath = getDummySuitePath(nestedSuiteId)
-					const nestedSuiteName = getDummySuiteName(nestedSuitePath)
+					const nestedSuiteName = dummySuiteName(nestedSuiteId)
 
 					describe("when the suite starts running", () => {
 						const suite = dummyVitestSuite(nestedSuiteId, {
@@ -360,8 +424,12 @@ describe.each`
 						it("sends a 'suite-started' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
 								suiteStartedEvent({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
 									name: nestedSuiteName,
-									path: nestedSuitePath,
+									status: "running",
 								}),
 							)
 						})
@@ -378,7 +446,14 @@ describe.each`
 
 						it("sends a 'suite-failed' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteFailedEvent({ path: nestedSuitePath }),
+								suiteFailedEvent({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
+									name: nestedSuiteName,
+									status: "failed",
+								}),
 							)
 						})
 					})
@@ -394,7 +469,14 @@ describe.each`
 
 						it("sends a 'suite-passed' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suitePassedEvent({ path: nestedSuitePath }),
+								suitePassedEvent({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
+									name: nestedSuiteName,
+									status: "passed",
+								}),
 							)
 						})
 					})
@@ -410,7 +492,14 @@ describe.each`
 
 						it("sends a 'suite-skipped' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteSkippedEvent({ path: nestedSuitePath }),
+								suiteSkippedEvent({
+									type: "suite",
+									id: nestedSuiteId,
+									parentId: topLevelSuiteId,
+									parentModuleId: moduleId,
+									name: nestedSuiteName,
+									status: "skipped",
+								}),
 							)
 						})
 					})
@@ -425,8 +514,7 @@ describe.each`
 							id: DummyTestId
 						}) => {
 							const nestedTestId = nestedTestProps.id
-							const nestedTestPath = getDummyTestPath(nestedTestId)
-							const nestedTestName = getDummyTestName(nestedTestPath)
+							const nestedTestName = dummyTestName(nestedTestId)
 
 							describe("when the test starts running", () => {
 								const test = dummyVitestTest(nestedTestId, {
@@ -440,8 +528,12 @@ describe.each`
 								it("sends a 'test-started' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
 										testStartedEvent({
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentModuleId: moduleId,
 											name: nestedTestName,
-											path: nestedTestPath,
+											status: "running",
 										}),
 									)
 								})
@@ -459,7 +551,12 @@ describe.each`
 								it("sends a 'test-failed' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
 										testFailedEvent({
-											path: nestedTestPath,
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentModuleId: moduleId,
+											name: nestedTestName,
+											status: "failed",
 										}),
 									)
 								})
@@ -477,7 +574,12 @@ describe.each`
 								it("sends a 'test-passed' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
 										testPassedEvent({
-											path: nestedTestPath,
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentModuleId: moduleId,
+											name: nestedTestName,
+											status: "passed",
 										}),
 									)
 								})
@@ -495,7 +597,12 @@ describe.each`
 								it("sends a 'test-skipped' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
 										testSkippedEvent({
-											path: nestedTestPath,
+											type: "test",
+											id: nestedTestId,
+											parentId: nestedSuiteId,
+											parentModuleId: moduleId,
+											name: nestedTestName,
+											status: "skipped",
 										}),
 									)
 								})
@@ -518,8 +625,7 @@ describe.each`
 			id: DummyTestId
 		}) => {
 			const topLevelTestId = topLevelTestProps.id
-			const topLevelTestPath = getDummyTestPath(topLevelTestId)
-			const topLevelTestName = getDummyTestName(topLevelTestPath)
+			const topLevelTestName = dummyTestName(topLevelTestId)
 
 			describe("when the test starts running", () => {
 				const test = dummyVitestTest(topLevelTestId, {
@@ -533,8 +639,12 @@ describe.each`
 				it("sends a 'test-started' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
 						testStartedEvent({
+							type: "test",
+							id: topLevelTestId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
 							name: topLevelTestName,
-							path: topLevelTestPath,
+							status: "running",
 						}),
 					)
 				})
@@ -552,7 +662,12 @@ describe.each`
 				it("sends a 'test-failed' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
 						testFailedEvent({
-							path: topLevelTestPath,
+							type: "test",
+							id: topLevelTestId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
+							name: topLevelTestName,
+							status: "failed",
 						}),
 					)
 				})
@@ -570,7 +685,12 @@ describe.each`
 				it("sends a 'test-passed' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
 						testPassedEvent({
-							path: topLevelTestPath,
+							type: "test",
+							id: topLevelTestId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
+							name: topLevelTestName,
+							status: "passed",
 						}),
 					)
 				})
@@ -588,7 +708,12 @@ describe.each`
 				it("sends a 'test-skipped' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
 						testSkippedEvent({
-							path: topLevelTestPath,
+							type: "test",
+							id: topLevelTestId,
+							parentId: moduleId,
+							parentModuleId: moduleId,
+							name: topLevelTestName,
+							status: "skipped",
 						}),
 					)
 				})

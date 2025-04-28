@@ -1,54 +1,32 @@
-import { type ModuleId, newModule } from "+models/Module"
-import { type Project, getModuleById, putModule } from "+models/Project"
-import { assertNotNullish } from "+utilities/Assertions"
+import { type Module, isExistingModule, putModule } from "+models/Module"
+import type { Project } from "+models/Project"
 import { logDebug } from "+utilities/Logging"
 
 export type ModuleSkippedEvent = {
 	type: "module-skipped"
-	id: ModuleId
+	module: Module
 }
 
-export function moduleSkippedEvent(
-	props: Omit<ModuleSkippedEvent, "type">,
-): ModuleSkippedEvent {
-	return { type: "module-skipped", ...props }
+export function moduleSkippedEvent(module: Module): ModuleSkippedEvent {
+	return { type: "module-skipped", module }
 }
 
 export function applyModuleSkippedEvent(
 	project: Project,
 	event: ModuleSkippedEvent,
 ): Project {
-	const existingModule = getModuleById(project, event.id)
-
-	if (existingModule === null) {
-		return project
-	}
-
-	const updatedModule = newModule({
-		...existingModule,
-		status: "skipped",
-	})
-
-	return putModule(project, updatedModule)
+	return isExistingModule(project, event.module)
+		? putModule(project, event.module)
+		: project
 }
 
-export function logModuleSkippedEvent(
-	project: Project,
-	event: ModuleSkippedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
-	const module = getModuleById(project, event.id)
-	assertNotNullish(module)
-
-	const { suitesAndTests, ...loggableModule } = module
-
+export function logModuleSkippedEvent(event: ModuleSkippedEvent): void {
 	logDebug(
 		{
 			label: "Module skipped",
 			labelColour: "#374151",
-			message: module.filename,
+			message: event.module.filename,
 		},
-		{ event, module: loggableModule, project: loggableProject },
+		{ event },
 	)
 }

@@ -1,68 +1,20 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { moduleStartedEvent } from "+events/module/ModuleStartedEvent"
-import {
-	type Module,
-	type ModuleId,
-	type ModuleStatus,
-	countModuleChildren,
-} from "+models/Module"
-import { dummyModule } from "+models/Module.fixtures"
-import {
-	type Project,
-	type ProjectStatus,
-	assertDummyModules,
-	assertDummyProject,
-	getModuleById,
-	getOtherModules,
-} from "+models/Project"
+import { type Module, getModuleById } from "+models/Module"
+import type { Project, ProjectStatus } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
-import { dummySuite } from "+models/Suite.fixtures"
-import { dummyTest } from "+models/Test.fixtures"
+import type { TaskId } from "+models/TaskId"
+import type { TaskStatus } from "+models/TaskStatus"
 import { assertNotNullish } from "+utilities/Assertions"
-import { beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { status: "passed" }, [
-		dummySuite("15b021ef72_0", { status: "passed" }, [
-			dummyTest("15b021ef72_0_1", { status: "failed" }),
-		]),
-		dummyTest("15b021ef72_3", { status: "failed" }),
-		dummyTest("15b021ef72_5", { status: "failed" }),
-	]),
-	dummyModule("a3fdd8b6c3", { status: "failed" }, [
-		dummyTest("a3fdd8b6c3_1", { status: "passed" }),
-		dummyTest("a3fdd8b6c3_3", { status: "passed" }),
-		dummyTest("a3fdd8b6c3_5", { status: "failed" }),
-	]),
-	dummyModule("-1730f876b4", { status: "passed" }, [
-		dummySuite("-1730f876b4_0", { status: "passed" }, [
-			dummyTest("-1730f876b4_0_1", { status: "failed" }),
-			dummyTest("-1730f876b4_0_3", { status: "passed" }),
-			dummyTest("-1730f876b4_0_5", { status: "skipped" }),
-		]),
-		dummyTest("-1730f876b4_7", { status: "passed" }),
-	]),
-	dummyModule("-e45b128829", { status: "passed" }, [
-		dummySuite("-e45b128829_0", { status: "failed" }, [
-			dummyTest("-e45b128829_0_1", { status: "failed" }),
-			dummyTest("-e45b128829_0_3", { status: "passed" }),
-		]),
-		dummyTest("-e45b128829_5", { status: "passed" }),
-		dummySuite("-e45b128829_2", { status: "skipped" }, [
-			dummyTest("-e45b128829_2_7", { status: "failed" }),
-		]),
-		dummyTest("-e45b128829_9", { status: "failed" }),
-	]),
-])
-
-beforeAll(() => {
-	assertDummyProject(initialProject, { status: "failed" })
-	assertDummyModules(initialProject, {
-		"15b021ef72": { totalChildCount: 4 },
-		a3fdd8b6c3: { totalChildCount: 3 },
-		"-1730f876b4": { totalChildCount: 5 },
-		"-e45b128829": { totalChildCount: 7 },
-	})
+const initialProject = dummyProject({
+	modulesById: {
+		"15b021ef72": { status: "passed" },
+		"3afdd8b6c3": { status: "failed" },
+		"-1730f876b4": { status: "passed" },
+		"-e45b128829": { status: "passed" },
+	},
 })
 
 describe.each`
@@ -76,10 +28,12 @@ describe.each`
 `(
 	"when a new module named $filename with id $id has started running",
 	(props: {
-		id: ModuleId
+		id: TaskId
 		filename: string
 		expectedFilenameOrder: Array<string>
 	}) => {
+		const moduleId = props.id
+
 		let actualProject: Project
 		let actualModule: Module
 
@@ -87,35 +41,29 @@ describe.each`
 			actualProject = applyProjectEvent(
 				initialProject,
 				moduleStartedEvent({
-					id: props.id,
+					type: "module",
+					id: moduleId,
 					path: initialProject.rootPath + props.filename,
+					filename: props.filename,
+					status: "running",
 				}),
 			)
 
-			const module = getModuleById(actualProject, props.id)
+			const module = getModuleById(actualProject, moduleId)
 			assertNotNullish(module)
 			actualModule = module
 		})
 
 		it("sets the module status to 'running'", () => {
-			expect(actualModule.status).toBe<ModuleStatus>("running")
-		})
-
-		it("clears the suites and tests in the module", () => {
-			expect(actualModule.suitesAndTests).toHaveLength(0)
+			expect(actualModule.status).toBe<TaskStatus>("running")
 		})
 
 		it("adds the module to the project", () => {
-			expect(actualProject.modules).toHaveLength(
-				initialProject.modules.length + 1,
-			)
-			expect(actualProject.modules).toContainEqual(actualModule)
-		})
+			const actualModuleIds = Object.keys(actualProject.modulesById)
+			const initialModuleIds = Object.keys(initialProject.modulesById)
 
-		it("sorts the modules by their filenames in alphabetic order", () => {
-			expect(actualProject.modules.map((module) => module.filename)).toEqual(
-				props.expectedFilenameOrder,
-			)
+			expect(actualModuleIds).toHaveLength(initialModuleIds.length + 1)
+			expect(actualModuleIds).toContain(moduleId)
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
@@ -125,16 +73,15 @@ describe.each`
 )
 
 describe.each`
-	id               | filename
-	${"15b021ef72"}  | ${"Apples.tests.ts"}
-	${"a3fdd8b6c3"}  | ${"Bananas.tests.ts"}
-	${"-1730f876b4"} | ${"Oranges.tests.ts"}
-	${"-e45b128829"} | ${"Peaches.tests.ts"}
+	id
+	${"15b021ef72"}
+	${"3afdd8b6c3"}
+	${"-1730f876b4"}
+	${"-e45b128829"}
 `(
 	"when an existing module named $filename with id $id has started running",
 	(props: {
-		id: ModuleId
-		filename: string
+		id: TaskId
 	}) => {
 		const initialModule = getModuleById(initialProject, props.id)
 		assertNotNullish(initialModule)
@@ -145,10 +92,7 @@ describe.each`
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				moduleStartedEvent({
-					id: props.id,
-					path: initialProject.rootPath + props.filename,
-				}),
+				moduleStartedEvent({ ...initialModule, status: "running" }),
 			)
 
 			const module = getModuleById(actualProject, props.id)
@@ -157,23 +101,31 @@ describe.each`
 		})
 
 		it("sets the module status to 'running'", () => {
-			expect(actualModule.status).toBe<ModuleStatus>("running")
+			expect(actualModule.status).toBe<TaskStatus>("running")
 		})
 
-		it("does not affect the number of suites and tests in the module", () => {
-			expect(countModuleChildren(actualModule)).toBe(
-				countModuleChildren(initialModule),
-			)
+		it("does not affect the set of suites and tests in the project", () => {
+			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
+			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
+
+			expect(actualSubtaskIds).toEqual(initialSubtaskIds)
 		})
 
-		it("does not affect the number of modules in the project", () => {
-			expect(actualProject.modules).toHaveLength(initialProject.modules.length)
+		it("does not affect the set of modules in the project", () => {
+			const actualModuleIds = Object.keys(actualProject.modulesById)
+			const initialModuleIds = Object.keys(initialProject.modulesById)
+
+			expect(actualModuleIds).toHaveLength(initialModuleIds.length)
 		})
 
 		it("does not affect the other modules in the project", () => {
-			expect(getOtherModules(actualProject, props.id)).toEqual(
-				getOtherModules(initialProject, props.id),
-			)
+			const { [props.id]: initialUpdatedModule, ...initialOtherModules } =
+				initialProject.modulesById
+
+			const { [props.id]: actualUpdatedModule, ...actualOtherModules } =
+				actualProject.modulesById
+
+			expect(actualOtherModules).toEqual(initialOtherModules)
 		})
 
 		it("updates the project status based on the latest set of modules", () => {

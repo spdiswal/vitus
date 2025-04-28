@@ -1,65 +1,38 @@
+import type { Project } from "+models/Project"
 import {
-	type Project,
-	getModuleById,
-	getSuiteByPath,
-	putSuite,
-} from "+models/Project"
-import { newSuite } from "+models/Suite"
-import type { SuitePath } from "+models/SuitePath"
-import { assertNotNullish } from "+utilities/Assertions"
+	hasExistingParents,
+	isExistingSubtask,
+	putSubtask,
+} from "+models/Subtask"
+import type { Suite } from "+models/Suite"
 import { logDebug } from "+utilities/Logging"
 
 export type SuiteFailedEvent = {
 	type: "suite-failed"
-	path: SuitePath
+	suite: Suite
 }
 
-export function suiteFailedEvent(
-	props: Omit<SuiteFailedEvent, "type">,
-): SuiteFailedEvent {
-	return { type: "suite-failed", ...props }
+export function suiteFailedEvent(suite: Suite): SuiteFailedEvent {
+	return { type: "suite-failed", suite }
 }
 
 export function applySuiteFailedEvent(
 	project: Project,
 	event: SuiteFailedEvent,
 ): Project {
-	const existingSuite = getSuiteByPath(project, event.path)
-
-	if (existingSuite === null) {
-		return project
-	}
-
-	const updatedSuite = newSuite({ ...existingSuite, status: "failed" })
-	return putSuite(project, updatedSuite)
+	return isExistingSubtask(project, event.suite) &&
+		hasExistingParents(project, event.suite)
+		? putSubtask(project, event.suite)
+		: project
 }
 
-export function logSuiteFailedEvent(
-	project: Project,
-	event: SuiteFailedEvent,
-): void {
-	const { modules, ...loggableProject } = project
-
-	const module = getModuleById(project, event.path[0])
-	assertNotNullish(module)
-
-	const suite = getSuiteByPath(project, event.path)
-	assertNotNullish(suite)
-
-	const { suitesAndTests, ...loggableModule } = module
-	const { suitesAndTests: _suitesAndTests, ...loggableSuite } = suite
-
+export function logSuiteFailedEvent(event: SuiteFailedEvent): void {
 	logDebug(
 		{
 			label: "Suite failed",
 			labelColour: "#b91c1c",
-			message: `${module.filename} > ${event.path.length > 2 ? "... > " : ""}${suite.name}`,
+			message: event.suite.name,
 		},
-		{
-			event,
-			suite: loggableSuite,
-			module: loggableModule,
-			project: loggableProject,
-		},
+		{ event },
 	)
 }

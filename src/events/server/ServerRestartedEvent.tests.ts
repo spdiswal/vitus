@@ -1,24 +1,10 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { dummyModule } from "+models/Module.fixtures"
-import {
-	type Project,
-	type ProjectStatus,
-	assertDummyProject,
-} from "+models/Project"
+import type { Project, ProjectStatus } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
-import { beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { status: "failed" }),
-	dummyModule("a3fdd8b6c3", { status: "passed" }),
-	dummyModule("-1730f876b4", { status: "passed" }),
-	dummyModule("-e45b128829", { status: "failed" }),
-])
-
-beforeAll(() => {
-	assertDummyProject(initialProject, { status: "failed" })
-})
+const initialProject = dummyProject()
 
 describe("when the server has restarted", () => {
 	let actualProject: Project
@@ -36,7 +22,13 @@ describe("when the server has restarted", () => {
 	})
 
 	it("clears all modules", () => {
-		expect(actualProject.modules).toHaveLength(0)
+		const actualModuleIds = Object.keys(actualProject.modulesById)
+		expect(actualModuleIds).toHaveLength(0)
+	})
+
+	it("clears all suites and tests", () => {
+		const actualSubtaskIds = Object.keys(actualProject.subtasksById)
+		expect(actualSubtaskIds).toHaveLength(0)
 	})
 
 	it("updates the project status based on the latest set of modules", () => {

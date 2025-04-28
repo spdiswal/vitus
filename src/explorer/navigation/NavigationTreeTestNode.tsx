@@ -3,13 +3,15 @@ import { cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { Link } from "wouter-preact"
 
-export function NavigationTreeTestNode(props: Test): Renderable {
+export function NavigationTreeTestNode(props: {
+	test: Test
+}): Renderable {
 	return (
 		<li class="pt-1 flex flex-col">
 			<Link
 				class={cn(
 					"flex justify-start items-center text-start gap-x-2 px-2 py-1.5 rounded-md outline-none hocus:ring-1 active:hocus:ring-2 transition cursor-pointer",
-					cx(props.status)({
+					cx(props.test.status)({
 						failed:
 							"text-rose-500 ring-rose-500 hocus:bg-rose-100 dark:ring-rose-700 dark:hocus:bg-rose-950",
 						passed:
@@ -20,16 +22,16 @@ export function NavigationTreeTestNode(props: Test): Renderable {
 							"text-gray-400 ring-gray-400 hocus:bg-gray-200 dark:ring-gray-600 dark:hocus:bg-gray-800",
 					}),
 				)}
-				href={`/${props.path.join("/")}`}
+				href={`/${props.test.id}`}
 			>
 				<span
 					class={cn(
 						"shrink-0 m-1 size-2 bg-current rounded-full transition",
-						props.status === "running" && "animate-pulse",
+						props.test.status === "running" && "animate-pulse",
 					)}
 				/>
 				<span class="text-gray-950 dark:text-gray-50 transition">
-					{props.name}
+					{props.test.name}
 				</span>
 			</Link>
 		</li>

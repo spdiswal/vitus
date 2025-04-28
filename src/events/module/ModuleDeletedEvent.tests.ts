@@ -1,33 +1,24 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { moduleDeletedEvent } from "+events/module/ModuleDeletedEvent"
-import {
-	type DummyModuleId,
-	dummyModule,
-	getDummyModulePath,
-} from "+models/Module.fixtures"
-import {
-	type Project,
-	type ProjectStatus,
-	assertDummyProject,
-} from "+models/Project"
+import { type DummyModuleId, dummyModulePath } from "+models/Module.fixtures"
+import type { Project, ProjectStatus } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
-import { beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
-const initialProject = dummyProject({}, [
-	dummyModule("15b021ef72", { status: "passed" }),
-	dummyModule("a3fdd8b6c3", { status: "passed" }),
-	dummyModule("-1730f876b4", { status: "running" }),
-	dummyModule("-e45b128829", { status: "passed" }),
-])
-
-beforeAll(() => {
-	assertDummyProject(initialProject, { status: "running" })
+const initialProject = dummyProject({
+	status: "running",
+	modulesById: {
+		"15b021ef72": { status: "passed" },
+		"3afdd8b6c3": { status: "passed" },
+		"-1730f876b4": { status: "running" },
+		"-e45b128829": { status: "passed" },
+	},
 })
 
 describe.each`
 	id               | expectedProjectStatus
 	${"15b021ef72"}  | ${"running"}
-	${"a3fdd8b6c3"}  | ${"running"}
+	${"3afdd8b6c3"}  | ${"running"}
 	${"-1730f876b4"} | ${"passed"}
 	${"-e45b128829"} | ${"running"}
 `(
@@ -36,24 +27,21 @@ describe.each`
 		id: DummyModuleId
 		expectedProjectStatus: ProjectStatus
 	}) => {
-		const deletedPath = getDummyModulePath(props.id)
-
 		let actualProject: Project
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				moduleDeletedEvent({ path: deletedPath }),
+				moduleDeletedEvent(dummyModulePath(props.id)),
 			)
 		})
 
 		it("forgets about the deleted module", () => {
-			expect(actualProject.modules).toHaveLength(
-				initialProject.modules.length - 1,
-			)
-			expect(actualProject.modules.map((module) => module.path)).not.toContain(
-				deletedPath,
-			)
+			const actualModuleIds = Object.keys(actualProject.modulesById)
+			const initialModuleIds = Object.keys(initialProject.modulesById)
+
+			expect(actualModuleIds).toHaveLength(initialModuleIds.length - 1)
+			expect(actualModuleIds).not.toContain(props.id)
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
@@ -68,9 +56,7 @@ describe("when a non-existing module has been deleted", () => {
 	beforeEach(() => {
 		actualProject = applyProjectEvent(
 			initialProject,
-			moduleDeletedEvent({
-				path: "/Users/sdi/repositories/plantation/src/basket/Imaginary.tests.ts",
-			}),
+			moduleDeletedEvent(dummyModulePath("f9bb9e8bc0")),
 		)
 	})
 

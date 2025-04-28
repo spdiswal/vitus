@@ -5,9 +5,14 @@ import { useEffect } from "preact/hooks"
 
 export function SummaryPage(): Renderable {
 	const project = useProject()
+	const moduleCount = count(
+		Object.keys(project.modulesById),
+		"module",
+		"modules",
+	)
 
 	useEffect(() => {
-		document.title = `${count(project.modules, "module", "modules")} – Vitest – Vitus`
+		document.title = `${moduleCount} – Vitest – Vitus`
 	}, [])
 
 	return (
@@ -16,7 +21,7 @@ export function SummaryPage(): Renderable {
 				Vitest &ndash; Vitus
 			</h1>
 			<div class="font-mono">{project.rootPath}</div>
-			<div>{count(project.modules, "module", "modules")}</div>
+			<div>{moduleCount}</div>
 		</main>
 	)
 }

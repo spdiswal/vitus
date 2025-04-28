@@ -1,8 +1,6 @@
-import {
-	dropUnfinishedModuleChildren,
-	hasNotModuleStatus,
-} from "+models/Module"
-import { type Project, newProject } from "+models/Project"
+import { removeModulesByStatus } from "+models/Module"
+import type { Project } from "+models/Project"
+import { removeSubtasksByStatus } from "+models/Subtask"
 import { logDebug } from "+utilities/Logging"
 
 export type ServerDisconnectedEvent = {
@@ -14,27 +12,24 @@ export function serverDisconnectedEvent(): ServerDisconnectedEvent {
 }
 
 export function applyServerDisconnectedEvent(project: Project): Project {
-	return newProject({
-		...project,
-		modules: project.modules
-			.filter(hasNotModuleStatus("running"))
-			.map(dropUnfinishedModuleChildren),
+	return {
+		...removeModulesByStatus(
+			removeSubtasksByStatus(project, "running"),
+			"running",
+		),
 		isConnected: false,
-	})
+	}
 }
 
 export function logServerDisconnectedEvent(
-	project: Project,
 	event: ServerDisconnectedEvent,
 ): void {
-	const { modules, ...loggableProject } = project
-
 	logDebug(
 		{
 			label: "Server disconnected",
 			labelColour: "#a21caf",
-			message: `Project ${project.status}`,
+			message: "",
 		},
-		{ event, project: loggableProject },
+		{ event },
 	)
 }
