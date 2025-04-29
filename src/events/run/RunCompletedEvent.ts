@@ -21,7 +21,7 @@ export function applyRunCompletedEvent(project: Project): Project {
 export function logRunCompletedEvent(event: RunCompletedEvent): void {
 	logDebug(
 		{
-			label: "Run completed",
+			label: "run completed",
 			labelColour: "#1d4ed8",
 			message: "",
 		},

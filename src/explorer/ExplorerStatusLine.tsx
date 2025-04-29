@@ -15,6 +15,7 @@ export function ExplorerStatusLine(props: {
 				cx(project.status)({
 					failed: "bg-rose-700",
 					passed: "bg-green-700",
+					skipped: "bg-gray-700",
 					started: "bg-amber-500 animate-pulse",
 				}),
 				props.class,

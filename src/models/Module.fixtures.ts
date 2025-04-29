@@ -52,7 +52,11 @@ export type DummyModuleId =
 	| "-1730f876b4"
 	| "-e45b128829"
 
-export type NonExistingDummyModuleId = "f9bb9e8bc0"
+export type NonExistingDummyModuleId =
+	| "134672b00e"
+	| "29bb9e8bc0"
+	| "-20e94f4789"
+	| "6ab50b9861"
 
 const dummyPathsById: Record<DummyModuleId | NonExistingDummyModuleId, Path> = {
 	"15b021ef72":
@@ -63,8 +67,17 @@ const dummyPathsById: Record<DummyModuleId | NonExistingDummyModuleId, Path> = {
 		"/Users/spdiswal/repositories/plantation/src/basket/Oranges.tests.ts",
 	"-e45b128829":
 		"/Users/spdiswal/repositories/plantation/src/supermarket/Peaches.tests.ts",
-	f9bb9e8bc0:
-		"/Users/spdiswal/repositories/plantation/src/basket/Imaginary.tests.ts",
+	"134672b00e": "/Users/spdiswal/repositories/plantation/src/Cherries.tests.ts",
+	"29bb9e8bc0":
+		"/Users/spdiswal/repositories/plantation/src/Strawberries.tests.ts",
+	"-20e94f4789": "/Users/spdiswal/repositories/plantation/src/Grapes.tests.ts",
+	"6ab50b9861": "/Users/spdiswal/repositories/plantation/src/Lemons.tests.ts",
+}
+
+export function dummyModuleFilename(
+	moduleId: DummyModuleId | NonExistingDummyModuleId,
+): string {
+	return getFilenameFromPath(dummyModulePath(moduleId))
 }
 
 export function dummyModulePath(

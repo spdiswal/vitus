@@ -1,7 +1,8 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import type { Project, ProjectStatus } from "+models/Project"
+import type { Project } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
+import type { TaskStatus } from "+models/TaskStatus"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject()
@@ -32,6 +33,6 @@ describe("when the server has restarted", () => {
 	})
 
 	it("updates the project status based on the latest set of modules", () => {
-		expect(actualProject.status).toBe<ProjectStatus>("passed")
+		expect(actualProject.status).toBe<TaskStatus>("passed")
 	})
 })

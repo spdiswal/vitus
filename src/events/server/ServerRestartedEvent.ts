@@ -22,7 +22,7 @@ export function applyServerRestartedEvent(project: Project): Project {
 export function logServerRestartedEvent(event: ServerRestartedEvent): void {
 	logDebug(
 		{
-			label: "Server restarted",
+			label: "server restarted",
 			labelColour: "#a21caf",
 			message: "",
 		},

@@ -1,6 +1,7 @@
-import { type Module, mapVitestToModule } from "+models/Module"
+import { type Module, type Modules, mapVitestToModule } from "+models/Module"
 import { type Suite, mapVitestToSuite } from "+models/Suite"
 import type { TaskId } from "+models/TaskId"
+import type { TaskStatus } from "+models/TaskStatus"
 import { type Test, mapVitestToTest } from "+models/Test"
 import type { Path } from "+types/Path"
 import type { Vitest } from "vitest/node"
@@ -8,22 +9,12 @@ import type { Vitest } from "vitest/node"
 export type Project = {
 	rootPath: Path
 	isConnected: boolean
-	status: ProjectStatus
+	status: TaskStatus
 	modulesById: Record<TaskId, Module>
 	subtasksById: Record<TaskId, Suite | Test> // Suites and tests use a shared id namespace in Vitest (i.e. it is impossible to determine from an id alone whether it is a suite or test).
 }
 
-export type ProjectStatus = "failed" | "passed" | "started"
-
 export function newProject(project: Project): Project {
-	const modules = Object.values(project.modulesById)
-
-	const status = modules.some((module) => module.status === "started")
-		? "started"
-		: modules.some((module) => module.status === "failed")
-			? "failed"
-			: "passed"
-
 	const remainingSubtasksById = Object.fromEntries(
 		Object.entries(project.subtasksById).filter(
 			([, subtask]) =>
@@ -33,7 +24,11 @@ export function newProject(project: Project): Project {
 		),
 	)
 
-	return { ...project, status, subtasksById: remainingSubtasksById }
+	return {
+		...project,
+		status: getProjectStatus(Object.values(project.modulesById)),
+		subtasksById: remainingSubtasksById,
+	}
 }
 
 export function mapVitestToProject(vitest: Vitest): Project {
@@ -54,8 +49,18 @@ export function mapVitestToProject(vitest: Vitest): Project {
 	return newProject({
 		rootPath: vitest.config.root,
 		isConnected: true,
-		status: "started",
+		status: getProjectStatus(Object.values(modulesById)),
 		modulesById,
 		subtasksById,
 	})
+}
+
+function getProjectStatus(modules: Modules): TaskStatus {
+	return modules.some((module) => module.status === "started")
+		? "started"
+		: modules.some((module) => module.status === "failed")
+			? "failed"
+			: modules.some((module) => module.status === "passed")
+				? "passed"
+				: "skipped"
 }

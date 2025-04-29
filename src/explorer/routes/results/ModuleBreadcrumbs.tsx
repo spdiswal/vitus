@@ -1,6 +1,7 @@
 import { useProject } from "+explorer/UseProject"
 import type { Module } from "+models/Module"
 import type { Renderable } from "+types/Renderable"
+import { useEffect } from "preact/hooks"
 
 export function ModuleBreadcrumbs(props: {
 	module: Module
@@ -10,6 +11,10 @@ export function ModuleBreadcrumbs(props: {
 	const modulePath = props.module.path
 	const relativePath = modulePath.slice(project.rootPath.length + 1)
 	const segments = relativePath.split("/")
+
+	useEffect(() => {
+		document.title = `${props.module.filename} – Vitest – Vitus`
+	}, [props.module.filename])
 
 	return (
 		<div>

@@ -22,7 +22,7 @@ export function applyModuleDeletedEvent(
 export function logModuleDeletedEvent(event: ModuleDeletedEvent): void {
 	logDebug(
 		{
-			label: "Module deleted",
+			label: "module deleted",
 			labelColour: "#374151",
 			message: event.path,
 		},

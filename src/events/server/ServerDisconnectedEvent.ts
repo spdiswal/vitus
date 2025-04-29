@@ -26,7 +26,7 @@ export function logServerDisconnectedEvent(
 ): void {
 	logDebug(
 		{
-			label: "Server disconnected",
+			label: "server disconnected",
 			labelColour: "#a21caf",
 			message: "",
 		},

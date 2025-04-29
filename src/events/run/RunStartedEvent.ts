@@ -43,7 +43,7 @@ export function applyRunStartedEvent(
 export function logRunStartedEvent(event: RunStartedEvent): void {
 	logDebug(
 		{
-			label: "Run started",
+			label: "run started",
 			labelColour: "#1d4ed8",
 			message: "",
 		},

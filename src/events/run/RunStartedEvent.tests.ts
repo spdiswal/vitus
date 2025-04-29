@@ -1,12 +1,12 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { runStartedEvent } from "+events/run/RunStartedEvent"
-import { type Module, getModuleById } from "+models/Module"
-import type { Project, ProjectStatus } from "+models/Project"
+import { getModulesByIds } from "+models/Module"
+import type { Project } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
+import { getSubtasksByModuleIds } from "+models/Subtask"
 import type { TaskId } from "+models/TaskId"
 import type { TaskStatus } from "+models/TaskStatus"
 import type { Vector } from "+types/Vector"
-import { assertNotNullish } from "+utilities/Assertions"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject()
@@ -22,31 +22,38 @@ describe.each`
 		moduleIds: Vector<TaskId, 2>
 	}) => {
 		let actualProject: Project
-		let actualModules: Vector<Module, 2>
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
 				runStartedEvent(props.moduleIds),
 			)
-
-			const moduleA = getModuleById(actualProject, props.moduleIds[0])
-			const moduleB = getModuleById(actualProject, props.moduleIds[1])
-
-			assertNotNullish(moduleA)
-			assertNotNullish(moduleB)
-
-			actualModules = [moduleA, moduleB]
 		})
 
 		it("sets the module statuses to 'started'", () => {
-			expect(actualModules[0].status).toBe<TaskStatus>("started")
-			expect(actualModules[1].status).toBe<TaskStatus>("started")
+			const actualModuleStatuses = Array.from(
+				new Set(
+					getModulesByIds(actualProject, props.moduleIds).map(
+						(module) => module.status,
+					),
+				),
+			)
+
+			expect(actualModuleStatuses).toHaveLength(1)
+			expect(actualModuleStatuses[0]).toEqual<TaskStatus>("started")
 		})
 
-		it.todo("sets the module subtask statuses to 'started'", () => {
-			// expect(actualModules[0].status).toBe<TaskStatus>("started")
-			// expect(actualModules[1].status).toBe<TaskStatus>("started")
+		it("sets the module subtask statuses to 'started'", () => {
+			const actualSubtaskStatuses = Array.from(
+				new Set(
+					getSubtasksByModuleIds(actualProject, props.moduleIds).map(
+						(subtask) => subtask.status,
+					),
+				),
+			)
+
+			expect(actualSubtaskStatuses).toHaveLength(1)
+			expect(actualSubtaskStatuses[0]).toEqual<TaskStatus>("started")
 		})
 
 		it("does not affect the set of suites and tests in the project", () => {
@@ -64,7 +71,7 @@ describe.each`
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
-			expect(actualProject.status).toBe<ProjectStatus>("started")
+			expect(actualProject.status).toBe<TaskStatus>("started")
 		})
 	},
 )

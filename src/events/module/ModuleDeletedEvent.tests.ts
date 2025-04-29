@@ -1,8 +1,13 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { moduleDeletedEvent } from "+events/module/ModuleDeletedEvent"
-import { type DummyModuleId, dummyModulePath } from "+models/Module.fixtures"
-import type { Project, ProjectStatus } from "+models/Project"
+import {
+	type DummyModuleId,
+	type NonExistingDummyModuleId,
+	dummyModulePath,
+} from "+models/Module.fixtures"
+import type { Project } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
+import type { TaskStatus } from "+models/TaskStatus"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({
@@ -16,23 +21,23 @@ const initialProject = dummyProject({
 })
 
 describe.each`
-	id               | expectedProjectStatus
+	moduleId         | expectedProjectStatus
 	${"15b021ef72"}  | ${"started"}
 	${"3afdd8b6c3"}  | ${"started"}
 	${"-1730f876b4"} | ${"passed"}
 	${"-e45b128829"} | ${"started"}
 `(
-	"when an existing module $id has been deleted",
+	"when an existing module $moduleId has been deleted",
 	(props: {
-		id: DummyModuleId
-		expectedProjectStatus: ProjectStatus
+		moduleId: DummyModuleId
+		expectedProjectStatus: TaskStatus
 	}) => {
 		let actualProject: Project
 
 		beforeEach(() => {
 			actualProject = applyProjectEvent(
 				initialProject,
-				moduleDeletedEvent(dummyModulePath(props.id)),
+				moduleDeletedEvent(dummyModulePath(props.moduleId)),
 			)
 		})
 
@@ -41,7 +46,7 @@ describe.each`
 			const initialModuleIds = Object.keys(initialProject.modulesById)
 
 			expect(actualModuleIds).toHaveLength(initialModuleIds.length - 1)
-			expect(actualModuleIds).not.toContain(props.id)
+			expect(actualModuleIds).not.toContain(props.moduleId)
 		})
 
 		it("updates the project status based on the latest set of modules", () => {
@@ -50,17 +55,28 @@ describe.each`
 	},
 )
 
-describe("when a non-existing module has been deleted", () => {
-	let actualProject: Project
+describe.each`
+	moduleId
+	${"134672b00e"}
+	${"29bb9e8bc0"}
+	${"-20e94f4789"}
+	${"6ab50b9861"}
+`(
+	"when a non-existing module with id $moduleId has been deleted",
+	(props: {
+		moduleId: NonExistingDummyModuleId
+	}) => {
+		let actualProject: Project
 
-	beforeEach(() => {
-		actualProject = applyProjectEvent(
-			initialProject,
-			moduleDeletedEvent(dummyModulePath("f9bb9e8bc0")),
-		)
-	})
+		beforeEach(() => {
+			actualProject = applyProjectEvent(
+				initialProject,
+				moduleDeletedEvent(dummyModulePath(props.moduleId)),
+			)
+		})
 
-	it("does not affect the project", () => {
-		expect(actualProject).toEqual(initialProject)
-	})
-})
+		it("does not affect the project", () => {
+			expect(actualProject).toEqual(initialProject)
+		})
+	},
+)

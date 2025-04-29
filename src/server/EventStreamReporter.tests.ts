@@ -1,20 +1,10 @@
 import { type EventStreamSubscriber, newEventStream } from "+events/EventStream"
 import { moduleDeletedEvent } from "+events/module/ModuleDeletedEvent"
-import { moduleFailedEvent } from "+events/module/ModuleFailedEvent"
-import { modulePassedEvent } from "+events/module/ModulePassedEvent"
-import { moduleSkippedEvent } from "+events/module/ModuleSkippedEvent"
-import { moduleStartedEvent } from "+events/module/ModuleStartedEvent"
+import { moduleUpdatedEvent } from "+events/module/ModuleUpdatedEvent"
 import { runCompletedEvent } from "+events/run/RunCompletedEvent"
 import { runStartedEvent } from "+events/run/RunStartedEvent"
 import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { suiteFailedEvent } from "+events/suite/SuiteFailedEvent"
-import { suitePassedEvent } from "+events/suite/SuitePassedEvent"
-import { suiteSkippedEvent } from "+events/suite/SuiteSkippedEvent"
-import { suiteStartedEvent } from "+events/suite/SuiteStartedEvent"
-import { testFailedEvent } from "+events/test/TestFailedEvent"
-import { testPassedEvent } from "+events/test/TestPassedEvent"
-import { testSkippedEvent } from "+events/test/TestSkippedEvent"
-import { testStartedEvent } from "+events/test/TestStartedEvent"
+import { subtaskUpdatedEvent } from "+events/subtask/SubtaskUpdatedEvent"
 import {
 	type DummyModuleId,
 	dummyModulePath,
@@ -109,9 +99,9 @@ describe.each`
 			reporter.onTestModuleStart(module)
 		})
 
-		it("sends a 'module-started' event", () => {
+		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleStartedEvent({
+				moduleUpdatedEvent({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -131,9 +121,9 @@ describe.each`
 			reporter.onTestModuleEnd(module)
 		})
 
-		it("sends a 'module-failed' event", () => {
+		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleFailedEvent({
+				moduleUpdatedEvent({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -153,9 +143,9 @@ describe.each`
 			reporter.onTestModuleEnd(module)
 		})
 
-		it("sends a 'module-passed' event", () => {
+		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				modulePassedEvent({
+				moduleUpdatedEvent({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -175,9 +165,9 @@ describe.each`
 			reporter.onTestModuleEnd(module)
 		})
 
-		it("sends a 'module-skipped' event", () => {
+		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleSkippedEvent({
+				moduleUpdatedEvent({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -218,9 +208,9 @@ describe.each`
 					reporter.onTestSuiteReady(suite)
 				})
 
-				it("sends a 'suite-started' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteStartedEvent({
+						subtaskUpdatedEvent({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -239,9 +229,9 @@ describe.each`
 					reporter.onTestSuiteResult(suite)
 				})
 
-				it("sends a 'suite-failed' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteFailedEvent({
+						subtaskUpdatedEvent({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -260,9 +250,9 @@ describe.each`
 					reporter.onTestSuiteResult(suite)
 				})
 
-				it("sends a 'suite-passed' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suitePassedEvent({
+						subtaskUpdatedEvent({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -281,9 +271,9 @@ describe.each`
 					reporter.onTestSuiteResult(suite)
 				})
 
-				it("sends a 'suite-skipped' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						suiteSkippedEvent({
+						subtaskUpdatedEvent({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -317,9 +307,9 @@ describe.each`
 							reporter.onTestCaseReady(test)
 						})
 
-						it("sends a 'test-started' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testStartedEvent({
+								subtaskUpdatedEvent({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -340,9 +330,9 @@ describe.each`
 							reporter.onTestCaseResult(test)
 						})
 
-						it("sends a 'test-failed' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testFailedEvent({
+								subtaskUpdatedEvent({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -363,9 +353,9 @@ describe.each`
 							reporter.onTestCaseResult(test)
 						})
 
-						it("sends a 'test-passed' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testPassedEvent({
+								subtaskUpdatedEvent({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -386,9 +376,9 @@ describe.each`
 							reporter.onTestCaseResult(test)
 						})
 
-						it("sends a 'test-skipped' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								testSkippedEvent({
+								subtaskUpdatedEvent({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -421,9 +411,9 @@ describe.each`
 							reporter.onTestSuiteReady(suite)
 						})
 
-						it("sends a 'suite-started' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteStartedEvent({
+								subtaskUpdatedEvent({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -444,9 +434,9 @@ describe.each`
 							reporter.onTestSuiteResult(suite)
 						})
 
-						it("sends a 'suite-failed' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteFailedEvent({
+								subtaskUpdatedEvent({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -467,9 +457,9 @@ describe.each`
 							reporter.onTestSuiteResult(suite)
 						})
 
-						it("sends a 'suite-passed' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suitePassedEvent({
+								subtaskUpdatedEvent({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -490,9 +480,9 @@ describe.each`
 							reporter.onTestSuiteResult(suite)
 						})
 
-						it("sends a 'suite-skipped' event", () => {
+						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								suiteSkippedEvent({
+								subtaskUpdatedEvent({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -525,9 +515,9 @@ describe.each`
 									reporter.onTestCaseReady(test)
 								})
 
-								it("sends a 'test-started' event", () => {
+								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testStartedEvent({
+										subtaskUpdatedEvent({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -548,9 +538,9 @@ describe.each`
 									reporter.onTestCaseResult(test)
 								})
 
-								it("sends a 'test-failed' event", () => {
+								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testFailedEvent({
+										subtaskUpdatedEvent({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -571,9 +561,9 @@ describe.each`
 									reporter.onTestCaseResult(test)
 								})
 
-								it("sends a 'test-passed' event", () => {
+								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testPassedEvent({
+										subtaskUpdatedEvent({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -594,9 +584,9 @@ describe.each`
 									reporter.onTestCaseResult(test)
 								})
 
-								it("sends a 'test-skipped' event", () => {
+								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										testSkippedEvent({
+										subtaskUpdatedEvent({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -636,9 +626,9 @@ describe.each`
 					reporter.onTestCaseReady(test)
 				})
 
-				it("sends a 'test-started' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testStartedEvent({
+						subtaskUpdatedEvent({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,
@@ -659,9 +649,9 @@ describe.each`
 					reporter.onTestCaseResult(test)
 				})
 
-				it("sends a 'test-failed' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testFailedEvent({
+						subtaskUpdatedEvent({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,
@@ -682,9 +672,9 @@ describe.each`
 					reporter.onTestCaseResult(test)
 				})
 
-				it("sends a 'test-passed' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testPassedEvent({
+						subtaskUpdatedEvent({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,
@@ -705,9 +695,9 @@ describe.each`
 					reporter.onTestCaseResult(test)
 				})
 
-				it("sends a 'test-skipped' event", () => {
+				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						testSkippedEvent({
+						subtaskUpdatedEvent({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,

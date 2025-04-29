@@ -1,9 +1,10 @@
 import { applyProjectEvent } from "+events/ProjectEvent"
 import { serverDisconnectedEvent } from "+events/server/ServerDisconnectedEvent"
 import type { DummyModuleId } from "+models/Module.fixtures"
-import type { Project, ProjectStatus } from "+models/Project"
+import type { Project } from "+models/Project"
 import { dummyProject } from "+models/Project.fixtures"
 import type { DummySuiteId } from "+models/Suite.fixtures"
+import type { TaskStatus } from "+models/TaskStatus"
 import type { DummyTestId } from "+models/Test.fixtures"
 import { beforeEach, describe, expect, it } from "vitest"
 
@@ -46,6 +47,6 @@ describe("when the server has disconnected", () => {
 	})
 
 	it("updates the project status based on the latest set of modules", () => {
-		expect(actualProject.status).toBe<ProjectStatus>("failed")
+		expect(actualProject.status).toBe<TaskStatus>("failed")
 	})
 })

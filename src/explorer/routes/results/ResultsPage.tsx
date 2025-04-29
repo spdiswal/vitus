@@ -3,10 +3,9 @@ import { DiffLegend } from "+explorer/routes/results/DiffLegend"
 import { ModuleBreadcrumbs } from "+explorer/routes/results/ModuleBreadcrumbs"
 import { SubtaskBreadcrumbs } from "+explorer/routes/results/SubtaskBreadcrumbs"
 import { getModuleById } from "+models/Module"
-import { getSubtaskById } from "+models/Subtask"
+import { getSubtaskById, hasSubtask } from "+models/Subtask"
 import type { TaskId } from "+models/TaskId"
 import type { Renderable } from "+types/Renderable"
-import { useEffect } from "preact/hooks"
 import { useParams } from "wouter-preact"
 
 export function ResultsPage(): Renderable {
@@ -15,21 +14,12 @@ export function ResultsPage(): Renderable {
 	const params = useParams()
 	const taskId = params.taskId as TaskId
 
-	const subtask = getSubtaskById(project, taskId)
-	const module =
-		subtask !== null ? getModuleById(project, subtask.parentModuleId) : null
-
-	const filename = module?.filename ?? null
-
-	useEffect(() => {
-		if (filename !== null) {
-			document.title = `${filename} – Vitest – Vitus`
-		}
-	}, [filename])
-
-	if (subtask === null || module === null) {
+	if (!hasSubtask(project, taskId)) {
 		return null // TODO: 404 Not Found Page
 	}
+
+	const subtask = getSubtaskById(project, taskId)
+	const module = getModuleById(project, subtask.parentModuleId)
 
 	return (
 		<main class="flex flex-col transition">

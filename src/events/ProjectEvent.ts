@@ -4,25 +4,10 @@ import {
 	logModuleDeletedEvent,
 } from "+events/module/ModuleDeletedEvent"
 import {
-	type ModuleFailedEvent,
-	applyModuleFailedEvent,
-	logModuleFailedEvent,
-} from "+events/module/ModuleFailedEvent"
-import {
-	type ModulePassedEvent,
-	applyModulePassedEvent,
-	logModulePassedEvent,
-} from "+events/module/ModulePassedEvent"
-import {
-	type ModuleSkippedEvent,
-	applyModuleSkippedEvent,
-	logModuleSkippedEvent,
-} from "+events/module/ModuleSkippedEvent"
-import {
-	type ModuleStartedEvent,
-	applyModuleStartedEvent,
-	logModuleStartedEvent,
-} from "+events/module/ModuleStartedEvent"
+	type ModuleUpdatedEvent,
+	applyModuleUpdatedEvent,
+	logModuleUpdatedEvent,
+} from "+events/module/ModuleUpdatedEvent"
 import {
 	type RunCompletedEvent,
 	applyRunCompletedEvent,
@@ -44,65 +29,20 @@ import {
 	logServerRestartedEvent,
 } from "+events/server/ServerRestartedEvent"
 import {
-	type SuiteFailedEvent,
-	applySuiteFailedEvent,
-	logSuiteFailedEvent,
-} from "+events/suite/SuiteFailedEvent"
-import {
-	type SuitePassedEvent,
-	applySuitePassedEvent,
-	logSuitePassedEvent,
-} from "+events/suite/SuitePassedEvent"
-import {
-	type SuiteSkippedEvent,
-	applySuiteSkippedEvent,
-	logSuiteSkippedEvent,
-} from "+events/suite/SuiteSkippedEvent"
-import {
-	type SuiteStartedEvent,
-	applySuiteStartedEvent,
-	logSuiteStartedEvent,
-} from "+events/suite/SuiteStartedEvent"
-import {
-	type TestFailedEvent,
-	applyTestFailedEvent,
-	logTestFailedEvent,
-} from "+events/test/TestFailedEvent"
-import {
-	type TestPassedEvent,
-	applyTestPassedEvent,
-	logTestPassedEvent,
-} from "+events/test/TestPassedEvent"
-import {
-	type TestSkippedEvent,
-	applyTestSkippedEvent,
-	logTestSkippedEvent,
-} from "+events/test/TestSkippedEvent"
-import {
-	type TestStartedEvent,
-	applyTestStartedEvent,
-	logTestStartedEvent,
-} from "+events/test/TestStartedEvent"
+	type SubtaskUpdatedEvent,
+	applySubtaskUpdatedEvent,
+	logSubtaskUpdatedEvent,
+} from "+events/subtask/SubtaskUpdatedEvent"
 import type { Project } from "+models/Project"
 
 export type ProjectEvent =
 	| ModuleDeletedEvent
-	| ModuleFailedEvent
-	| ModulePassedEvent
-	| ModuleSkippedEvent
-	| ModuleStartedEvent
+	| ModuleUpdatedEvent
 	| RunCompletedEvent
 	| RunStartedEvent
 	| ServerDisconnectedEvent
 	| ServerRestartedEvent
-	| SuiteFailedEvent
-	| SuitePassedEvent
-	| SuiteSkippedEvent
-	| SuiteStartedEvent
-	| TestFailedEvent
-	| TestPassedEvent
-	| TestSkippedEvent
-	| TestStartedEvent
+	| SubtaskUpdatedEvent
 
 export type ProjectEvents = Array<ProjectEvent>
 
@@ -121,17 +61,8 @@ export function applyProjectEvent(
 		case "module-deleted": {
 			return applyModuleDeletedEvent(project, event)
 		}
-		case "module-failed": {
-			return applyModuleFailedEvent(project, event)
-		}
-		case "module-passed": {
-			return applyModulePassedEvent(project, event)
-		}
-		case "module-skipped": {
-			return applyModuleSkippedEvent(project, event)
-		}
-		case "module-started": {
-			return applyModuleStartedEvent(project, event)
+		case "module-updated": {
+			return applyModuleUpdatedEvent(project, event)
 		}
 		case "run-completed": {
 			return applyRunCompletedEvent(project)
@@ -145,29 +76,8 @@ export function applyProjectEvent(
 		case "server-restarted": {
 			return applyServerRestartedEvent(project)
 		}
-		case "suite-failed": {
-			return applySuiteFailedEvent(project, event)
-		}
-		case "suite-passed": {
-			return applySuitePassedEvent(project, event)
-		}
-		case "suite-skipped": {
-			return applySuiteSkippedEvent(project, event)
-		}
-		case "suite-started": {
-			return applySuiteStartedEvent(project, event)
-		}
-		case "test-failed": {
-			return applyTestFailedEvent(project, event)
-		}
-		case "test-passed": {
-			return applyTestPassedEvent(project, event)
-		}
-		case "test-skipped": {
-			return applyTestSkippedEvent(project, event)
-		}
-		case "test-started": {
-			return applyTestStartedEvent(project, event)
+		case "subtask-updated": {
+			return applySubtaskUpdatedEvent(project, event)
 		}
 	}
 }
@@ -184,20 +94,8 @@ export function logProjectEvent(event: ProjectEvent): void {
 			logModuleDeletedEvent(event)
 			break
 		}
-		case "module-failed": {
-			logModuleFailedEvent(event)
-			break
-		}
-		case "module-passed": {
-			logModulePassedEvent(event)
-			break
-		}
-		case "module-skipped": {
-			logModuleSkippedEvent(event)
-			break
-		}
-		case "module-started": {
-			logModuleStartedEvent(event)
+		case "module-updated": {
+			logModuleUpdatedEvent(event)
 			break
 		}
 		case "run-completed": {
@@ -216,36 +114,8 @@ export function logProjectEvent(event: ProjectEvent): void {
 			logServerRestartedEvent(event)
 			break
 		}
-		case "suite-failed": {
-			logSuiteFailedEvent(event)
-			break
-		}
-		case "suite-passed": {
-			logSuitePassedEvent(event)
-			break
-		}
-		case "suite-skipped": {
-			logSuiteSkippedEvent(event)
-			break
-		}
-		case "suite-started": {
-			logSuiteStartedEvent(event)
-			break
-		}
-		case "test-failed": {
-			logTestFailedEvent(event)
-			break
-		}
-		case "test-passed": {
-			logTestPassedEvent(event)
-			break
-		}
-		case "test-skipped": {
-			logTestSkippedEvent(event)
-			break
-		}
-		case "test-started": {
-			logTestStartedEvent(event)
+		case "subtask-updated": {
+			logSubtaskUpdatedEvent(event)
 			break
 		}
 	}

@@ -1,19 +1,32 @@
-import { type Module, getModuleById } from "+models/Module"
+import { type Module, getModuleById, hasModule } from "+models/Module"
 import { type Project, newProject } from "+models/Project"
 import type { Suite } from "+models/Suite"
-import type { TaskId } from "+models/TaskId"
+import type { TaskId, TaskIds } from "+models/TaskId"
 import type { TaskStatus } from "+models/TaskStatus"
 import type { Test } from "+models/Test"
+import { assertNotNullish } from "+utilities/Assertions"
 
 export type Subtask = Suite | Test
 export type Subtasks = Array<Subtask>
 
-export function getSubtaskById(project: Project, id: TaskId): Subtask | null {
-	return project.subtasksById[id] ?? null
+export function hasSubtask(project: Project, subtaskId: TaskId): boolean {
+	return subtaskId in project.subtasksById
 }
 
-export function isExistingSubtask(project: Project, subtask: Subtask): boolean {
-	return subtask.id in project.subtasksById
+export function getSubtaskById(project: Project, subtaskId: TaskId): Subtask {
+	const subtask = project.subtasksById[subtaskId]
+	assertNotNullish(subtask, "subtask")
+
+	return subtask
+}
+
+export function getSubtasksByModuleIds(
+	project: Project,
+	moduleIds: TaskIds,
+): Subtasks {
+	return Object.values(project.subtasksById).filter((subtask) =>
+		moduleIds.includes(subtask.parentModuleId),
+	)
 }
 
 export function hasExistingParents(
@@ -28,10 +41,12 @@ export function hasExistingParents(
 }
 
 export function putSubtask(project: Project, subtask: Subtask): Project {
-	return newProject({
-		...project,
-		subtasksById: { ...project.subtasksById, [subtask.id]: subtask },
-	})
+	return hasExistingParents(project, subtask)
+		? newProject({
+				...project,
+				subtasksById: { ...project.subtasksById, [subtask.id]: subtask },
+			})
+		: project
 }
 
 export function removeSubtasksByStatus(
@@ -55,16 +70,17 @@ export function enumerateSubtaskAncestors(
 	let currentParentId: TaskId | null = subtask.parentId
 
 	while (currentParentId !== null) {
-		const parent: Module | Subtask | null =
-			getSubtaskById(project, currentParentId) ??
-			getModuleById(project, currentParentId)
-
-		if (parent === null) {
+		if (hasSubtask(project, currentParentId)) {
+			const parent = getSubtaskById(project, currentParentId)
+			ancestors.push(parent)
+			currentParentId = parent.parentId
+		} else if (hasModule(project, currentParentId)) {
+			const parent = getModuleById(project, currentParentId)
+			ancestors.push(parent)
+			currentParentId = null
+		} else {
 			break
 		}
-
-		ancestors.push(parent)
-		currentParentId = parent.type !== "module" ? parent.parentId : null
 	}
 
 	ancestors.reverse()

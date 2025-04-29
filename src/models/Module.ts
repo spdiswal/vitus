@@ -1,7 +1,8 @@
 import { type Project, newProject } from "+models/Project"
-import type { TaskId } from "+models/TaskId"
+import type { TaskId, TaskIds } from "+models/TaskId"
 import type { TaskStatus } from "+models/TaskStatus"
 import { type Path, getFilenameFromPath } from "+types/Path"
+import { assertNotNullish } from "+utilities/Assertions"
 import type { TestModule } from "vitest/node"
 
 export type Module = {
@@ -14,12 +15,19 @@ export type Module = {
 
 export type Modules = Array<Module>
 
-export function getModuleById(project: Project, id: TaskId): Module | null {
-	return project.modulesById[id] ?? null
+export function hasModule(project: Project, moduleId: TaskId): boolean {
+	return moduleId in project.modulesById
 }
 
-export function isExistingModule(project: Project, module: Module): boolean {
-	return module.id in project.modulesById
+export function getModuleById(project: Project, moduleId: TaskId): Module {
+	const module = project.modulesById[moduleId]
+	assertNotNullish(module, "module")
+
+	return module
+}
+
+export function getModulesByIds(project: Project, moduleIds: TaskIds): Modules {
+	return moduleIds.map((moduleId) => getModuleById(project, moduleId))
 }
 
 export function putModule(project: Project, module: Module): Project {
