@@ -1,15 +1,13 @@
 import type { HexColour } from "+types/HexColour"
 
 export function logDebug(
-	summary: {
-		label: string
-		labelColour: HexColour
-		message: string
-	},
+	labelColour: HexColour,
+	label: string,
+	message = "",
 	details: Record<number | string, unknown> = {},
 ): void {
-	const labelAndMessage = `%c ${summary.label} %c ${summary.message.replace("%", "%%")}`
-	const labelStyle = `display:inline-block;padding:3px;border-radius:6px;background-color:${summary.labelColour};color:white;text-transform:uppercase;`
+	const labelAndMessage = `%c ${label} %c ${message.replace("%", "%%")}`
+	const labelStyle = `display:inline-block;padding:3px;border-radius:6px;background-color:${labelColour};color:white;text-transform:uppercase;`
 	const messageStyle = "display:inline-block;padding:3px;"
 
 	const detailsEntries = Object.entries(details)

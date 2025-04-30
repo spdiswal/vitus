@@ -12,9 +12,8 @@
 		"jsxImportSource": "preact",
 		"libReplacement": false,
 		"paths": {
-			"+events/*": ["src/events/*"],
+			"+api/*": ["src/api/*"],
 			"+explorer/*": ["src/explorer/*"],
-			"+models/*": ["src/models/*"],
 			"+server/*": ["src/server/*"],
 			"+types/*": ["src/types/*"],
 			"+utilities/*": ["src/utilities/*"]

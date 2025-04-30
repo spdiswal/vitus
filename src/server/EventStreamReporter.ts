@@ -1,13 +1,13 @@
-import type { EventStream } from "+events/EventStream"
-import { moduleDeletedEvent } from "+events/module/ModuleDeletedEvent"
-import { moduleUpdatedEvent } from "+events/module/ModuleUpdatedEvent"
-import { runCompletedEvent } from "+events/run/RunCompletedEvent"
-import { runStartedEvent } from "+events/run/RunStartedEvent"
-import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { subtaskUpdatedEvent } from "+events/subtask/SubtaskUpdatedEvent"
-import { mapVitestToModule } from "+models/Module"
-import { mapVitestToSuite } from "+models/Suite"
-import { mapVitestToTest } from "+models/Test"
+import { moduleDeleted } from "+api/events/ModuleDeleted"
+import { moduleUpdated } from "+api/events/ModuleUpdated"
+import { runCompleted } from "+api/events/RunCompleted"
+import { runStarted } from "+api/events/RunStarted"
+import { serverRestarted } from "+api/events/ServerRestarted"
+import { subtaskUpdated } from "+api/events/SubtaskUpdated"
+import type { EventStream } from "+server/EventStream"
+import { newModuleFromVitest } from "+server/models/VitestModule"
+import { newSuiteFromVitest } from "+server/models/VitestSuite"
+import { newTestFromVitest } from "+server/models/VitestTest"
 import { notNullish } from "+utilities/Arrays"
 import type { Reporter } from "vitest/reporters"
 
@@ -30,39 +30,45 @@ export function newEventStreamReporter(
 ): EventStreamReporter {
 	return {
 		onServerRestart(): void {
-			eventStream.send(serverRestartedEvent())
+			eventStream.send(serverRestarted())
 		},
 		onTestRunStart(specifications): void {
 			const invalidatedModuleIds = specifications
 				.map((specification) => specification.testModule?.id)
 				.filter(notNullish)
 
-			eventStream.send(runStartedEvent(invalidatedModuleIds))
+			eventStream.send(runStarted(invalidatedModuleIds))
 		},
 		onTestModuleStart(module): void {
-			eventStream.send(moduleUpdatedEvent(mapVitestToModule(module)))
+			eventStream.send(
+				moduleUpdated(newModuleFromVitest(module, { status: "pending" })),
+			)
 		},
 		onTestSuiteReady(suite): void {
-			eventStream.send(subtaskUpdatedEvent(mapVitestToSuite(suite)))
+			eventStream.send(
+				subtaskUpdated(newSuiteFromVitest(suite, { status: "pending" })),
+			)
 		},
 		onTestCaseReady(test): void {
-			eventStream.send(subtaskUpdatedEvent(mapVitestToTest(test)))
+			eventStream.send(
+				subtaskUpdated(newTestFromVitest(test, { status: "pending" })),
+			)
 		},
 		onTestCaseResult(test): void {
-			eventStream.send(subtaskUpdatedEvent(mapVitestToTest(test)))
+			eventStream.send(subtaskUpdated(newTestFromVitest(test)))
 		},
 		onTestSuiteResult(suite): void {
-			eventStream.send(subtaskUpdatedEvent(mapVitestToSuite(suite)))
+			eventStream.send(subtaskUpdated(newSuiteFromVitest(suite)))
 		},
 		onTestModuleEnd(module): void {
-			eventStream.send(moduleUpdatedEvent(mapVitestToModule(module)))
+			eventStream.send(moduleUpdated(newModuleFromVitest(module)))
 		},
 		onTestRunEnd(): void {
-			eventStream.send(runCompletedEvent())
+			eventStream.send(runCompleted())
 		},
 		onTestRemoved(moduleId): void {
 			if (moduleId !== undefined) {
-				eventStream.send(moduleDeletedEvent(moduleId))
+				eventStream.send(moduleDeleted(moduleId))
 			}
 		},
 	}

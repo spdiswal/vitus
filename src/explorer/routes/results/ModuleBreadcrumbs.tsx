@@ -1,5 +1,5 @@
-import { useProject } from "+explorer/UseProject"
-import type { Module } from "+models/Module"
+import type { Module } from "+api/models/Module"
+import { useProject } from "+explorer/project/UseProject"
 import type { Renderable } from "+types/Renderable"
 import { useEffect } from "preact/hooks"
 

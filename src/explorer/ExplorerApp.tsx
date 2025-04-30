@@ -1,11 +1,11 @@
+import type { Project } from "+api/models/Project"
 import { ExplorerStatusLine } from "+explorer/ExplorerStatusLine"
-import { ProjectProvider } from "+explorer/UseProject"
 import { NavigationTree } from "+explorer/navigation/NavigationTree"
+import { ProjectProvider } from "+explorer/project/UseProject"
 import { ResultsPage } from "+explorer/routes/results/ResultsPage"
 import { SummaryPage } from "+explorer/routes/summary/SummaryPage"
 import type { SelectableTheme } from "+explorer/theme/Theme"
 import { ThemePicker } from "+explorer/theme/ThemePicker"
-import type { Project } from "+models/Project"
 import type { Renderable } from "+types/Renderable"
 import { Route, Switch } from "wouter-preact"
 

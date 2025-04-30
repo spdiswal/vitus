@@ -1,4 +1,4 @@
-import type { Test } from "+models/Test"
+import type { Test } from "+api/models/Test"
 import { cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { Link } from "wouter-preact"

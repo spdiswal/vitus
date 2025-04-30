@@ -1,5 +1,5 @@
+import type { Project } from "+api/models/Project"
 import { ExplorerApp } from "+explorer/ExplorerApp"
-import type { Project } from "+models/Project"
 import { renderToStringAsync } from "preact-render-to-string"
 import { Router } from "wouter-preact"
 

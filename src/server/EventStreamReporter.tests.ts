@@ -1,27 +1,23 @@
-import { type EventStreamSubscriber, newEventStream } from "+events/EventStream"
-import { moduleDeletedEvent } from "+events/module/ModuleDeletedEvent"
-import { moduleUpdatedEvent } from "+events/module/ModuleUpdatedEvent"
-import { runCompletedEvent } from "+events/run/RunCompletedEvent"
-import { runStartedEvent } from "+events/run/RunStartedEvent"
-import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { subtaskUpdatedEvent } from "+events/subtask/SubtaskUpdatedEvent"
+import { moduleDeleted } from "+api/events/ModuleDeleted"
+import { moduleUpdated } from "+api/events/ModuleUpdated"
+import { runCompleted } from "+api/events/RunCompleted"
+import { runStarted } from "+api/events/RunStarted"
+import { serverRestarted } from "+api/events/ServerRestarted"
+import { subtaskUpdated } from "+api/events/SubtaskUpdated"
 import {
 	type DummyModuleId,
 	dummyModulePath,
+} from "+api/models/Module.fixtures"
+import { type DummySuiteId, dummySuiteName } from "+api/models/Suite.fixtures"
+import { type DummyTestId, dummyTestName } from "+api/models/Test.fixtures"
+import { type EventStreamSubscriber, newEventStream } from "+server/EventStream"
+import { newEventStreamReporter } from "+server/EventStreamReporter"
+import {
 	dummyVitestModule,
 	dummyVitestSpecification,
-} from "+models/Module.fixtures"
-import {
-	type DummySuiteId,
-	dummySuiteName,
-	dummyVitestSuite,
-} from "+models/Suite.fixtures"
-import {
-	type DummyTestId,
-	dummyTestName,
-	dummyVitestTest,
-} from "+models/Test.fixtures"
-import { newEventStreamReporter } from "+server/EventStreamReporter"
+} from "+server/models/VitestModule.fixtures"
+import { dummyVitestSuite } from "+server/models/VitestSuite.fixtures"
+import { dummyVitestTest } from "+server/models/VitestTest.fixtures"
 import { getFilenameFromPath } from "+types/Path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -39,7 +35,7 @@ describe("when the server restarts", () => {
 	})
 
 	it("sends a 'server-restarted' event", () => {
-		expect(spy).toHaveBeenCalledExactlyOnceWith(serverRestartedEvent())
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serverRestarted())
 	})
 })
 
@@ -58,9 +54,7 @@ describe.each`
 			})
 
 			it("sends a 'run-started' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(
-					runStartedEvent(moduleProps.ids),
-				)
+				expect(spy).toHaveBeenCalledExactlyOnceWith(runStarted(moduleProps.ids))
 			})
 		})
 
@@ -74,7 +68,7 @@ describe.each`
 			})
 
 			it("sends a 'run-completed' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(runCompletedEvent())
+				expect(spy).toHaveBeenCalledExactlyOnceWith(runCompleted())
 			})
 		})
 	},
@@ -101,7 +95,7 @@ describe.each`
 
 		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleUpdatedEvent({
+				moduleUpdated({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -123,7 +117,7 @@ describe.each`
 
 		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleUpdatedEvent({
+				moduleUpdated({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -145,7 +139,7 @@ describe.each`
 
 		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleUpdatedEvent({
+				moduleUpdated({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -167,7 +161,7 @@ describe.each`
 
 		it("sends a 'module-updated' event", () => {
 			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleUpdatedEvent({
+				moduleUpdated({
 					type: "module",
 					id: moduleId,
 					path: modulePath,
@@ -184,9 +178,7 @@ describe.each`
 		})
 
 		it("sends a 'module-deleted' event", () => {
-			expect(spy).toHaveBeenCalledExactlyOnceWith(
-				moduleDeletedEvent(modulePath),
-			)
+			expect(spy).toHaveBeenCalledExactlyOnceWith(moduleDeleted(modulePath))
 		})
 	})
 
@@ -210,7 +202,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -231,7 +223,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -252,7 +244,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -273,7 +265,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "suite",
 							id: topLevelSuiteId,
 							parentId: moduleId,
@@ -309,7 +301,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -332,7 +324,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -355,7 +347,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -378,7 +370,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "test",
 									id: nestedTestId,
 									parentId: topLevelSuiteId,
@@ -413,7 +405,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -436,7 +428,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -459,7 +451,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -482,7 +474,7 @@ describe.each`
 
 						it("sends a 'subtask-updated' event", () => {
 							expect(spy).toHaveBeenCalledExactlyOnceWith(
-								subtaskUpdatedEvent({
+								subtaskUpdated({
 									type: "suite",
 									id: nestedSuiteId,
 									parentId: topLevelSuiteId,
@@ -517,7 +509,7 @@ describe.each`
 
 								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										subtaskUpdatedEvent({
+										subtaskUpdated({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -540,7 +532,7 @@ describe.each`
 
 								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										subtaskUpdatedEvent({
+										subtaskUpdated({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -563,7 +555,7 @@ describe.each`
 
 								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										subtaskUpdatedEvent({
+										subtaskUpdated({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -586,7 +578,7 @@ describe.each`
 
 								it("sends a 'subtask-updated' event", () => {
 									expect(spy).toHaveBeenCalledExactlyOnceWith(
-										subtaskUpdatedEvent({
+										subtaskUpdated({
 											type: "test",
 											id: nestedTestId,
 											parentId: nestedSuiteId,
@@ -628,7 +620,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,
@@ -651,7 +643,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,
@@ -674,7 +666,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,
@@ -697,7 +689,7 @@ describe.each`
 
 				it("sends a 'subtask-updated' event", () => {
 					expect(spy).toHaveBeenCalledExactlyOnceWith(
-						subtaskUpdatedEvent({
+						subtaskUpdated({
 							type: "test",
 							id: topLevelTestId,
 							parentId: moduleId,

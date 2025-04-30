@@ -1,8 +1,8 @@
-import { useSubtasks } from "+explorer/UseSubtasks"
+import type { Module } from "+api/models/Module"
 import { NavigationTreeNode } from "+explorer/navigation/NavigationTreeNode"
 import { NavigationTreeSuiteNode } from "+explorer/navigation/NavigationTreeSuiteNode"
 import { NavigationTreeTestNode } from "+explorer/navigation/NavigationTreeTestNode"
-import type { Module } from "+models/Module"
+import { useSubtasks } from "+explorer/project/UseSubtasks"
 import type { Renderable } from "+types/Renderable"
 import { useMemo } from "preact/hooks"
 

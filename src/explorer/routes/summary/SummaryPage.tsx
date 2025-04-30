@@ -1,4 +1,4 @@
-import { useProject } from "+explorer/UseProject"
+import { useProject } from "+explorer/project/UseProject"
 import type { Renderable } from "+types/Renderable"
 import { count } from "+utilities/Strings"
 import { useEffect } from "preact/hooks"

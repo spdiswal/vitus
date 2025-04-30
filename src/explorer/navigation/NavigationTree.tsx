@@ -1,5 +1,5 @@
-import { useModules } from "+explorer/UseModules"
 import { NavigationTreeModuleNode } from "+explorer/navigation/NavigationTreeModuleNode"
+import { useModules } from "+explorer/project/UseModules"
 import { type ClassString, cn } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 import { useMemo } from "preact/hooks"

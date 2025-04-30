@@ -1,5 +1,5 @@
+import { dummyProject } from "+api/models/Project.fixtures"
 import { ExplorerApp } from "+explorer/ExplorerApp"
-import { dummyProject } from "+models/Project.fixtures"
 import { describe, expect, it } from "vitest"
 
 const project = dummyProject()

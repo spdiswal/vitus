@@ -1,4 +1,4 @@
-import { useProject } from "+explorer/UseProject"
+import { useProject } from "+explorer/project/UseProject"
 import { type ClassString, cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
