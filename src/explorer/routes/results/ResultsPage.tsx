@@ -1,6 +1,6 @@
 import { getModuleById } from "+api/models/Module"
 import { getSubtaskById, hasSubtask } from "+api/models/Subtask"
-import type { TaskId } from "+api/models/TaskId"
+import type { TestId } from "+api/models/TestId"
 import { useProject } from "+explorer/project/UseProject"
 import { DiffLegend } from "+explorer/routes/results/DiffLegend"
 import { ModuleBreadcrumbs } from "+explorer/routes/results/ModuleBreadcrumbs"
@@ -12,7 +12,7 @@ export function ResultsPage(): Renderable {
 	const project = useProject()
 
 	const params = useParams()
-	const taskId = params.taskId as TaskId
+	const taskId = params.taskId as TestId
 
 	if (!hasSubtask(project, taskId)) {
 		return null // TODO: 404 Not Found Page

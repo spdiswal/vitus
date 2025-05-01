@@ -1,15 +1,16 @@
 import type { Module } from "+api/models/Module"
+import type { ModuleId } from "+api/models/ModuleId"
 import { type Project, newProject } from "+api/models/Project"
 import type { Subtask } from "+api/models/Subtask"
-import type { TaskId } from "+api/models/TaskId"
+import type { SubtaskId } from "+api/models/SubtaskId"
 import { newModuleFromVitest } from "+server/models/VitestModule"
 import { newSuiteFromVitest } from "+server/models/VitestSuite"
 import { newTestFromVitest } from "+server/models/VitestTest"
 import type { Vitest } from "vitest/node"
 
 export function newProjectFromVitest(vitest: Vitest): Project {
-	const modulesById: Record<TaskId, Module> = {}
-	const subtasksById: Record<TaskId, Subtask> = {}
+	const modulesById: Record<ModuleId, Module> = {}
+	const subtasksById: Record<SubtaskId, Subtask> = {}
 
 	for (const module of vitest.state.getTestModules()) {
 		modulesById[module.id] = newModuleFromVitest(module)

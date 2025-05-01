@@ -1,31 +1,32 @@
 import type { Module } from "+api/models/Module"
+import type { ModuleId, ModuleIds } from "+api/models/ModuleId"
 import { type Project, newProject } from "+api/models/Project"
 import type { Subtask } from "+api/models/Subtask"
-import type { TaskId, TaskIds } from "+api/models/TaskId"
+import type { SubtaskId } from "+api/models/SubtaskId"
 
 export type RunStarted = {
 	type: "run-started"
-	invalidatedModuleIds: TaskIds
+	invalidatedIds: ModuleIds
 }
 
-export function runStarted(invalidatedModuleIds: TaskIds): RunStarted {
-	return { type: "run-started", invalidatedModuleIds }
+export function runStarted(invalidatedIds: ModuleIds): RunStarted {
+	return { type: "run-started", invalidatedIds }
 }
 
 export function applyRunStarted(project: Project, event: RunStarted): Project {
-	const modulesById: Record<TaskId, Module> = Object.fromEntries(
+	const modulesById: Record<ModuleId, Module> = Object.fromEntries(
 		Object.entries(project.modulesById).map(([moduleId, module]) => [
 			moduleId,
-			event.invalidatedModuleIds.includes(module.id)
+			event.invalidatedIds.includes(module.id)
 				? { ...module, status: "started" }
 				: module,
 		]),
 	)
 
-	const subtasksById: Record<TaskId, Subtask> = Object.fromEntries(
+	const subtasksById: Record<SubtaskId, Subtask> = Object.fromEntries(
 		Object.entries(project.subtasksById).map(([subtaskId, subtask]) => [
 			subtaskId,
-			event.invalidatedModuleIds.includes(subtask.parentModuleId)
+			event.invalidatedIds.includes(subtask.parentModuleId)
 				? { ...subtask, status: "started" }
 				: subtask,
 		]),

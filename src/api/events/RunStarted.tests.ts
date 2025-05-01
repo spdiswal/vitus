@@ -1,36 +1,35 @@
 import { applyEvent } from "+api/events/Event"
 import { runStarted } from "+api/events/RunStarted"
 import { getModulesByIds } from "+api/models/Module"
+import type { ModuleIds } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
-import { getSubtasksByModuleIds } from "+api/models/Subtask"
-import type { TaskId } from "+api/models/TaskId"
+import { getSubtasksByParentModuleIds } from "+api/models/Subtask"
 import type { TaskStatus } from "+api/models/TaskStatus"
-import type { Vector } from "+types/Vector"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject()
 
 describe.each`
-	moduleIds
+	ids
 	${["15b021ef72", "-1730f876b4"]}
 	${["3afdd8b6c3", "-1730f876b4"]}
 	${["3afdd8b6c3", "-e45b128829"]}
 `(
-	"when a run has started for 2 modules with ids $moduleIds.0 and $moduleIds.1",
+	"when a run has started for 2 modules with ids $ids.0 and $ids.1",
 	(props: {
-		moduleIds: Vector<TaskId, 2>
+		ids: ModuleIds
 	}) => {
 		let actualProject: Project
 
 		beforeEach(() => {
-			actualProject = applyEvent(initialProject, runStarted(props.moduleIds))
+			actualProject = applyEvent(initialProject, runStarted(props.ids))
 		})
 
 		it("sets the module statuses to 'started'", () => {
 			const actualModuleStatuses = Array.from(
 				new Set(
-					getModulesByIds(actualProject, props.moduleIds).map(
+					getModulesByIds(actualProject, props.ids).map(
 						(module) => module.status,
 					),
 				),
@@ -43,7 +42,7 @@ describe.each`
 		it("sets the module subtask statuses to 'started'", () => {
 			const actualSubtaskStatuses = Array.from(
 				new Set(
-					getSubtasksByModuleIds(actualProject, props.moduleIds).map(
+					getSubtasksByParentModuleIds(actualProject, props.ids).map(
 						(subtask) => subtask.status,
 					),
 				),

@@ -1,11 +1,12 @@
-import type { TaskId } from "+api/models/TaskId"
+import type { ModuleId } from "+api/models/ModuleId"
+import type { SuiteId } from "+api/models/SuiteId"
 import type { TaskStatus } from "+api/models/TaskStatus"
 
 export type Suite = {
 	type: "suite"
-	id: TaskId
-	parentId: TaskId
-	parentModuleId: TaskId
+	id: SuiteId
+	parentId: ModuleId | SuiteId
+	parentModuleId: ModuleId
 	name: string
 	status: TaskStatus
 }

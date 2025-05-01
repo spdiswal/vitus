@@ -1,32 +1,32 @@
+import type { ModuleId, ModuleIds } from "+api/models/ModuleId"
 import { type Project, newProject } from "+api/models/Project"
-import type { TaskId, TaskIds } from "+api/models/TaskId"
+import type { TaskId } from "+api/models/TaskId"
 import type { TaskStatus } from "+api/models/TaskStatus"
 import type { Path } from "+types/Path"
 import { assertNotNullish } from "+utilities/Assertions"
 
 export type Module = {
 	type: "module"
-	id: TaskId
+	id: ModuleId
 	path: Path
 	filename: string
 	status: TaskStatus
 }
-
 export type Modules = Array<Module>
 
-export function hasModule(project: Project, moduleId: TaskId): boolean {
-	return moduleId in project.modulesById
+export function hasModule(project: Project, id: TaskId): id is ModuleId {
+	return id in project.modulesById
 }
 
-export function getModuleById(project: Project, moduleId: TaskId): Module {
-	const module = project.modulesById[moduleId]
+export function getModuleById(project: Project, id: ModuleId): Module {
+	const module = project.modulesById[id]
 	assertNotNullish(module, "module")
 
 	return module
 }
 
-export function getModulesByIds(project: Project, moduleIds: TaskIds): Modules {
-	return moduleIds.map((moduleId) => getModuleById(project, moduleId))
+export function getModulesByIds(project: Project, ids: ModuleIds): Modules {
+	return ids.map((moduleId) => getModuleById(project, moduleId))
 }
 
 export function putModule(project: Project, module: Module): Project {

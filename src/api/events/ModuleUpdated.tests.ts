@@ -6,9 +6,9 @@ import {
 	dummyModuleFilename,
 	dummyModulePath,
 } from "+api/models/Module.fixtures"
+import type { ModuleId } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
-import type { TaskId } from "+api/models/TaskId"
 import type { TaskStatus } from "+api/models/TaskStatus"
 import { beforeEach, describe, expect, it } from "vitest"
 
@@ -22,18 +22,18 @@ const initialProject = dummyProject({
 })
 
 describe.each`
-	moduleId         | newStatus
+	id               | newStatus
 	${"15b021ef72"}  | ${"failed"}
 	${"3afdd8b6c3"}  | ${"passed"}
 	${"-1730f876b4"} | ${"skipped"}
 	${"-e45b128829"} | ${"started"}
 `(
-	"when an existing module with id $moduleId has $newStatus",
+	"when an existing module with id $id has $newStatus",
 	(props: {
-		moduleId: TaskId
+		id: ModuleId
 		newStatus: TaskStatus
 	}) => {
-		const moduleId = props.moduleId
+		const moduleId = props.id
 
 		let actualProject: Project
 		let actualModule: Module

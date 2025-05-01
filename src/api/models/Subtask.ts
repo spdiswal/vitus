@@ -1,7 +1,10 @@
 import { type Module, getModuleById, hasModule } from "+api/models/Module"
+import type { ModuleId, ModuleIds } from "+api/models/ModuleId"
 import { type Project, newProject } from "+api/models/Project"
+import type { SubtaskId } from "+api/models/SubtaskId"
 import type { Suite } from "+api/models/Suite"
-import type { TaskId, TaskIds } from "+api/models/TaskId"
+import type { SuiteId } from "+api/models/SuiteId"
+import type { TaskId } from "+api/models/TaskId"
 import type { TaskStatus } from "+api/models/TaskStatus"
 import type { Test } from "+api/models/Test"
 import { assertNotNullish } from "+utilities/Assertions"
@@ -9,23 +12,23 @@ import { assertNotNullish } from "+utilities/Assertions"
 export type Subtask = Suite | Test
 export type Subtasks = Array<Subtask>
 
-export function hasSubtask(project: Project, subtaskId: TaskId): boolean {
-	return subtaskId in project.subtasksById
+export function hasSubtask(project: Project, id: TaskId): id is SubtaskId {
+	return id in project.subtasksById
 }
 
-export function getSubtaskById(project: Project, subtaskId: TaskId): Subtask {
-	const subtask = project.subtasksById[subtaskId]
+export function getSubtaskById(project: Project, id: SubtaskId): Subtask {
+	const subtask = project.subtasksById[id]
 	assertNotNullish(subtask, "subtask")
 
 	return subtask
 }
 
-export function getSubtasksByModuleIds(
+export function getSubtasksByParentModuleIds(
 	project: Project,
-	moduleIds: TaskIds,
+	ids: ModuleIds,
 ): Subtasks {
 	return Object.values(project.subtasksById).filter((subtask) =>
-		moduleIds.includes(subtask.parentModuleId),
+		ids.includes(subtask.parentModuleId),
 	)
 }
 
@@ -67,7 +70,7 @@ export function enumerateSubtaskAncestors(
 	subtask: Subtask,
 ): Iterable<Module | Subtask> {
 	const ancestors: Array<Module | Subtask> = []
-	let currentParentId: TaskId | null = subtask.parentId
+	let currentParentId: ModuleId | SuiteId | null = subtask.parentId
 
 	while (currentParentId !== null) {
 		if (hasSubtask(project, currentParentId)) {

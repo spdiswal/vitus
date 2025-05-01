@@ -1,12 +1,16 @@
-import type { TypeBrand } from "+types/TypeBrand"
+import type { Flavour } from "+types/Flavour"
 import { clsx } from "clsx/lite"
 
-export type ClassString = ClassStringBrand & ClassValue
+export type ClassString = ClassValue & Flavour<"ClassString">
 type ClassValue = string | false | null | undefined
 
-type NonClassValue<Class extends ClassValue> = Class extends ClassStringBrand
-	? "Expected the `class` prop to be the last argument"
-	: NormalisedClassValue<Class>
+/**
+ * The type flavour ensures that the `class` prop always appears as the last argument to the `cn()` function.
+ */
+type NonClassValue<Class extends ClassValue> =
+	Class extends Flavour<"ClassString">
+		? "Expected the `class` prop to be the last argument"
+		: NormalisedClassValue<Class>
 
 type NormalisedClassValue<Class extends ClassValue> = Class extends ""
 	? "Unexpected empty `class` string"
@@ -17,11 +21,6 @@ type NormalisedClassValue<Class extends ClassValue> = Class extends ""
 			: Class extends `${string}  ${string}`
 				? "Unexpected multiple consecutive whitespace in the `class` string"
 				: Class
-
-/**
- * The type brand ensures that the `class` prop always appears as the last argument to the `cn()` function.
- */
-type ClassStringBrand = TypeBrand<"ClassString">
 
 /**
  * Combines the given class strings to a single string, excluding falsy values.

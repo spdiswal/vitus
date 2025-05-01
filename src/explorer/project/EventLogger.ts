@@ -72,7 +72,7 @@ function logRunCompleted(): void {
 
 function logRunStarted(event: RunStarted): void {
 	logDebug("#1d4ed8", "run started", "", {
-		invalidatedModuleIds: event.invalidatedModuleIds,
+		invalidatedIds: event.invalidatedIds,
 	})
 }
 
