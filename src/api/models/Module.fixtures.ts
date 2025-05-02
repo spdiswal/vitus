@@ -58,10 +58,10 @@ export function dummyModulePath(
 }
 
 export function dummyParentIds(
-	id: DummySuiteId | DummyTestId,
+	subtaskId: DummySuiteId | DummyTestId,
 ): [DummyModuleId, DummySuiteId | null] {
-	const moduleId = id.slice(0, id.indexOf("_"))
-	const parentSuiteId = id.slice(0, id.lastIndexOf("_"))
+	const moduleId = subtaskId.slice(0, subtaskId.indexOf("_"))
+	const parentSuiteId = subtaskId.slice(0, subtaskId.lastIndexOf("_"))
 
 	return [
 		moduleId as DummyModuleId,

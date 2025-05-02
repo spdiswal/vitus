@@ -17,14 +17,18 @@ describe("when the run has completed", () => {
 		actualProject = applyEvent(initialProject, runCompleted())
 	})
 
-	it("discards unfinished tasks", () => {
+	it("discards unfinished modules", () => {
 		const actualModuleIds = Object.keys(actualProject.modulesById)
-		const actualSubtaskIds = Object.keys(actualProject.subtasksById)
 
 		expect(actualModuleIds).toEqual<Array<DummyModuleId>>([
 			"3afdd8b6c3",
 			"-1730f876b4",
 		])
+	})
+
+	it("discards unfinished subtasks", () => {
+		const actualSubtaskIds = Object.keys(actualProject.subtasksById)
+
 		expect(actualSubtaskIds).toEqual<Array<DummySuiteId | DummyTestId>>([
 			"3afdd8b6c3_2",
 			"3afdd8b6c3_2_5",

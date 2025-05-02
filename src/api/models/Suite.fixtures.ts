@@ -3,17 +3,17 @@ import type { Suite } from "+api/models/Suite"
 import type { EvenDigit } from "+types/Digit"
 
 export function dummySuite(
-	id: DummySuiteId,
+	suiteId: DummySuiteId,
 	overrides?: Partial<Suite>,
 ): Suite {
-	const [parentModuleId, parentSuiteId] = dummyParentIds(id)
+	const [parentModuleId, parentSuiteId] = dummyParentIds(suiteId)
 
 	return {
 		type: "suite",
-		id,
+		id: suiteId,
 		parentId: parentSuiteId ?? parentModuleId,
 		parentModuleId,
-		name: dummySuiteName(id),
+		name: dummySuiteName(suiteId),
 		status: "passed",
 		...overrides,
 	}
@@ -55,9 +55,9 @@ const dummyNamesById: Record<DummyModuleId, Record<EvenDigit, string>> = {
 	},
 }
 
-export function dummySuiteName(id: DummySuiteId): string {
-	const [moduleId, parentSuiteId] = dummyParentIds(id)
-	const lastDigit = Number.parseInt(id.slice(-1)) as EvenDigit
+export function dummySuiteName(suiteId: DummySuiteId): string {
+	const [moduleId, parentSuiteId] = dummyParentIds(suiteId)
+	const lastDigit = Number.parseInt(suiteId.slice(-1)) as EvenDigit
 
 	return `${parentSuiteId === null ? "when" : "and"} ${dummyNamesById[moduleId][lastDigit]}`
 }

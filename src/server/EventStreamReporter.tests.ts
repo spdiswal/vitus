@@ -12,10 +12,8 @@ import { type DummySuiteId, dummySuiteName } from "+api/models/Suite.fixtures"
 import { type DummyTestId, dummyTestName } from "+api/models/Test.fixtures"
 import { type EventStreamSubscriber, newEventStream } from "+server/EventStream"
 import { newEventStreamReporter } from "+server/EventStreamReporter"
-import {
-	dummyVitestModule,
-	dummyVitestSpecification,
-} from "+server/models/VitestModule.fixtures"
+import { dummyVitestModule } from "+server/models/VitestModule.fixtures"
+import { dummyVitestSpecification } from "+server/models/VitestSpecification.fixtures"
 import { dummyVitestSuite } from "+server/models/VitestSuite.fixtures"
 import { dummyVitestTest } from "+server/models/VitestTest.fixtures"
 import { getFilenameFromPath } from "+types/Path"
@@ -47,6 +45,7 @@ describe.each`
 	"given a set of modules $ids",
 	(moduleProps: { ids: Array<DummyModuleId> }) => {
 		describe("when a run has started", () => {
+			const invalidatedModuleIds = moduleProps.ids
 			const specifications = moduleProps.ids.map(dummyVitestSpecification)
 
 			beforeEach(() => {
@@ -54,7 +53,9 @@ describe.each`
 			})
 
 			it("sends a 'run-started' event", () => {
-				expect(spy).toHaveBeenCalledExactlyOnceWith(runStarted(moduleProps.ids))
+				expect(spy).toHaveBeenCalledExactlyOnceWith(
+					runStarted(invalidatedModuleIds),
+				)
 			})
 		})
 
@@ -75,13 +76,13 @@ describe.each`
 )
 
 describe.each`
-	id
+	moduleId
 	${"15b021ef72"}
 	${"3afdd8b6c3"}
 	${"-1730f876b4"}
 	${"-e45b128829"}
-`("given a module $id", (moduleProps: { id: DummyModuleId }) => {
-	const moduleId = moduleProps.id
+`("given a module $moduleId", (moduleProps: { moduleId: DummyModuleId }) => {
+	const moduleId = moduleProps.moduleId
 	const modulePath = dummyModulePath(moduleId)
 
 	describe("when the module starts", () => {
@@ -183,14 +184,14 @@ describe.each`
 	})
 
 	describe.each`
-		id
+		suiteId
 		${`${moduleId}_0`}
 		${`${moduleId}_2`}
 		${`${moduleId}_4`}
 	`(
-		"and given a top-level suite $id",
-		(topLevelSuiteProps: { id: DummySuiteId }) => {
-			const topLevelSuiteId = topLevelSuiteProps.id
+		"and given a top-level suite $suiteId",
+		(topLevelSuiteProps: { suiteId: DummySuiteId }) => {
+			const topLevelSuiteId = topLevelSuiteProps.suiteId
 			const topLevelSuiteName = dummySuiteName(topLevelSuiteId)
 
 			describe("when the suite starts", () => {
@@ -278,16 +279,16 @@ describe.each`
 			})
 
 			describe.each`
-				id
-				${`${topLevelSuiteProps.id}_1`}
-				${`${topLevelSuiteProps.id}_3`}
-				${`${topLevelSuiteProps.id}_5`}
+				testId
+				${`${topLevelSuiteProps.suiteId}_1`}
+				${`${topLevelSuiteProps.suiteId}_3`}
+				${`${topLevelSuiteProps.suiteId}_5`}
 			`(
-				"and given a nested test $id",
+				"and given a nested test $testId",
 				(nestedTestProps: {
-					id: DummyTestId
+					testId: DummyTestId
 				}) => {
-					const nestedTestId = nestedTestProps.id
+					const nestedTestId = nestedTestProps.testId
 					const nestedTestName = dummyTestName(nestedTestId)
 
 					describe("when the test starts", () => {
@@ -385,13 +386,13 @@ describe.each`
 			)
 
 			describe.each`
-				id
-				${`${topLevelSuiteProps.id}_6`}
-				${`${topLevelSuiteProps.id}_8`}
+				suiteId
+				${`${topLevelSuiteProps.suiteId}_6`}
+				${`${topLevelSuiteProps.suiteId}_8`}
 			`(
-				"and given a nested suite $id",
-				(nestedSuiteProps: { id: DummySuiteId }) => {
-					const nestedSuiteId = nestedSuiteProps.id
+				"and given a nested suite $suiteId",
+				(nestedSuiteProps: { suiteId: DummySuiteId }) => {
+					const nestedSuiteId = nestedSuiteProps.suiteId
 					const nestedSuiteName = dummySuiteName(nestedSuiteId)
 
 					describe("when the suite starts", () => {
@@ -487,15 +488,15 @@ describe.each`
 					})
 
 					describe.each`
-						id
-						${`${nestedSuiteProps.id}_7`}
-						${`${nestedSuiteProps.id}_9`}
+						testId
+						${`${nestedSuiteId}_7`}
+						${`${nestedSuiteId}_9`}
 					`(
-						"and given a nested test $id",
+						"and given a nested test $testId",
 						(nestedTestProps: {
-							id: DummyTestId
+							testId: DummyTestId
 						}) => {
-							const nestedTestId = nestedTestProps.id
+							const nestedTestId = nestedTestProps.testId
 							const nestedTestName = dummyTestName(nestedTestId)
 
 							describe("when the test starts", () => {
@@ -597,16 +598,16 @@ describe.each`
 	)
 
 	describe.each`
-		id
+		testId
 		${`${moduleId}_1`}
 		${`${moduleId}_3`}
 		${`${moduleId}_5`}
 	`(
-		"and given a top-level test $id",
+		"and given a top-level test $testId",
 		(topLevelTestProps: {
-			id: DummyTestId
+			testId: DummyTestId
 		}) => {
-			const topLevelTestId = topLevelTestProps.id
+			const topLevelTestId = topLevelTestProps.testId
 			const topLevelTestName = dummyTestName(topLevelTestId)
 
 			describe("when the test starts", () => {

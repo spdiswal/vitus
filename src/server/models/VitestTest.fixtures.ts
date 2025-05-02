@@ -9,12 +9,12 @@ import type {
 import type { TestCase, TestResult, TestState } from "vitest/node"
 
 export function dummyVitestTest(
-	id: DummyTestId,
+	testId: DummyTestId,
 	props: {
 		status: TestState
 	},
 ): TestCase {
-	const [parentModuleId, parentSuiteId] = dummyParentIds(id)
+	const [parentModuleId, parentSuiteId] = dummyParentIds(testId)
 
 	const parentModule = dummyVitestModule(parentModuleId, { status: "pending" })
 	const parentSuite =
@@ -24,8 +24,8 @@ export function dummyVitestTest(
 
 	return {
 		type: "test",
-		id,
-		name: dummyTestName(id),
+		id: testId,
+		name: dummyTestName(testId),
 		module: parentModule,
 		parent: parentSuite ?? parentModule,
 		result: (): TestResult => getDummyTestResult(props.status),

@@ -22,18 +22,18 @@ const initialProject = dummyProject({
 })
 
 describe.each`
-	id               | newStatus
+	moduleId         | newStatus
 	${"15b021ef72"}  | ${"failed"}
 	${"3afdd8b6c3"}  | ${"passed"}
 	${"-1730f876b4"} | ${"skipped"}
 	${"-e45b128829"} | ${"started"}
 `(
-	"when an existing module with id $id has $newStatus",
+	"when an existing module with id $moduleId has $newStatus",
 	(props: {
-		id: ModuleId
+		moduleId: ModuleId
 		newStatus: TaskStatus
 	}) => {
-		const moduleId = props.id
+		const moduleId = props.moduleId
 
 		let actualProject: Project
 		let actualModule: Module

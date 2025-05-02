@@ -1,6 +1,7 @@
-import { removeModulesByPath } from "+api/models/Module"
+import { getModules } from "+api/models/Module"
 import type { Project } from "+api/models/Project"
-import type { Path } from "+types/Path"
+import { removeTasks } from "+api/models/Task"
+import { type Path, byPath } from "+types/Path"
 
 export type ModuleDeleted = {
 	type: "module-deleted"
@@ -15,5 +16,6 @@ export function applyModuleDeleted(
 	project: Project,
 	event: ModuleDeleted,
 ): Project {
-	return removeModulesByPath(project, event.path)
+	const deletedModules = getModules(project, byPath(event.path))
+	return removeTasks(project, deletedModules, [])
 }

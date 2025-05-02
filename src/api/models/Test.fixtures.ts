@@ -3,15 +3,18 @@ import type { DummySuiteId } from "+api/models/Suite.fixtures"
 import type { Test } from "+api/models/Test"
 import type { OddDigit } from "+types/Digit"
 
-export function dummyTest(id: DummyTestId, overrides?: Partial<Test>): Test {
-	const [parentModuleId, parentSuiteId] = dummyParentIds(id)
+export function dummyTest(
+	testId: DummyTestId,
+	overrides?: Partial<Test>,
+): Test {
+	const [parentModuleId, parentSuiteId] = dummyParentIds(testId)
 
 	return {
 		type: "test",
-		id,
+		id: testId,
 		parentId: parentSuiteId ?? parentModuleId,
 		parentModuleId,
-		name: dummyTestName(id),
+		name: dummyTestName(testId),
 		status: "passed",
 		...overrides,
 	}
@@ -52,9 +55,9 @@ const dummyNamesById: Record<DummyModuleId, Record<OddDigit, string>> = {
 	},
 }
 
-export function dummyTestName(id: DummyTestId): string {
-	const [moduleId] = dummyParentIds(id)
-	const lastDigit = Number.parseInt(id.slice(-1)) as OddDigit
+export function dummyTestName(testId: DummyTestId): string {
+	const [moduleId] = dummyParentIds(testId)
+	const lastDigit = Number.parseInt(testId.slice(-1)) as OddDigit
 
 	return dummyNamesById[moduleId][lastDigit]
 }

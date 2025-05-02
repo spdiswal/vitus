@@ -14,7 +14,7 @@ describe("when the server has restarted", () => {
 		actualProject = applyEvent(initialProject, serverRestarted())
 	})
 
-	it("is still connected", () => {
+	it("is connected", () => {
 		expect(actualProject.isConnected).toBe(true)
 	})
 
@@ -33,6 +33,6 @@ describe("when the server has restarted", () => {
 	})
 
 	it("updates the project status based on the latest set of modules", () => {
-		expect(actualProject.status).toBe<TaskStatus>("passed")
+		expect(actualProject.status).toBe<TaskStatus>("skipped")
 	})
 })

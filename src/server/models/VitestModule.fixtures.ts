@@ -10,20 +10,8 @@ import type {
 	TestCase,
 	TestModule,
 	TestModuleState,
-	TestSpecification,
 	TestSuite,
 } from "vitest/node"
-
-export function dummyVitestSpecification(
-	moduleId: DummyModuleId,
-): TestSpecification {
-	return {
-		moduleId: dummyModulePath(moduleId),
-		get testModule(): TestModule {
-			return dummyVitestModule(moduleId, { status: "pending" })
-		},
-	} as TestSpecification
-}
 
 export function dummyVitestModule(
 	moduleId: DummyModuleId,

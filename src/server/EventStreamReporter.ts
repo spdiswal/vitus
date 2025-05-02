@@ -4,6 +4,7 @@ import { runCompleted } from "+api/events/RunCompleted"
 import { runStarted } from "+api/events/RunStarted"
 import { serverRestarted } from "+api/events/ServerRestarted"
 import { subtaskUpdated } from "+api/events/SubtaskUpdated"
+import type { ModuleIds } from "+api/models/ModuleId"
 import type { EventStream } from "+server/EventStream"
 import { newModuleFromVitest } from "+server/models/VitestModule"
 import { newSuiteFromVitest } from "+server/models/VitestSuite"
@@ -33,7 +34,7 @@ export function newEventStreamReporter(
 			eventStream.send(serverRestarted())
 		},
 		onTestRunStart(specifications): void {
-			const invalidatedModuleIds = specifications
+			const invalidatedModuleIds: ModuleIds = specifications
 				.map((specification) => specification.testModule?.id)
 				.filter(notNullish)
 

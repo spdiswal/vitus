@@ -26,6 +26,7 @@ export function newProjectFromVitest(vitest: Vitest): Project {
 	return newProject({
 		rootPath: vitest.config.root,
 		isConnected: true,
+		status: "started",
 		modulesById,
 		subtasksById,
 	})

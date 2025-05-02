@@ -1,4 +1,4 @@
-import type { Module } from "+api/models/Module"
+import type { Module, Modules } from "+api/models/Module"
 import type { ModuleId } from "+api/models/ModuleId"
 import type { Subtask } from "+api/models/Subtask"
 import type { SubtaskId } from "+api/models/SubtaskId"
@@ -9,28 +9,32 @@ export type Project = {
 	rootPath: Path
 	isConnected: boolean
 	status: TaskStatus
-	modulesById: Record<ModuleId, Module>
-	subtasksById: Record<SubtaskId, Subtask> // Suites and tests use a shared id namespace in Vitest (i.e. it is impossible to determine from an id alone whether it is a suite or test).
+	modulesById: Readonly<Record<ModuleId, Module>>
+	subtasksById: Readonly<Record<SubtaskId, Subtask>> // Suites and tests use a shared id namespace in Vitest (i.e. it is impossible to determine from an id alone whether it is a suite or test).
 }
 
-export function newProject(project: Omit<Project, "status">): Project {
+export function newProject(project: Project): Project {
 	const modules = Object.values(project.modulesById)
-	const status = modules.some((module) => module.status === "started")
-		? "started"
-		: modules.some((module) => module.status === "failed")
-			? "failed"
-			: modules.some((module) => module.status === "passed")
-				? "passed"
-				: "skipped"
+	const status = getProjectStatusFromModules(modules)
 
-	const remainingSubtasksById = Object.fromEntries(
-		Object.entries(project.subtasksById).filter(
-			([, subtask]) =>
-				subtask.parentModuleId in project.modulesById &&
-				(subtask.parentId in project.modulesById ||
-					subtask.parentId in project.subtasksById),
-		),
-	)
+	return status !== project.status ? { ...project, status } : project
+}
 
-	return { ...project, status, subtasksById: remainingSubtasksById }
+function getProjectStatusFromModules(modules: Modules): TaskStatus {
+	const statuses = new Set<TaskStatus>()
+
+	for (const module of modules) {
+		if (module.status === "started") {
+			return "started"
+		}
+		statuses.add(module.status)
+	}
+
+	if (statuses.has("failed")) {
+		return "failed"
+	}
+	if (statuses.has("passed")) {
+		return "passed"
+	}
+	return "skipped"
 }
