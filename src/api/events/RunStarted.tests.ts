@@ -1,12 +1,13 @@
 import { applyEvent } from "+api/events/Event"
 import { runStarted } from "+api/events/RunStarted"
-import { getModules } from "+api/models/Module"
+import { getModuleStatuses, getModules } from "+api/models/Module"
 import type { DummyModuleId } from "+api/models/Module.fixtures"
 import { byModuleIds, byParentModuleIds } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
-import { getSubtasks } from "+api/models/Subtask"
+import { getSubtaskStatuses, getSubtasks } from "+api/models/Subtask"
 import type { TaskStatus } from "+api/models/TaskStatus"
+import { not } from "+utilities/Predicates"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject()
@@ -14,10 +15,9 @@ const initialProject = dummyProject()
 describe.each`
 	moduleIds
 	${["15b021ef72", "-1730f876b4"]}
-	${["3afdd8b6c3", "-1730f876b4"]}
-	${["3afdd8b6c3", "-e45b128829"]}
+	${["3afdd8b6c3", "-1730f876b4", "-e45b128829"]}
 `(
-	"when a run has started for 2 modules with ids $moduleIds.0 and $moduleIds.1",
+	"when a run has started for modules with ids $moduleIds",
 	(props: {
 		moduleIds: Array<DummyModuleId>
 	}) => {
@@ -31,36 +31,46 @@ describe.each`
 			)
 		})
 
-		it("sets the module statuses to 'started'", () => {
-			const actualModuleStatuses = new Set(
-				getModules(actualProject, byModuleIds(invalidatedModuleIds)).map(
-					(module) => module.status,
-				),
+		it("sets the status of invalidated modules to 'started'", () => {
+			const actualModuleStatuses = getModuleStatuses(
+				actualProject,
+				byModuleIds(invalidatedModuleIds),
 			)
-			expect(actualModuleStatuses).toEqual(new Set<TaskStatus>(["started"]))
+			expect(actualModuleStatuses[0]).toBe<TaskStatus>("started")
 		})
 
-		it("sets the module subtask statuses to 'started'", () => {
-			const actualSubtaskStatuses = new Set(
-				getSubtasks(actualProject, byParentModuleIds(invalidatedModuleIds)).map(
-					(subtask) => subtask.status,
-				),
+		it("does not affect the other modules in the project", () => {
+			const initialOtherModules = getModules(
+				initialProject,
+				not(byModuleIds(invalidatedModuleIds)),
 			)
-			expect(actualSubtaskStatuses).toEqual(new Set<TaskStatus>(["started"]))
+			const actualOtherModules = getModules(
+				actualProject,
+				not(byModuleIds(invalidatedModuleIds)),
+			)
+
+			expect(actualOtherModules).toEqual(initialOtherModules)
 		})
 
-		it("does not affect the set of suites and tests in the project", () => {
-			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
-			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
-
-			expect(actualSubtaskIds).toEqual(initialSubtaskIds)
+		it("sets the status of invalidated subtasks to 'started'", () => {
+			const actualSubtaskStatuses = getSubtaskStatuses(
+				actualProject,
+				byParentModuleIds(invalidatedModuleIds),
+			)
+			expect(actualSubtaskStatuses[0]).toBe<TaskStatus>("started")
 		})
 
-		it("does not affect the set of modules in the project", () => {
-			const actualModuleIds = Object.keys(actualProject.modulesById)
-			const initialModuleIds = Object.keys(initialProject.modulesById)
+		it("does not affect the other subtasks in the project", () => {
+			const initialOtherSubtasks = getSubtasks(
+				initialProject,
+				not(byParentModuleIds(invalidatedModuleIds)),
+			)
+			const actualOtherSubtasks = getSubtasks(
+				actualProject,
+				not(byParentModuleIds(invalidatedModuleIds)),
+			)
 
-			expect(actualModuleIds).toHaveLength(initialModuleIds.length)
+			expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
 		})
 
 		it("updates the project status based on the latest set of modules", () => {

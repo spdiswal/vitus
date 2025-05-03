@@ -27,7 +27,7 @@ describe("when the server has restarted", () => {
 		expect(actualModuleIds).toHaveLength(0)
 	})
 
-	it("clears all suites and tests", () => {
+	it("clears all subtasks", () => {
 		const actualSubtaskIds = Object.keys(actualProject.subtasksById)
 		expect(actualSubtaskIds).toHaveLength(0)
 	})

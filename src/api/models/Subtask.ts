@@ -2,6 +2,7 @@ import { type Project, newProject } from "+api/models/Project"
 import type { SubtaskId } from "+api/models/SubtaskId"
 import type { Suite } from "+api/models/Suite"
 import type { TaskId } from "+api/models/TaskId"
+import type { TaskStatus, TaskStatuses } from "+api/models/TaskStatus"
 import type { Test } from "+api/models/Test"
 import { assertNotNullish } from "+utilities/Assertions"
 
@@ -14,6 +15,19 @@ export function getSubtasks(
 ): Subtasks {
 	const subtasks = Object.values(project.subtasksById)
 	return predicate !== undefined ? subtasks.filter(predicate) : subtasks
+}
+
+export function getSubtaskStatuses(
+	project: Project,
+	predicate?: (subtask: Subtask) => boolean,
+): TaskStatuses {
+	const statuses = new Set<TaskStatus>()
+
+	for (const subtask of getSubtasks(project, predicate)) {
+		statuses.add(subtask.status)
+	}
+
+	return Array.from(statuses)
 }
 
 export function hasSubtask(

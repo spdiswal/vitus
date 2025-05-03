@@ -7,6 +7,12 @@ import { type TaskIds, byParentIds } from "+api/models/TaskId"
 
 export type Task = Module | Subtask
 
+export function skipTask<TaskToUpdate extends Task>(
+	task: TaskToUpdate,
+): TaskToUpdate {
+	return { ...task, status: "skipped" }
+}
+
 export function startTask<TaskToUpdate extends Task>(
 	task: TaskToUpdate,
 ): TaskToUpdate {

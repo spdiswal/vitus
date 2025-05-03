@@ -1,7 +1,7 @@
 import { getModules } from "+api/models/Module"
 import type { Project } from "+api/models/Project"
 import { getSubtasks } from "+api/models/Subtask"
-import { removeTasks } from "+api/models/Task"
+import { putTasks, skipTask } from "+api/models/Task"
 import { byStatus } from "+api/models/TaskStatus"
 
 export type ServerDisconnected = {
@@ -16,9 +16,9 @@ export function applyServerDisconnected(project: Project): Project {
 	const unfinishedModules = getModules(project, byStatus("started"))
 	const unfinishedSubtasks = getSubtasks(project, byStatus("started"))
 
-	return removeTasks(
+	return putTasks(
 		{ ...project, isConnected: false },
-		unfinishedModules,
-		unfinishedSubtasks,
+		unfinishedModules.map(skipTask),
+		unfinishedSubtasks.map(skipTask),
 	)
 }
