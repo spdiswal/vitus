@@ -10,6 +10,12 @@ export function byModuleIds(moduleIds: ModuleIds): (module: Module) => boolean {
 	return (module): boolean => ids.has(module.id)
 }
 
+export function byParentModuleId(
+	moduleId: ModuleId,
+): (subtask: Subtask) => boolean {
+	return (subtask): boolean => subtask.parentModuleId === moduleId
+}
+
 export function byParentModuleIds(
 	moduleIds: ModuleIds,
 ): (subtask: Subtask) => boolean {

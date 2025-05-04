@@ -3,51 +3,58 @@ import { subtaskUpdated } from "+api/events/SubtaskUpdated"
 import { dummyParentIds } from "+api/models/Module.fixtures"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
-import { type Subtask, getSubtaskById } from "+api/models/Subtask"
+import { type Subtask, getSubtaskById, getSubtasks } from "+api/models/Subtask"
+import { bySubtaskIds } from "+api/models/SubtaskId"
 import type { DummySuiteId } from "+api/models/Suite.fixtures"
 import type { TaskStatus } from "+api/models/TaskStatus"
 import type { DummyTestId } from "+api/models/Test.fixtures"
+import { not } from "+utilities/Predicates"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject()
 
 describe.each`
-	subtaskId                | newStatus
-	${"15b021ef72_0"}        | ${"failed"}
-	${"15b021ef72_0_1"}      | ${"passed"}
-	${"15b021ef72_1"}        | ${"skipped"}
-	${"15b021ef72_2"}        | ${"started"}
-	${"15b021ef72_2_6"}      | ${"failed"}
-	${"15b021ef72_2_6_9"}    | ${"passed"}
-	${"3afdd8b6c3_0"}        | ${"skipped"}
-	${"3afdd8b6c3_0_3"}      | ${"started"}
-	${"3afdd8b6c3_1"}        | ${"failed"}
-	${"3afdd8b6c3_3"}        | ${"passed"}
-	${"3afdd8b6c3_2_6"}      | ${"skipped"}
-	${"3afdd8b6c3_2_6_7"}    | ${"started"}
-	${"3afdd8b6c3_2_8"}      | ${"failed"}
-	${"3afdd8b6c3_2_8_4"}    | ${"passed"}
-	${"3afdd8b6c3_2_8_4_1"}  | ${"skipped"}
-	${"3afdd8b6c3_4"}        | ${"started"}
-	${"-1730f876b4_0"}       | ${"failed"}
-	${"-1730f876b4_0_1"}     | ${"passed"}
-	${"-1730f876b4_0_4"}     | ${"skipped"}
-	${"-1730f876b4_0_4_5"}   | ${"started"}
-	${"-1730f876b4_7"}       | ${"failed"}
-	${"-1730f876b4_9"}       | ${"passed"}
-	${"-e45b128829_2"}       | ${"skipped"}
-	${"-e45b128829_2_1"}     | ${"started"}
-	${"-e45b128829_4_4"}     | ${"failed"}
-	${"-e45b128829_4_4_3"}   | ${"passed"}
-	${"-e45b128829_4_4_6"}   | ${"skipped"}
-	${"-e45b128829_4_4_6_5"} | ${"started"}
+	subtaskId                | newStatus    | expectedDiscardedSubtaskIds
+	${"15b021ef72_0"}        | ${"failed"}  | ${[]}
+	${"15b021ef72_0_1"}      | ${"passed"}  | ${[]}
+	${"15b021ef72_1"}        | ${"skipped"} | ${[]}
+	${"15b021ef72_2"}        | ${"started"} | ${[]}
+	${"15b021ef72_2_6"}      | ${"failed"}  | ${["15b021ef72_2_6_9"]}
+	${"15b021ef72_2_6_9"}    | ${"passed"}  | ${[]}
+	${"3afdd8b6c3_0"}        | ${"skipped"} | ${["3afdd8b6c3_0_1"]}
+	${"3afdd8b6c3_0_3"}      | ${"started"} | ${[]}
+	${"3afdd8b6c3_1"}        | ${"failed"}  | ${[]}
+	${"3afdd8b6c3_2"}        | ${"passed"}  | ${["3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1"]}
+	${"3afdd8b6c3_2_6"}      | ${"skipped"} | ${["3afdd8b6c3_2_6_7"]}
+	${"3afdd8b6c3_2_6_7"}    | ${"started"} | ${[]}
+	${"3afdd8b6c3_2_8"}      | ${"failed"}  | ${["3afdd8b6c3_2_8_1"]}
+	${"3afdd8b6c3_2_8_4"}    | ${"passed"}  | ${["3afdd8b6c3_2_8_4_1"]}
+	${"3afdd8b6c3_2_8_4_1"}  | ${"skipped"} | ${[]}
+	${"3afdd8b6c3_3"}        | ${"started"} | ${[]}
+	${"3afdd8b6c3_4"}        | ${"failed"}  | ${["3afdd8b6c3_4_5"]}
+	${"-1730f876b4_0"}       | ${"passed"}  | ${["-1730f876b4_0_1", "-1730f876b4_0_4", "-1730f876b4_0_4_5"]}
+	${"-1730f876b4_0_1"}     | ${"skipped"} | ${[]}
+	${"-1730f876b4_0_4"}     | ${"started"} | ${[]}
+	${"-1730f876b4_0_4_5"}   | ${"failed"}  | ${[]}
+	${"-1730f876b4_7"}       | ${"passed"}  | ${[]}
+	${"-1730f876b4_9"}       | ${"skipped"} | ${[]}
+	${"-e45b128829_2"}       | ${"started"} | ${[]}
+	${"-e45b128829_2_1"}     | ${"failed"}  | ${[]}
+	${"-e45b128829_4"}       | ${"passed"}  | ${["-e45b128829_4_4", "-e45b128829_4_4_3", "-e45b128829_4_4_6", "-e45b128829_4_4_6_5"]}
+	${"-e45b128829_4_4"}     | ${"skipped"} | ${[]}
+	${"-e45b128829_4_4_3"}   | ${"started"} | ${[]}
+	${"-e45b128829_4_4_6"}   | ${"failed"}  | ${[]}
+	${"-e45b128829_4_4_6_5"} | ${"passed"}  | ${[]}
 `(
 	"when an existing subtask with id $subtaskId has $newStatus",
 	(props: {
 		subtaskId: DummySuiteId | DummyTestId
 		newStatus: TaskStatus
+		expectedDiscardedSubtaskIds: Array<DummySuiteId | DummyTestId>
 	}) => {
 		const subtaskId = props.subtaskId
+		const discardedSubtaskIds = props.expectedDiscardedSubtaskIds
+		const affectedSubtaskIds = [subtaskId, ...discardedSubtaskIds]
 
 		let actualProject: Project
 		let actualSubtask: Subtask
@@ -67,28 +74,33 @@ describe.each`
 			expect(actualSubtask.status).toBe(props.newStatus)
 		})
 
-		it("does not affect the set of subtasks in the project", () => {
-			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
-			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
-
-			expect(actualSubtaskIds).toEqual(initialSubtaskIds)
-		})
-
-		it("does not affect the other subtasks in the project", () => {
-			const { [subtaskId]: initialUpdatedSubtask, ...initialOtherSubtasks } =
-				initialProject.subtasksById
-
-			const { [subtaskId]: actualUpdatedSubtask, ...actualOtherSubtasks } =
-				actualProject.subtasksById
-
-			expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
-		})
-
 		it("does not affect the modules in the project", () => {
 			const initialModules = initialProject.modulesById
 			const actualModules = actualProject.modulesById
 
 			expect(actualModules).toEqual(initialModules)
+		})
+
+		it("discards unfinished nested subtasks in the subtask", () => {
+			const actualSubtasks = getSubtasks(
+				actualProject,
+				bySubtaskIds(discardedSubtaskIds),
+			)
+
+			expect(actualSubtasks).toEqual([])
+		})
+
+		it("does not affect the other subtasks in the project", () => {
+			const initialOtherSubtasks = getSubtasks(
+				initialProject,
+				not(bySubtaskIds(affectedSubtaskIds)),
+			)
+			const actualOtherSubtasks = getSubtasks(
+				actualProject,
+				not(bySubtaskIds(affectedSubtaskIds)),
+			)
+
+			expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
 		})
 	},
 )
@@ -129,11 +141,11 @@ describe.each`
 			expect(actualSubtask.name).toBe(props.newName)
 		})
 
-		it("does not affect the set of subtasks in the project", () => {
-			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
-			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
+		it("does not affect the modules in the project", () => {
+			const initialModules = initialProject.modulesById
+			const actualModules = actualProject.modulesById
 
-			expect(actualSubtaskIds).toEqual(initialSubtaskIds)
+			expect(actualModules).toEqual(initialModules)
 		})
 
 		it("does not affect the other subtasks in the project", () => {
@@ -144,13 +156,6 @@ describe.each`
 				actualProject.subtasksById
 
 			expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
-		})
-
-		it("does not affect the modules in the project", () => {
-			const initialModules = initialProject.modulesById
-			const actualModules = actualProject.modulesById
-
-			expect(actualModules).toEqual(initialModules)
 		})
 	},
 )
@@ -201,6 +206,13 @@ describe.each`
 			expect(actualSubtask.name).toBe(props.name)
 		})
 
+		it("does not affect the modules in the project", () => {
+			const initialModules = initialProject.modulesById
+			const actualModules = actualProject.modulesById
+
+			expect(actualModules).toEqual(initialModules)
+		})
+
 		it("adds the subtask to the project", () => {
 			const initialSubtaskIds = Object.keys(initialProject.subtasksById)
 			const actualSubtaskIds = Object.keys(actualProject.subtasksById)
@@ -215,13 +227,6 @@ describe.each`
 				actualProject.subtasksById
 
 			expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
-		})
-
-		it("does not affect the modules in the project", () => {
-			const initialModules = initialProject.modulesById
-			const actualModules = actualProject.modulesById
-
-			expect(actualModules).toEqual(initialModules)
 		})
 	},
 )

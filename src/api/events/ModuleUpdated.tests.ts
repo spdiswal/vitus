@@ -9,7 +9,12 @@ import {
 import type { ModuleId } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
+import { getSubtasks } from "+api/models/Subtask"
+import { bySubtaskIds } from "+api/models/SubtaskId"
+import type { DummySuiteId } from "+api/models/Suite.fixtures"
 import type { TaskStatus } from "+api/models/TaskStatus"
+import type { DummyTestId } from "+api/models/Test.fixtures"
+import { not } from "+utilities/Predicates"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({
@@ -22,18 +27,21 @@ const initialProject = dummyProject({
 })
 
 describe.each`
-	moduleId         | newStatus
-	${"15b021ef72"}  | ${"failed"}
-	${"3afdd8b6c3"}  | ${"passed"}
-	${"-1730f876b4"} | ${"skipped"}
-	${"-e45b128829"} | ${"started"}
+	moduleId         | newStatus    | expectedDiscardedSubtaskIds
+	${"15b021ef72"}  | ${"failed"}  | ${["15b021ef72_1", "15b021ef72_2_6", "15b021ef72_2_6_7", "15b021ef72_2_6_9"]}
+	${"3afdd8b6c3"}  | ${"passed"}  | ${["3afdd8b6c3_0", "3afdd8b6c3_0_1", "3afdd8b6c3_0_3", "3afdd8b6c3_1", "3afdd8b6c3_2_6_7", "3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1", "3afdd8b6c3_4_5"]}
+	${"-1730f876b4"} | ${"skipped"} | ${["-1730f876b4_0_1", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_9"]}
+	${"-e45b128829"} | ${"started"} | ${[]}
 `(
 	"when an existing module with id $moduleId has $newStatus",
 	(props: {
 		moduleId: ModuleId
 		newStatus: TaskStatus
+		expectedDiscardedSubtaskIds: Array<DummySuiteId | DummyTestId>
 	}) => {
 		const moduleId = props.moduleId
+		const discardedSubtaskIds = props.expectedDiscardedSubtaskIds
+		const affectedSubtaskIds = discardedSubtaskIds
 
 		let actualProject: Project
 		let actualModule: Module
@@ -57,13 +65,6 @@ describe.each`
 			expect(actualProject.status).toBe(props.newStatus)
 		})
 
-		it("does not affect the set of modules in the project", () => {
-			const initialModuleIds = Object.keys(initialProject.modulesById)
-			const actualModuleIds = Object.keys(actualProject.modulesById)
-
-			expect(actualModuleIds).toEqual(initialModuleIds)
-		})
-
 		it("does not affect the other modules in the project", () => {
 			const { [moduleId]: initialUpdatedModule, ...initialOtherModules } =
 				initialProject.modulesById
@@ -74,11 +75,26 @@ describe.each`
 			expect(actualOtherModules).toEqual(initialOtherModules)
 		})
 
-		it("does not affect the subtasks in the project", () => {
-			const initialSubtasks = initialProject.subtasksById
-			const actualSubtasks = actualProject.subtasksById
+		it("discards unfinished subtasks in the module", () => {
+			const actualSubtasks = getSubtasks(
+				actualProject,
+				bySubtaskIds(discardedSubtaskIds),
+			)
 
-			expect(actualSubtasks).toEqual(initialSubtasks)
+			expect(actualSubtasks).toEqual([])
+		})
+
+		it("does not affect the other subtasks in the project", () => {
+			const initialOtherSubtasks = getSubtasks(
+				initialProject,
+				not(bySubtaskIds(affectedSubtaskIds)),
+			)
+			const actualOtherSubtasks = getSubtasks(
+				actualProject,
+				not(bySubtaskIds(affectedSubtaskIds)),
+			)
+
+			expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
 		})
 	},
 )

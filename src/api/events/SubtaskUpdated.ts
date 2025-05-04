@@ -1,5 +1,8 @@
 import type { Project } from "+api/models/Project"
-import { type Subtask, putSubtask } from "+api/models/Subtask"
+import { type Subtask, getSubtasks, putSubtask } from "+api/models/Subtask"
+import { removeTasks } from "+api/models/Task"
+import { byParentId } from "+api/models/TaskId"
+import { byStatus } from "+api/models/TaskStatus"
 
 export type SubtaskUpdated = {
 	type: "subtask-updated"
@@ -14,5 +17,16 @@ export function applySubtaskUpdated(
 	project: Project,
 	event: SubtaskUpdated,
 ): Project {
-	return putSubtask(project, event.subtask)
+	const updatedProject = putSubtask(project, event.subtask)
+
+	if (event.subtask.status === "started") {
+		return updatedProject
+	}
+
+	const unfinishedChildSubtasks = getSubtasks(
+		project,
+		byParentId(event.subtask.id),
+	).filter(byStatus("started"))
+
+	return removeTasks(updatedProject, [], unfinishedChildSubtasks)
 }
