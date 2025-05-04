@@ -6,9 +6,11 @@
 	],
 	"compilerOptions": {
 		"baseUrl": "./",
+		"erasableSyntaxOnly": true,
 		"incremental": true,
 		"jsx": "react-jsx",
 		"jsxImportSource": "preact",
+		"libReplacement": false,
 		"paths": {
 			"+events/*": ["src/events/*"],
 			"+explorer/*": ["src/explorer/*"],
