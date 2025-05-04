@@ -1,5 +1,5 @@
 import type { ModuleId } from "+api/models/ModuleId"
-import { type Project, newProject } from "+api/models/Project"
+import type { Project } from "+api/models/Project"
 import type { TaskId } from "+api/models/TaskId"
 import type { TaskStatus, TaskStatuses } from "+api/models/TaskStatus"
 import type { Path } from "+types/Path"
@@ -50,8 +50,8 @@ export function getModuleById(project: Project, moduleId: ModuleId): Module {
 }
 
 export function putModule(project: Project, module: Module): Project {
-	return newProject({
+	return {
 		...project,
 		modulesById: { ...project.modulesById, [module.id]: module },
-	})
+	}
 }

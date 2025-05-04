@@ -73,7 +73,7 @@ describe.each`
 			expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
 		})
 
-		it("updates the project status based on the latest set of modules", () => {
+		it("sets the project status to 'started'", () => {
 			expect(actualProject.status).toBe<TaskStatus>("started")
 		})
 	},

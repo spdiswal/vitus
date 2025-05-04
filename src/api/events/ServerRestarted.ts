@@ -12,7 +12,7 @@ export function applyServerRestarted(project: Project): Project {
 	return {
 		rootPath: project.rootPath,
 		isConnected: true,
-		status: "skipped",
+		status: "started",
 		modulesById: {},
 		subtasksById: {},
 	}

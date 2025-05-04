@@ -18,6 +18,7 @@ import { not } from "+utilities/Predicates"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({
+	status: "skipped",
 	modulesById: {
 		"15b021ef72": { status: "skipped" },
 		"3afdd8b6c3": { status: "skipped" },
@@ -61,8 +62,8 @@ describe.each`
 			expect(actualModule.status).toBe(props.newStatus)
 		})
 
-		it("updates the project status based on the latest set of modules", () => {
-			expect(actualProject.status).toBe(props.newStatus)
+		it("does not affect the project status", () => {
+			expect(actualProject.status).toBe(initialProject.status)
 		})
 
 		it("does not affect the other modules in the project", () => {
@@ -133,8 +134,8 @@ describe.each`
 			expect(actualModule.status).toBe(props.newStatus)
 		})
 
-		it("updates the project status based on the latest set of modules", () => {
-			expect(actualProject.status).toBe(props.newStatus)
+		it("does not affect the project status", () => {
+			expect(actualProject.status).toBe(initialProject.status)
 		})
 
 		it("adds the module to the project", () => {

@@ -1,8 +1,9 @@
 import type { Module } from "+api/models/Module"
 import type { ModuleId } from "+api/models/ModuleId"
-import { type Project, newProject } from "+api/models/Project"
+import type { Project } from "+api/models/Project"
 import type { Subtask } from "+api/models/Subtask"
 import type { SubtaskId } from "+api/models/SubtaskId"
+import { computeProjectStatus } from "+api/models/TaskStatus"
 import { newModuleFromVitest } from "+server/models/VitestModule"
 import { newSuiteFromVitest } from "+server/models/VitestSuite"
 import { newTestFromVitest } from "+server/models/VitestTest"
@@ -23,11 +24,11 @@ export function newProjectFromVitest(vitest: Vitest): Project {
 		}
 	}
 
-	return newProject({
+	return {
 		rootPath: vitest.config.root,
 		isConnected: true,
-		status: "started",
+		status: computeProjectStatus(modulesById),
 		modulesById,
 		subtasksById,
-	})
+	}
 }

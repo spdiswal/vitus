@@ -1,4 +1,4 @@
-import { type Project, newProject } from "+api/models/Project"
+import type { Project } from "+api/models/Project"
 import type { SubtaskId } from "+api/models/SubtaskId"
 import type { Suite } from "+api/models/Suite"
 import type { TaskId } from "+api/models/TaskId"
@@ -54,10 +54,10 @@ export function putSubtask(project: Project, subtask: Subtask): Project {
 			subtask.parentId in project.subtasksById)
 
 	if (hasExistingParents) {
-		return newProject({
+		return {
 			...project,
 			subtasksById: { ...project.subtasksById, [subtask.id]: subtask },
-		})
+		}
 	}
 
 	return project

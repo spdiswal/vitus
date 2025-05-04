@@ -1,6 +1,6 @@
 import type { Module, Modules } from "+api/models/Module"
 import type { ModuleId } from "+api/models/ModuleId"
-import { type Project, newProject } from "+api/models/Project"
+import type { Project } from "+api/models/Project"
 import { type Subtask, type Subtasks, getSubtasks } from "+api/models/Subtask"
 import type { SubtaskId } from "+api/models/SubtaskId"
 import { type TaskIds, byParentIds } from "+api/models/TaskId"
@@ -49,7 +49,7 @@ export function putTasks(
 		modulesById !== project.modulesById ||
 		subtasksById !== project.subtasksById
 	) {
-		return newProject({ ...project, modulesById, subtasksById })
+		return { ...project, modulesById, subtasksById }
 	}
 
 	return project
@@ -85,7 +85,7 @@ export function removeTasks(
 		delete subtasksById[descendant.id]
 	}
 
-	return newProject({ ...project, modulesById, subtasksById })
+	return { ...project, modulesById, subtasksById }
 }
 
 function getDescendants(project: Project, taskIds: TaskIds): Subtasks {

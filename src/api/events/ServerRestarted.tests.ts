@@ -32,7 +32,7 @@ describe("when the server has restarted", () => {
 		expect(actualSubtaskIds).toHaveLength(0)
 	})
 
-	it("updates the project status based on the latest set of modules", () => {
-		expect(actualProject.status).toBe<TaskStatus>("skipped")
+	it("sets the project status to 'started'", () => {
+		expect(actualProject.status).toBe<TaskStatus>("started")
 	})
 })

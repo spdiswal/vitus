@@ -1,6 +1,7 @@
 import { getModules } from "+api/models/Module"
 import type { Project } from "+api/models/Project"
 import { removeTasks } from "+api/models/Task"
+import { computeProjectStatus } from "+api/models/TaskStatus"
 import { type Path, byPath } from "+types/Path"
 
 export type ModuleDeleted = {
@@ -17,5 +18,13 @@ export function applyModuleDeleted(
 	event: ModuleDeleted,
 ): Project {
 	const deletedModules = getModules(project, byPath(event.path))
-	return removeTasks(project, deletedModules, [])
+
+	const updatedProject = removeTasks(project, deletedModules, [])
+	const newProjectStatus = computeProjectStatus(updatedProject.modulesById)
+
+	if (newProjectStatus !== updatedProject.status) {
+		return { ...updatedProject, status: newProjectStatus }
+	}
+
+	return updatedProject
 }

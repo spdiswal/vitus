@@ -23,7 +23,7 @@ export function applyRunStarted(project: Project, event: RunStarted): Project {
 	const invalidatedSubtasks = getSubtasks(project, byParentModuleIds(moduleIds))
 
 	return putTasks(
-		project,
+		{ ...project, status: "started" },
 		invalidatedModules.map(startTask),
 		invalidatedSubtasks.map(startTask),
 	)

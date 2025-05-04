@@ -93,7 +93,7 @@ describe("when the server has disconnected", () => {
 		expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
 	})
 
-	it("updates the project status based on the latest set of modules", () => {
-		expect(actualProject.status).toBe<TaskStatus>("failed")
+	it("sets the project status to 'skipped'", () => {
+		expect(actualProject.status).toBe<TaskStatus>("skipped")
 	})
 })
