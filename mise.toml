@@ -1,15 +1,15 @@
 # Manage devtools and tasks with mise-en-place.
 # https://mise.jdx.dev/configuration.html
 
-min_version = "2025.1.3"
+min_version = "2025.5.0"
 
-# Improve IntelliJ IDEA experience:
+# Improve the IntelliJ IDEA experience:
 # ln -s ~/.local/share/mise ~/.asdf
 # https://mise.jdx.dev/ide-integration.html#sdk-selection-using-asdf-layout
 
 [tools]
-node = "20.18.1"
-pnpm = "10.0.0"
+node = "20.19.1"
+pnpm = "10.10.0"
 
 [tasks.build]
 alias = ["b"]

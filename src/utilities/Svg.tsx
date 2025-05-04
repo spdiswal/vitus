@@ -7,7 +7,7 @@ export function Svg(props: {
 	fill?: string
 	stroke?: string
 	"stroke-width"?: string
-	title?: string
+	title?: string | null | undefined
 	children: Renderable
 }): Renderable {
 	return (
@@ -20,7 +20,7 @@ export function Svg(props: {
 			height="1" // Workaround for Safari; use Tailwind CSS classes (e.g. `h-*` or `size-*`) to set the actual height.
 			aria-hidden="true"
 		>
-			{props.title !== undefined ? <title>{props.title}</title> : null}
+			{props.title ? <title>{props.title}</title> : null}
 			{props.children}
 		</svg>
 	)
