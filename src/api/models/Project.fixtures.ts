@@ -16,7 +16,6 @@ export function dummyProject(overrides: Partial<DummyProject> = {}): Project {
 	const { modulesById, subtasksById, ...remainingOverrides } = overrides
 
 	return {
-		isConnected: true,
 		rootPath: "/Users/spdiswal/repositories/plantations/",
 		status: "started",
 		modulesById: {

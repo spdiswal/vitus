@@ -1,8 +1,9 @@
 import { getModules } from "+api/models/Module"
 import type { Project } from "+api/models/Project"
+import { computeProjectStatus } from "+api/models/ProjectStatus"
 import { getSubtasks } from "+api/models/Subtask"
 import { removeTasks } from "+api/models/Task"
-import { byStatus, computeProjectStatus } from "+api/models/TaskStatus"
+import { byStatus } from "+api/models/TaskStatus"
 
 export type RunCompleted = {
 	type: "run-completed"
@@ -21,11 +22,10 @@ export function applyRunCompleted(project: Project): Project {
 		unfinishedModules,
 		unfinishedSubtasks,
 	)
-	const newProjectStatus = computeProjectStatus(updatedProject.modulesById)
+	const projectStatus = computeProjectStatus(updatedProject.modulesById)
 
-	if (newProjectStatus !== updatedProject.status) {
-		return { ...updatedProject, status: newProjectStatus }
+	if (projectStatus !== updatedProject.status) {
+		return { ...updatedProject, status: projectStatus }
 	}
-
 	return updatedProject
 }

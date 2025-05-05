@@ -7,7 +7,7 @@ import {
 } from "+api/models/Module.fixtures"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
-import type { TaskStatus } from "+api/models/TaskStatus"
+import type { ProjectStatus } from "+api/models/ProjectStatus"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({
@@ -30,7 +30,7 @@ describe.each`
 	"when an existing module $moduleId has been deleted",
 	(props: {
 		moduleId: DummyModuleId
-		expectedProjectStatus: TaskStatus
+		expectedProjectStatus: ProjectStatus
 	}) => {
 		let actualProject: Project
 

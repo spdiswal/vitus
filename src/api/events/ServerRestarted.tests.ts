@@ -2,7 +2,7 @@ import { applyEvent } from "+api/events/Event"
 import { serverRestarted } from "+api/events/ServerRestarted"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
-import type { TaskStatus } from "+api/models/TaskStatus"
+import type { ProjectStatus } from "+api/models/ProjectStatus"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject()
@@ -12,10 +12,6 @@ describe("when the server has restarted", () => {
 
 	beforeEach(() => {
 		actualProject = applyEvent(initialProject, serverRestarted())
-	})
-
-	it("is connected", () => {
-		expect(actualProject.isConnected).toBe(true)
 	})
 
 	it("does not affect the project root path", () => {
@@ -33,6 +29,6 @@ describe("when the server has restarted", () => {
 	})
 
 	it("sets the project status to 'started'", () => {
-		expect(actualProject.status).toBe<TaskStatus>("started")
+		expect(actualProject.status).toBe<ProjectStatus>("started")
 	})
 })

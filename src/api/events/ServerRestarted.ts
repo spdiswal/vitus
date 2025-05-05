@@ -11,7 +11,6 @@ export function serverRestarted(): ServerRestarted {
 export function applyServerRestarted(project: Project): Project {
 	return {
 		rootPath: project.rootPath,
-		isConnected: true,
 		status: "started",
 		modulesById: {},
 		subtasksById: {},

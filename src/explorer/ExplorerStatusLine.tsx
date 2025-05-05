@@ -11,8 +11,8 @@ export function ExplorerStatusLine(props: {
 		<div
 			class={cn(
 				"h-2 transition",
-				!project.isConnected && "hidden",
 				cx(project.status)({
+					disconnected: "hidden",
 					failed: "bg-rose-700",
 					passed: "bg-green-700",
 					skipped: "bg-gray-700",

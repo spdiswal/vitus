@@ -5,6 +5,7 @@ import type { DummyModuleId } from "+api/models/Module.fixtures"
 import { byModuleIds, byParentModuleIds } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
+import type { ProjectStatus } from "+api/models/ProjectStatus"
 import { getSubtaskStatuses, getSubtasks } from "+api/models/Subtask"
 import type { TaskStatus } from "+api/models/TaskStatus"
 import { not } from "+utilities/Predicates"
@@ -74,7 +75,7 @@ describe.each`
 		})
 
 		it("sets the project status to 'started'", () => {
-			expect(actualProject.status).toBe<TaskStatus>("started")
+			expect(actualProject.status).toBe<ProjectStatus>("started")
 		})
 	},
 )

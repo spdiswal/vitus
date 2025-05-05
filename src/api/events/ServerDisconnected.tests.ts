@@ -5,6 +5,7 @@ import type { DummyModuleId } from "+api/models/Module.fixtures"
 import { byModuleIds } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
+import type { ProjectStatus } from "+api/models/ProjectStatus"
 import { getSubtaskStatuses, getSubtasks } from "+api/models/Subtask"
 import { bySubtaskIds } from "+api/models/SubtaskId"
 import type { DummySuiteId } from "+api/models/Suite.fixtures"
@@ -41,10 +42,6 @@ describe("when the server has disconnected", () => {
 
 	beforeEach(() => {
 		actualProject = applyEvent(initialProject, serverDisconnected())
-	})
-
-	it("is no longer connected", () => {
-		expect(actualProject.isConnected).toBe(false)
 	})
 
 	it("does not affect the project root path", () => {
@@ -93,7 +90,7 @@ describe("when the server has disconnected", () => {
 		expect(actualOtherSubtasks).toEqual(initialOtherSubtasks)
 	})
 
-	it("sets the project status to 'skipped'", () => {
-		expect(actualProject.status).toBe<TaskStatus>("skipped")
+	it("sets the project status to 'disconnected'", () => {
+		expect(actualProject.status).toBe<ProjectStatus>("disconnected")
 	})
 })

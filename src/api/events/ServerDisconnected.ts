@@ -17,7 +17,7 @@ export function applyServerDisconnected(project: Project): Project {
 	const unfinishedSubtasks = getSubtasks(project, byStatus("started"))
 
 	return putTasks(
-		{ ...project, status: "skipped", isConnected: false },
+		{ ...project, status: "disconnected" },
 		unfinishedModules.map(skipTask),
 		unfinishedSubtasks.map(skipTask),
 	)

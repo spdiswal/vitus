@@ -3,8 +3,8 @@ import { runCompleted } from "+api/events/RunCompleted"
 import type { DummyModuleId } from "+api/models/Module.fixtures"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
+import type { ProjectStatus } from "+api/models/ProjectStatus"
 import type { DummySuiteId } from "+api/models/Suite.fixtures"
-import type { TaskStatus } from "+api/models/TaskStatus"
 import type { DummyTestId } from "+api/models/Test.fixtures"
 import { beforeEach, describe, expect, it } from "vitest"
 
@@ -43,6 +43,6 @@ describe("when the run has completed", () => {
 	})
 
 	it("updates the project status based on the latest set of modules", () => {
-		expect(actualProject.status).toBe<TaskStatus>("failed")
+		expect(actualProject.status).toBe<ProjectStatus>("failed")
 	})
 })
