@@ -1,31 +1,65 @@
-import type { Module } from "+api/models/Module"
-import type { ModuleId } from "+api/models/ModuleId"
 import type { Task } from "+api/models/Task"
+import type { Duration } from "+types/Duration"
 
-export type TaskStatus = "failed" | "passed" | "skipped" | "started"
-export type TaskStatuses = Array<TaskStatus>
+export type TaskStatus = TaskFailed | TaskPassed | TaskSkipped | TaskStarted
 
-export function byStatus(status: TaskStatus): (task: Task) => boolean {
-	return (task): boolean => task.status === status
+export type TaskStatusType = TaskStatus["type"]
+
+export type TaskFailed = {
+	type: "failed"
+	duration: Duration
 }
 
-export function computeProjectStatus(
-	modulesById: Readonly<Record<ModuleId, Module>>,
+export function failed(duration: Duration): TaskFailed {
+	return { type: "failed", duration }
+}
+
+export type TaskPassed = {
+	type: "passed"
+	duration: Duration
+}
+
+export function passed(duration: Duration): TaskPassed {
+	return { type: "passed", duration }
+}
+
+export type TaskSkipped = {
+	type: "skipped"
+}
+
+export function skipped(): TaskSkipped {
+	return { type: "skipped" }
+}
+
+export type TaskStarted = {
+	type: "started"
+}
+
+export function started(): TaskStarted {
+	return { type: "started" }
+}
+
+export function byStatus(status: TaskStatusType): (task: Task) => boolean {
+	return (task): boolean => task.status.type === status
+}
+
+export function getTaskStatusFromVitest(
+	status: "failed" | "passed" | "pending" | "queued" | "skipped",
+	duration: Duration = 0,
 ): TaskStatus {
-	const statuses = new Set<TaskStatus>()
-
-	for (const module of Object.values(modulesById)) {
-		if (module.status === "started") {
-			return "started"
+	switch (status) {
+		case "failed": {
+			return failed(duration)
 		}
-		statuses.add(module.status)
+		case "passed": {
+			return passed(duration)
+		}
+		case "pending":
+		case "queued": {
+			return started()
+		}
+		case "skipped": {
+			return skipped()
+		}
 	}
-
-	if (statuses.has("failed")) {
-		return "failed"
-	}
-	if (statuses.has("passed")) {
-		return "passed"
-	}
-	return "skipped"
 }

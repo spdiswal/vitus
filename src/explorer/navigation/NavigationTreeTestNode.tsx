@@ -1,5 +1,6 @@
 import type { Test } from "+api/models/Test"
 import { cn, cx } from "+types/ClassString"
+import { formatDuration } from "+types/Duration"
 import type { Renderable } from "+types/Renderable"
 import { Link } from "wouter-preact"
 
@@ -11,7 +12,7 @@ export function NavigationTreeTestNode(props: {
 			<Link
 				class={cn(
 					"flex justify-start items-center text-start gap-x-2 px-2 py-1.5 rounded-md outline-none hocus:ring-1 active:hocus:ring-2 transition cursor-pointer",
-					cx(props.test.status)({
+					cx(props.test.status.type)({
 						failed:
 							"text-rose-500 ring-rose-500 hocus:bg-rose-100 dark:ring-rose-700 dark:hocus:bg-rose-950",
 						passed:
@@ -27,11 +28,17 @@ export function NavigationTreeTestNode(props: {
 				<span
 					class={cn(
 						"shrink-0 m-1 size-2 bg-current rounded-full transition",
-						props.test.status === "started" && "animate-pulse",
+						props.test.status.type === "started" && "animate-pulse",
 					)}
 				/>
 				<span class="text-gray-950 dark:text-gray-50 transition">
 					{props.test.name}
+					{props.test.status.type === "failed" ||
+					props.test.status.type === "passed" ? (
+						<span class="ml-2 text-xs/1 font-light text-gray-500 whitespace-nowrap">
+							in {formatDuration(props.test.status.duration)}
+						</span>
+					) : null}
 				</span>
 			</Link>
 		</li>

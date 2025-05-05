@@ -1,5 +1,6 @@
 import { type DummyModuleId, dummyParentIds } from "+api/models/Module.fixtures"
 import type { Suite } from "+api/models/Suite"
+import { passed } from "+api/models/TaskStatus"
 import type { EvenDigit } from "+types/Digit"
 
 export function dummySuite(
@@ -14,7 +15,7 @@ export function dummySuite(
 		parentId: parentSuiteId ?? parentModuleId,
 		parentModuleId,
 		name: dummySuiteName(suiteId),
-		status: "passed",
+		status: passed(2),
 		...overrides,
 	}
 }

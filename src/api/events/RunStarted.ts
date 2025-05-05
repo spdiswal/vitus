@@ -1,12 +1,12 @@
-import { getModules } from "+api/models/Module"
+import { getModules, startModule } from "+api/models/Module"
 import {
 	type ModuleIds,
 	byModuleIds,
 	byParentModuleIds,
 } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
-import { getSubtasks } from "+api/models/Subtask"
-import { putTasks, startTask } from "+api/models/Task"
+import { getSubtasks, startSubtask } from "+api/models/Subtask"
+import { putTasks } from "+api/models/Task"
 
 export type RunStarted = {
 	type: "run-started"
@@ -24,7 +24,7 @@ export function applyRunStarted(project: Project, event: RunStarted): Project {
 
 	return putTasks(
 		{ ...project, status: "started" },
-		invalidatedModules.map(startTask),
-		invalidatedSubtasks.map(startTask),
+		invalidatedModules.map(startModule),
+		invalidatedSubtasks.map(startSubtask),
 	)
 }

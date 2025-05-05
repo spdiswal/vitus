@@ -1,13 +1,13 @@
 import { applyEvent } from "+api/events/Event"
 import { runStarted } from "+api/events/RunStarted"
-import { getModuleStatuses, getModules } from "+api/models/Module"
+import { getModules } from "+api/models/Module"
 import type { DummyModuleId } from "+api/models/Module.fixtures"
 import { byModuleIds, byParentModuleIds } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
 import type { ProjectStatus } from "+api/models/ProjectStatus"
-import { getSubtaskStatuses, getSubtasks } from "+api/models/Subtask"
-import type { TaskStatus } from "+api/models/TaskStatus"
+import { getSubtasks } from "+api/models/Subtask"
+import type { TaskStatusType } from "+api/models/TaskStatus"
 import { not } from "+utilities/Predicates"
 import { beforeEach, describe, expect, it } from "vitest"
 
@@ -33,11 +33,15 @@ describe.each`
 		})
 
 		it("sets the status of invalidated modules to 'started'", () => {
-			const actualModuleStatuses = getModuleStatuses(
+			const actualModules = getModules(
 				actualProject,
 				byModuleIds(invalidatedModuleIds),
 			)
-			expect(actualModuleStatuses[0]).toBe<TaskStatus>("started")
+			const statusTypes = Array.from(
+				new Set(actualModules.map((module) => module.status.type)),
+			)
+
+			expect(statusTypes[0]).toBe<TaskStatusType>("started")
 		})
 
 		it("does not affect the other modules in the project", () => {
@@ -54,11 +58,15 @@ describe.each`
 		})
 
 		it("sets the status of invalidated subtasks to 'started'", () => {
-			const actualSubtaskStatuses = getSubtaskStatuses(
+			const actualSubtasks = getSubtasks(
 				actualProject,
 				byParentModuleIds(invalidatedModuleIds),
 			)
-			expect(actualSubtaskStatuses[0]).toBe<TaskStatus>("started")
+			const statusTypes = Array.from(
+				new Set(actualSubtasks.map((subtask) => subtask.status.type)),
+			)
+
+			expect(statusTypes[0]).toBe<TaskStatusType>("started")
 		})
 
 		it("does not affect the other subtasks in the project", () => {

@@ -6,12 +6,14 @@ import type {
 	VitestTest,
 	VitestTestDiagnostic,
 } from "+server/models/VitestTest"
+import type { Duration } from "+types/Duration"
 import type { TestCase, TestResult, TestState } from "vitest/node"
 
 export function dummyVitestTest(
 	testId: DummyTestId,
 	props: {
 		status: TestState
+		duration?: Duration
 	},
 ): TestCase {
 	const [parentModuleId, parentSuiteId] = dummyParentIds(testId)
@@ -29,7 +31,8 @@ export function dummyVitestTest(
 		module: parentModule,
 		parent: parentSuite ?? parentModule,
 		result: (): TestResult => getDummyTestResult(props.status),
-		diagnostic: (): VitestTestDiagnostic => getDummyTestDiagnostic(0),
+		diagnostic: (): VitestTestDiagnostic =>
+			getDummyTestDiagnostic(props.duration),
 	} satisfies VitestTest as TestCase
 }
 

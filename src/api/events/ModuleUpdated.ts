@@ -20,7 +20,7 @@ export function applyModuleUpdated(
 ): Project {
 	const updatedProject = putModule(project, event.module)
 
-	if (event.module.status === "started") {
+	if (event.module.status.type === "started") {
 		return updatedProject
 	}
 

@@ -12,7 +12,13 @@ import { dummyProject } from "+api/models/Project.fixtures"
 import { getSubtasks } from "+api/models/Subtask"
 import { bySubtaskIds } from "+api/models/SubtaskId"
 import type { DummySuiteId } from "+api/models/Suite.fixtures"
-import type { TaskStatus } from "+api/models/TaskStatus"
+import {
+	type TaskStatus,
+	failed,
+	passed,
+	skipped,
+	started,
+} from "+api/models/TaskStatus"
 import type { DummyTestId } from "+api/models/Test.fixtures"
 import { not } from "+utilities/Predicates"
 import { beforeEach, describe, expect, it } from "vitest"
@@ -20,24 +26,24 @@ import { beforeEach, describe, expect, it } from "vitest"
 const initialProject = dummyProject({
 	status: "skipped",
 	modulesById: {
-		"15b021ef72": { status: "skipped" },
-		"3afdd8b6c3": { status: "skipped" },
-		"-1730f876b4": { status: "skipped" },
-		"-e45b128829": { status: "skipped" },
+		"15b021ef72": { status: skipped() },
+		"3afdd8b6c3": { status: skipped() },
+		"-1730f876b4": { status: skipped() },
+		"-e45b128829": { status: skipped() },
 	},
 })
 
 describe.each`
-	moduleId         | newStatus    | expectedDiscardedSubtaskIds
-	${"15b021ef72"}  | ${"failed"}  | ${["15b021ef72_1", "15b021ef72_2_6", "15b021ef72_2_6_7", "15b021ef72_2_6_9"]}
-	${"3afdd8b6c3"}  | ${"passed"}  | ${["3afdd8b6c3_0", "3afdd8b6c3_0_1", "3afdd8b6c3_0_3", "3afdd8b6c3_1", "3afdd8b6c3_2_6_7", "3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1", "3afdd8b6c3_4_5"]}
-	${"-1730f876b4"} | ${"skipped"} | ${["-1730f876b4_0_1", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_9"]}
-	${"-e45b128829"} | ${"started"} | ${[]}
+	moduleId         | status       | expectedDiscardedSubtaskIds
+	${"15b021ef72"}  | ${failed(7)} | ${["15b021ef72_1", "15b021ef72_2_6", "15b021ef72_2_6_7", "15b021ef72_2_6_9"]}
+	${"3afdd8b6c3"}  | ${passed(2)} | ${["3afdd8b6c3_0", "3afdd8b6c3_0_1", "3afdd8b6c3_0_3", "3afdd8b6c3_1", "3afdd8b6c3_2_6_7", "3afdd8b6c3_2_8", "3afdd8b6c3_2_8_1", "3afdd8b6c3_2_8_3", "3afdd8b6c3_2_8_4", "3afdd8b6c3_2_8_4_1", "3afdd8b6c3_4_5"]}
+	${"-1730f876b4"} | ${skipped()} | ${["-1730f876b4_0_1", "-1730f876b4_0_4", "-1730f876b4_0_4_5", "-1730f876b4_9"]}
+	${"-e45b128829"} | ${started()} | ${[]}
 `(
-	"when an existing module with id $moduleId has $newStatus",
+	"when an existing module with id $moduleId has $status.type",
 	(props: {
 		moduleId: ModuleId
-		newStatus: TaskStatus
+		status: TaskStatus
 		expectedDiscardedSubtaskIds: Array<DummySuiteId | DummyTestId>
 	}) => {
 		const moduleId = props.moduleId
@@ -51,15 +57,15 @@ describe.each`
 			const initialModule = getModuleById(initialProject, moduleId)
 			const updatedModule: Module = {
 				...initialModule,
-				status: props.newStatus,
+				status: props.status,
 			}
 
 			actualProject = applyEvent(initialProject, moduleUpdated(updatedModule))
 			actualModule = getModuleById(actualProject, moduleId)
 		})
 
-		it(`sets the module status to '${props.newStatus}'`, () => {
-			expect(actualModule.status).toBe(props.newStatus)
+		it(`sets the module status to '${props.status.type}'`, () => {
+			expect(actualModule.status).toBe(props.status)
 		})
 
 		it("does not affect the project status", () => {
@@ -101,16 +107,16 @@ describe.each`
 )
 
 describe.each`
-	moduleId         | newStatus
-	${"134672b00e"}  | ${"failed"}
-	${"29bb9e8bc0"}  | ${"passed"}
-	${"-20e94f4789"} | ${"skipped"}
-	${"6ab50b9861"}  | ${"started"}
+	moduleId         | status
+	${"134672b00e"}  | ${failed(10)}
+	${"29bb9e8bc0"}  | ${passed(4)}
+	${"-20e94f4789"} | ${skipped()}
+	${"6ab50b9861"}  | ${started()}
 `(
-	"when a non-existing module with id $moduleId has $newStatus",
+	"when a non-existing module with id $moduleId has $status.type",
 	(props: {
 		moduleId: NonExistingDummyModuleId
-		newStatus: TaskStatus
+		status: TaskStatus
 	}) => {
 		const moduleId = props.moduleId
 
@@ -123,15 +129,15 @@ describe.each`
 				id: moduleId,
 				path: dummyModulePath(moduleId),
 				filename: dummyModuleFilename(moduleId),
-				status: props.newStatus,
+				status: props.status,
 			}
 
 			actualProject = applyEvent(initialProject, moduleUpdated(newModule))
 			actualModule = getModuleById(actualProject, moduleId)
 		})
 
-		it(`sets the module status to '${props.newStatus}'`, () => {
-			expect(actualModule.status).toBe(props.newStatus)
+		it(`sets the module status to '${props.status.type}'`, () => {
+			expect(actualModule.status).toBe(props.status)
 		})
 
 		it("does not affect the project status", () => {

@@ -1,3 +1,4 @@
+import { getTaskStatusFromVitest } from "+api/models/TaskStatus"
 import type { Test } from "+api/models/Test"
 import type { VitestModule } from "+server/models/VitestModule"
 import type { VitestSuite } from "+server/models/VitestSuite"
@@ -17,15 +18,15 @@ export function newTestFromVitest(
 	test: VitestTest,
 	overrides?: { status?: TestState },
 ): Test {
-	const vitestStatus = overrides?.status ?? test.result().state
-	const status = vitestStatus === "pending" ? "started" : vitestStatus
-
 	return {
 		type: "test",
 		id: test.id,
 		parentId: test.parent.id,
 		parentModuleId: test.module.id,
 		name: test.name,
-		status,
+		status: getTaskStatusFromVitest(
+			overrides?.status ?? test.result().state,
+			test.diagnostic()?.duration,
+		),
 	}
 }

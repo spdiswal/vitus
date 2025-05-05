@@ -6,6 +6,7 @@ import type {
 	VitestModule,
 	VitestModuleDiagnostic,
 } from "+server/models/VitestModule"
+import type { Duration } from "+types/Duration"
 import type {
 	TestCase,
 	TestModule,
@@ -15,7 +16,10 @@ import type {
 
 export function dummyVitestModule(
 	moduleId: DummyModuleId,
-	props: { status: TestModuleState },
+	props: {
+		status: TestModuleState
+		duration?: Duration
+	},
 ): TestModule {
 	return {
 		type: "module",
@@ -27,7 +31,7 @@ export function dummyVitestModule(
 			prepareDuration: 0,
 			collectDuration: 0,
 			setupDuration: 0,
-			duration: 0,
+			duration: props.duration ?? 0,
 			heap: 0,
 		}),
 		children: {

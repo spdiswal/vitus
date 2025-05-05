@@ -1,6 +1,7 @@
 import type { TaskStatus } from "+api/models/TaskStatus"
 import { ChevronRightIcon } from "+explorer/icons/ChevronRightIcon"
 import { cn, cx } from "+types/ClassString"
+import { formatDuration } from "+types/Duration"
 import type { Renderable } from "+types/Renderable"
 import { useState } from "preact/hooks"
 
@@ -17,7 +18,7 @@ export function NavigationTreeNode(props: {
 				type="button"
 				class={cn(
 					"flex justify-start items-center text-start gap-x-2 px-2 py-1.5 rounded-md outline-none hocus:ring-1 active:hocus:ring-2 transition cursor-pointer",
-					cx(props.status)({
+					cx(props.status.type)({
 						failed:
 							"text-rose-500 ring-rose-500 hocus:bg-rose-100 dark:ring-rose-700 dark:hocus:bg-rose-950",
 						passed:
@@ -34,12 +35,17 @@ export function NavigationTreeNode(props: {
 					class={cn(
 						"shrink-0 size-4 transition",
 						expanded ? "rotate-90 translate-y-px" : "rotate-0 translate-x-px",
-						props.status === "started" && "animate-pulse",
+						props.status.type === "started" && "animate-pulse",
 					)}
 					stroke-width="3"
 				/>
 				<span class="text-gray-950 dark:text-gray-50 transition">
 					{props.label}
+					{props.status.type === "failed" || props.status.type === "passed" ? (
+						<span class="ml-2 text-xs/1 font-light text-gray-500 whitespace-nowrap">
+							in {formatDuration(props.status.duration)}
+						</span>
+					) : null}
 				</span>
 			</button>
 			<ul

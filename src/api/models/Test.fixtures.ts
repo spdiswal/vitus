@@ -1,5 +1,6 @@
 import { type DummyModuleId, dummyParentIds } from "+api/models/Module.fixtures"
 import type { DummySuiteId } from "+api/models/Suite.fixtures"
+import { passed } from "+api/models/TaskStatus"
 import type { Test } from "+api/models/Test"
 import type { OddDigit } from "+types/Digit"
 
@@ -15,7 +16,7 @@ export function dummyTest(
 		parentId: parentSuiteId ?? parentModuleId,
 		parentModuleId,
 		name: dummyTestName(testId),
-		status: "passed",
+		status: passed(1),
 		...overrides,
 	}
 }

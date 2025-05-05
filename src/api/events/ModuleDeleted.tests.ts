@@ -8,15 +8,16 @@ import {
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
 import type { ProjectStatus } from "+api/models/ProjectStatus"
+import { passed, started } from "+api/models/TaskStatus"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const initialProject = dummyProject({
 	status: "started",
 	modulesById: {
-		"15b021ef72": { status: "passed" },
-		"3afdd8b6c3": { status: "passed" },
-		"-1730f876b4": { status: "started" },
-		"-e45b128829": { status: "passed" },
+		"15b021ef72": { status: passed(1) },
+		"3afdd8b6c3": { status: passed(2) },
+		"-1730f876b4": { status: started() },
+		"-e45b128829": { status: passed(4) },
 	},
 })
 

@@ -19,7 +19,7 @@ export function applySubtaskUpdated(
 ): Project {
 	const updatedProject = putSubtask(project, event.subtask)
 
-	if (event.subtask.status === "started") {
+	if (event.subtask.status.type === "started") {
 		return updatedProject
 	}
 

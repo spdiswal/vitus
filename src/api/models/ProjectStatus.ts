@@ -14,10 +14,10 @@ export function computeProjectStatus(
 	const statuses = new Set<ProjectStatus>()
 
 	for (const module of Object.values(modulesById)) {
-		if (module.status === "started") {
+		if (module.status.type === "started") {
 			return "started"
 		}
-		statuses.add(module.status)
+		statuses.add(module.status.type)
 	}
 
 	if (statuses.has("failed")) {

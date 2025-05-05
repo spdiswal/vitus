@@ -1,5 +1,6 @@
 import type { Module } from "+api/models/Module"
 import type { DummySuiteId } from "+api/models/Suite.fixtures"
+import { passed } from "+api/models/TaskStatus"
 import type { DummyTestId } from "+api/models/Test.fixtures"
 import { type Path, getFilenameFromPath } from "+types/Path"
 
@@ -12,7 +13,7 @@ export function dummyModule(
 		id: moduleId,
 		path: dummyModulePath(moduleId),
 		filename: getFilenameFromPath(moduleId),
-		status: "passed",
+		status: passed(7),
 		...overrides,
 	}
 }

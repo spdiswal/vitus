@@ -3,7 +3,7 @@ import type { ModuleDeleted } from "+api/events/ModuleDeleted"
 import type { ModuleUpdated } from "+api/events/ModuleUpdated"
 import type { RunStarted } from "+api/events/RunStarted"
 import type { SubtaskUpdated } from "+api/events/SubtaskUpdated"
-import type { TaskStatus } from "+api/models/TaskStatus"
+import type { TaskStatusType } from "+api/models/TaskStatus"
 import type { HexColour } from "+types/HexColour"
 import { logDebug } from "+utilities/Logging"
 
@@ -46,7 +46,7 @@ function logProjectEvent(event: Event): void {
 	}
 }
 
-const coloursByStatus: Record<TaskStatus, HexColour> = {
+const coloursByStatus: Record<TaskStatusType, HexColour> = {
 	failed: "#b91c1c",
 	passed: "#15803d",
 	skipped: "#374151",
@@ -59,8 +59,8 @@ function logModuleDeleted(event: ModuleDeleted): void {
 
 function logModuleUpdated(event: ModuleUpdated): void {
 	logDebug(
-		coloursByStatus[event.module.status],
-		`module ${event.module.status}`,
+		coloursByStatus[event.module.status.type],
+		`module ${event.module.status.type}`,
 		event.module.filename,
 		event.module,
 	)
@@ -86,8 +86,8 @@ function logServerRestarted(): void {
 
 function logSubtaskUpdated(event: SubtaskUpdated): void {
 	logDebug(
-		coloursByStatus[event.subtask.status],
-		`${event.subtask.type} ${event.subtask.status}`,
+		coloursByStatus[event.subtask.status.type],
+		`${event.subtask.type} ${event.subtask.status.type}`,
 		event.subtask.name,
 		event.subtask,
 	)

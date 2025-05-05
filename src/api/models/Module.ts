@@ -1,7 +1,7 @@
 import type { ModuleId } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import type { TaskId } from "+api/models/TaskId"
-import type { TaskStatus, TaskStatuses } from "+api/models/TaskStatus"
+import { type TaskStatus, skipped, started } from "+api/models/TaskStatus"
 import type { Path } from "+types/Path"
 import { assertNotNullish } from "+utilities/Assertions"
 
@@ -20,19 +20,6 @@ export function getModules(
 ): Modules {
 	const modules = Object.values(project.modulesById)
 	return predicate !== undefined ? modules.filter(predicate) : modules
-}
-
-export function getModuleStatuses(
-	project: Project,
-	predicate?: (module: Module) => boolean,
-): TaskStatuses {
-	const statuses = new Set<TaskStatus>()
-
-	for (const module of getModules(project, predicate)) {
-		statuses.add(module.status)
-	}
-
-	return Array.from(statuses)
 }
 
 export function hasModule(
@@ -54,4 +41,12 @@ export function putModule(project: Project, module: Module): Project {
 		...project,
 		modulesById: { ...project.modulesById, [module.id]: module },
 	}
+}
+
+export function skipModule(module: Module): Module {
+	return { ...module, status: skipped() }
+}
+
+export function startModule(module: Module): Module {
+	return { ...module, status: started() }
 }

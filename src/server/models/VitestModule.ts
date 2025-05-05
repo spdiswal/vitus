@@ -1,4 +1,5 @@
 import type { Module } from "+api/models/Module"
+import { getTaskStatusFromVitest } from "+api/models/TaskStatus"
 import type { VitestSuite } from "+server/models/VitestSuite"
 import type { VitestTest } from "+server/models/VitestTest"
 import { getFilenameFromPath } from "+types/Path"
@@ -23,17 +24,14 @@ export function newModuleFromVitest(
 	module: VitestModule,
 	overrides?: { status?: TestModuleState },
 ): Module {
-	const vitestStatus = overrides?.status ?? module.state()
-	const status =
-		vitestStatus === "queued" || vitestStatus === "pending"
-			? "started"
-			: vitestStatus
-
 	return {
 		type: "module",
 		id: module.id,
 		path: module.moduleId,
 		filename: getFilenameFromPath(module.moduleId),
-		status,
+		status: getTaskStatusFromVitest(
+			overrides?.status ?? module.state(),
+			module.diagnostic().duration,
+		),
 	}
 }

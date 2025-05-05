@@ -2,12 +2,14 @@ import { dummyParentIds } from "+api/models/Module.fixtures"
 import { type DummySuiteId, dummySuiteName } from "+api/models/Suite.fixtures"
 import { dummyVitestModule } from "+server/models/VitestModule.fixtures"
 import type { VitestSuite } from "+server/models/VitestSuite"
-import type { TestCase, TestSuite, TestSuiteState } from "vitest/node"
+import type { VitestTest } from "+server/models/VitestTest"
+import type { TestSuite, TestSuiteState } from "vitest/node"
 
 export function dummyVitestSuite(
 	suiteId: DummySuiteId,
 	props: {
 		status: TestSuiteState
+		children?: Iterable<VitestTest>
 	},
 ): TestSuite {
 	const [parentModuleId, parentSuiteId] = dummyParentIds(suiteId)
@@ -26,8 +28,8 @@ export function dummyVitestSuite(
 		parent: parentSuite ?? parentModule,
 		state: (): TestSuiteState => props.status,
 		children: {
-			allTests(): Iterable<TestCase> {
-				return []
+			allTests(): Iterable<VitestTest> {
+				return props.children ?? []
 			},
 		},
 	} satisfies VitestSuite as TestSuite

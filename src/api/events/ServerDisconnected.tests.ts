@@ -1,15 +1,15 @@
 import { applyEvent } from "+api/events/Event"
 import { serverDisconnected } from "+api/events/ServerDisconnected"
-import { getModuleStatuses, getModules } from "+api/models/Module"
+import { getModules } from "+api/models/Module"
 import type { DummyModuleId } from "+api/models/Module.fixtures"
 import { byModuleIds } from "+api/models/ModuleId"
 import type { Project } from "+api/models/Project"
 import { dummyProject } from "+api/models/Project.fixtures"
 import type { ProjectStatus } from "+api/models/ProjectStatus"
-import { getSubtaskStatuses, getSubtasks } from "+api/models/Subtask"
+import { getSubtasks } from "+api/models/Subtask"
 import { bySubtaskIds } from "+api/models/SubtaskId"
 import type { DummySuiteId } from "+api/models/Suite.fixtures"
-import type { TaskStatus } from "+api/models/TaskStatus"
+import type { TaskStatusType } from "+api/models/TaskStatus"
 import type { DummyTestId } from "+api/models/Test.fixtures"
 import { not } from "+utilities/Predicates"
 import { beforeEach, describe, expect, it } from "vitest"
@@ -49,11 +49,15 @@ describe("when the server has disconnected", () => {
 	})
 
 	it("sets the status of unfinished modules to 'skipped'", () => {
-		const actualModuleStatuses = getModuleStatuses(
+		const actualModules = getModules(
 			actualProject,
 			byModuleIds(unfinishedModuleIds),
 		)
-		expect(actualModuleStatuses[0]).toBe<TaskStatus>("skipped")
+		const statusTypes = Array.from(
+			new Set(actualModules.map((module) => module.status.type)),
+		)
+
+		expect(statusTypes[0]).toBe<TaskStatusType>("skipped")
 	})
 
 	it("does not affect the other modules in the project", () => {
@@ -70,11 +74,15 @@ describe("when the server has disconnected", () => {
 	})
 
 	it("sets the status of unfinished subtasks to 'skipped'", () => {
-		const actualSubtaskStatuses = getSubtaskStatuses(
+		const actualSubtasks = getSubtasks(
 			actualProject,
 			bySubtaskIds(unfinishedSubtaskIds),
 		)
-		expect(actualSubtaskStatuses[0]).toBe<TaskStatus>("skipped")
+		const statusTypes = Array.from(
+			new Set(actualSubtasks.map((subtask) => subtask.status.type)),
+		)
+
+		expect(statusTypes[0]).toBe<TaskStatusType>("skipped")
 	})
 
 	it("does not affect the other subtasks in the project", () => {
