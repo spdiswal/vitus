@@ -1,22 +1,14 @@
-import type { EventStream } from "+events/EventStream"
-import { fileDeletedEvent } from "+events/file/FileDeletedEvent"
-import { fileFailedEvent } from "+events/file/FileFailedEvent"
-import { filePassedEvent } from "+events/file/FilePassedEvent"
-import { fileSkippedEvent } from "+events/file/FileSkippedEvent"
-import { fileStartedEvent } from "+events/file/FileStartedEvent"
-import { runCompletedEvent } from "+events/run/RunCompletedEvent"
-import { runStartedEvent } from "+events/run/RunStartedEvent"
-import { serverRestartedEvent } from "+events/server/ServerRestartedEvent"
-import { suiteFailedEvent } from "+events/suite/SuiteFailedEvent"
-import { suitePassedEvent } from "+events/suite/SuitePassedEvent"
-import { suiteSkippedEvent } from "+events/suite/SuiteSkippedEvent"
-import { suiteStartedEvent } from "+events/suite/SuiteStartedEvent"
-import { testFailedEvent } from "+events/test/TestFailedEvent"
-import { testPassedEvent } from "+events/test/TestPassedEvent"
-import { testSkippedEvent } from "+events/test/TestSkippedEvent"
-import { testStartedEvent } from "+events/test/TestStartedEvent"
-import { mapVitestToSuitePath } from "+models/Suite"
-import { mapVitestToTestPath } from "+models/Test"
+import { moduleDeleted } from "+api/events/ModuleDeleted"
+import { moduleUpdated } from "+api/events/ModuleUpdated"
+import { runCompleted } from "+api/events/RunCompleted"
+import { runStarted } from "+api/events/RunStarted"
+import { serverRestarted } from "+api/events/ServerRestarted"
+import { subtaskUpdated } from "+api/events/SubtaskUpdated"
+import type { ModuleIds } from "+api/models/ModuleId"
+import type { EventStream } from "+server/EventStream"
+import { newModuleFromVitest } from "+server/models/VitestModule"
+import { newSuiteFromVitest } from "+server/models/VitestSuite"
+import { newTestFromVitest } from "+server/models/VitestTest"
 import { notNullish } from "+utilities/Arrays"
 import type { Reporter } from "vitest/reporters"
 
@@ -39,90 +31,45 @@ export function newEventStreamReporter(
 ): EventStreamReporter {
 	return {
 		onServerRestart(): void {
-			eventStream.send(serverRestartedEvent())
+			eventStream.send(serverRestarted())
 		},
 		onTestRunStart(specifications): void {
-			const invalidatedFileIds = specifications
+			const invalidatedModuleIds: ModuleIds = specifications
 				.map((specification) => specification.testModule?.id)
 				.filter(notNullish)
 
-			eventStream.send(runStartedEvent({ invalidatedFileIds }))
+			eventStream.send(runStarted(invalidatedModuleIds))
 		},
 		onTestModuleStart(module): void {
 			eventStream.send(
-				fileStartedEvent({ id: module.id, path: module.moduleId }),
+				moduleUpdated(newModuleFromVitest(module, { status: "pending" })),
 			)
 		},
 		onTestSuiteReady(suite): void {
-			const path = mapVitestToSuitePath(suite)
-			eventStream.send(suiteStartedEvent({ name: suite.name, path }))
+			eventStream.send(
+				subtaskUpdated(newSuiteFromVitest(suite, { status: "pending" })),
+			)
 		},
 		onTestCaseReady(test): void {
-			const path = mapVitestToTestPath(test)
-			eventStream.send(testStartedEvent({ name: test.name, path }))
+			eventStream.send(
+				subtaskUpdated(newTestFromVitest(test, { status: "pending" })),
+			)
 		},
 		onTestCaseResult(test): void {
-			const duration = test.diagnostic()?.duration ?? 0
-			const path = mapVitestToTestPath(test)
-
-			switch (test.result().state) {
-				case "failed": {
-					eventStream.send(testFailedEvent({ duration, path }))
-					break
-				}
-				case "passed": {
-					eventStream.send(testPassedEvent({ duration, path }))
-					break
-				}
-				case "skipped": {
-					eventStream.send(testSkippedEvent({ duration, path }))
-					break
-				}
-			}
+			eventStream.send(subtaskUpdated(newTestFromVitest(test)))
 		},
 		onTestSuiteResult(suite): void {
-			const path = mapVitestToSuitePath(suite)
-
-			switch (suite.state()) {
-				case "failed": {
-					eventStream.send(suiteFailedEvent({ path }))
-					break
-				}
-				case "passed": {
-					eventStream.send(suitePassedEvent({ path }))
-					break
-				}
-				case "skipped": {
-					eventStream.send(suiteSkippedEvent({ path }))
-					break
-				}
-			}
+			eventStream.send(subtaskUpdated(newSuiteFromVitest(suite)))
 		},
 		onTestModuleEnd(module): void {
-			const duration = module.diagnostic().duration
-			const id = module.id
-
-			switch (module.state()) {
-				case "failed": {
-					eventStream.send(fileFailedEvent({ duration, id }))
-					break
-				}
-				case "passed": {
-					eventStream.send(filePassedEvent({ duration, id }))
-					break
-				}
-				case "skipped": {
-					eventStream.send(fileSkippedEvent({ duration, id }))
-					break
-				}
-			}
+			eventStream.send(moduleUpdated(newModuleFromVitest(module)))
 		},
 		onTestRunEnd(): void {
-			eventStream.send(runCompletedEvent())
+			eventStream.send(runCompleted())
 		},
 		onTestRemoved(moduleId): void {
 			if (moduleId !== undefined) {
-				eventStream.send(fileDeletedEvent({ path: moduleId }))
+				eventStream.send(moduleDeleted(moduleId))
 			}
 		},
 	}

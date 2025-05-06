@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises"
-import type { EventStream } from "+events/EventStream"
-import type { ProjectEvent } from "+events/ProjectEvent"
+import type { Event } from "+api/events/Event"
+import type { EventStream } from "+server/EventStream"
 import type { Vector } from "+types/Vector"
 import type { Middleware as PolkaMiddleware } from "polka"
 
@@ -27,7 +27,7 @@ export function handleEventStreamRequests(
 			connection: "keep-alive",
 		})
 
-		function handleEvent(event: ProjectEvent): void {
+		function handleEvent(event: Event): void {
 			// Messages in the event stream format must be terminated by a pair of newline characters.
 			// https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#event_stream_format
 			response.write(`data: ${JSON.stringify(event)}\n\n`)

@@ -1,4 +1,4 @@
-import { useProject } from "+explorer/UseProject"
+import { useProject } from "+explorer/project/UseProject"
 import { type ClassString, cn, cx } from "+types/ClassString"
 import type { Renderable } from "+types/Renderable"
 
@@ -11,11 +11,12 @@ export function ExplorerStatusLine(props: {
 		<div
 			class={cn(
 				"h-2 transition",
-				!project.isConnected && "hidden",
 				cx(project.status)({
+					disconnected: "hidden",
 					failed: "bg-rose-700",
 					passed: "bg-green-700",
-					running: "bg-amber-500 animate-pulse",
+					skipped: "bg-gray-700",
+					started: "bg-amber-500 animate-pulse",
 				}),
 				props.class,
 			)}

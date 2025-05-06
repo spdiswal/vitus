@@ -1,5 +1,5 @@
+import type { Project } from "+api/models/Project"
 import type { SelectableTheme } from "+explorer/theme/Theme"
-import type { Project } from "+models/Project"
 
 declare global {
 	interface Window {

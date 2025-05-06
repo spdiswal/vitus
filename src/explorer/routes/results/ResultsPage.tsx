@@ -1,53 +1,32 @@
-import { useProject } from "+explorer/UseProject"
-import { Breadcrumbs } from "+explorer/routes/results/Breadcrumbs"
+import { getModuleById } from "+api/models/Module"
+import { getSubtaskById, hasSubtask } from "+api/models/Subtask"
+import type { TestId } from "+api/models/TestId"
+import { useProject } from "+explorer/project/UseProject"
 import { DiffLegend } from "+explorer/routes/results/DiffLegend"
-import { getFileById, getSuiteByPath, getTestByPath } from "+models/Project"
-import type { SuiteIds } from "+models/Suite"
-import type { SuitePath } from "+models/SuitePath"
-import type { TestPath } from "+models/TestPath"
+import { ModuleBreadcrumbs } from "+explorer/routes/results/ModuleBreadcrumbs"
+import { SubtaskBreadcrumbs } from "+explorer/routes/results/SubtaskBreadcrumbs"
 import type { Renderable } from "+types/Renderable"
-import { notNullish } from "+utilities/Arrays"
-import { assertNotNullish } from "+utilities/Assertions"
-import { useEffect } from "preact/hooks"
 import { useParams } from "wouter-preact"
 
 export function ResultsPage(): Renderable {
-	const params = useParams()
-	const segments = params["*"]?.split("/")
-	assertNotNullish(segments)
-
 	const project = useProject()
-	const testPath = segments as TestPath
 
-	const [fileId, ...suiteAndTestIds] = testPath
-	suiteAndTestIds.pop()
-	const suiteIds = suiteAndTestIds as SuiteIds
+	const params = useParams()
+	const taskId = params.taskId as TestId
 
-	const file = getFileById(project, fileId)
-
-	const suites = suiteIds
-		.map((_, index) => [fileId, ...suiteIds.slice(0, index + 1)] as SuitePath)
-		.map((suitePath) => getSuiteByPath(project, suitePath))
-
-	const test = getTestByPath(project, testPath)
-
-	useEffect(() => {
-		if (file !== null) {
-			document.title = `${file.filename} – Vitest – Vitus`
-		}
-	}, [file?.path])
-
-	if (file === null || suites.includes(null) || test === null) {
-		return null
+	if (!hasSubtask(project, taskId)) {
+		return null // TODO: 404 Not Found Page
 	}
+
+	const subtask = getSubtaskById(project, taskId)
+	const module = getModuleById(project, subtask.parentModuleId)
 
 	return (
 		<main class="flex flex-col transition">
-			<Breadcrumbs
-				filePath={file.path.substring(project.rootPath.length + 1)}
-				suiteNames={suites.filter(notNullish).map((suite) => suite.name)}
-				testName={test.name}
-			/>
+			<div class="pb-5 flex flex-col gap-y-3 text-gray-800 dark:text-gray-200 transition">
+				<ModuleBreadcrumbs module={module} />
+				<SubtaskBreadcrumbs subtask={subtask} />
+			</div>
 			<h1 class="p-5 text-2xl font-mono font-bold rounded-tl-2xl border-b border-gray-400 dark:border-gray-700 transition">
 				AssertionError: expected 29 to be 42
 			</h1>

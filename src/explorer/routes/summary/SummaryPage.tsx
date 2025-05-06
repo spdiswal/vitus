@@ -1,13 +1,18 @@
-import { useProject } from "+explorer/UseProject"
+import { useProject } from "+explorer/project/UseProject"
 import type { Renderable } from "+types/Renderable"
 import { count } from "+utilities/Strings"
 import { useEffect } from "preact/hooks"
 
 export function SummaryPage(): Renderable {
 	const project = useProject()
+	const moduleCount = count(
+		Object.keys(project.modulesById),
+		"module",
+		"modules",
+	)
 
 	useEffect(() => {
-		document.title = `${count(project.files, "file", "files")} – Vitest – Vitus`
+		document.title = `${moduleCount} – Vitest – Vitus`
 	}, [])
 
 	return (
@@ -16,7 +21,7 @@ export function SummaryPage(): Renderable {
 				Vitest &ndash; Vitus
 			</h1>
 			<div class="font-mono">{project.rootPath}</div>
-			<div>{count(project.files, "file", "files")}</div>
+			<div>{moduleCount}</div>
 		</main>
 	)
 }
