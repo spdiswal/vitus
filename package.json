@@ -27,7 +27,7 @@
 		"@types/polka": "0.5.7",
 		"clsx": "2.1.1",
 		"html-minifier-terser": "7.2.0",
-		"lefthook": "1.11.12",
+		"lefthook": "1.11.13",
 		"polka": "0.5.2",
 		"preact": "10.26.6",
 		"preact-render-to-string": "6.5.13",
