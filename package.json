@@ -29,7 +29,7 @@
 		"html-minifier-terser": "7.2.0",
 		"lefthook": "1.11.13",
 		"polka": "0.5.2",
-		"preact": "10.26.7",
+		"preact": "10.26.8",
 		"preact-render-to-string": "6.5.13",
 		"sirv": "3.0.1",
 		"tailwindcss": "4.1.7",
