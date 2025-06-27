@@ -9,7 +9,7 @@ min_version = "2025.5.0"
 
 [tools]
 node = "20.19.1"
-pnpm = "10.10.0"
+pnpm = "10.12.3"
 
 [tasks.build]
 alias = ["b"]
