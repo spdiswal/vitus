@@ -23,7 +23,7 @@
 		"@rainstormy/presets-typescript": "1.1.0",
 		"@tailwindcss/vite": "4.1.13",
 		"@types/html-minifier-terser": "7.0.2",
-		"@types/node": "20.19.10",
+		"@types/node": "20.19.13",
 		"@types/polka": "0.5.7",
 		"clsx": "2.1.1",
 		"html-minifier-terser": "7.2.0",
