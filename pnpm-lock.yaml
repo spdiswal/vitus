@@ -15,8 +15,8 @@ importers:
         specifier: 2.4.8
         version: 2.4.8(preact@10.26.9)(vite@6.3.6(@types/node@20.19.16)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.37.0))
       '@rainstormy/presets-biome':
-        specifier: 1.0.0
-        version: 1.0.0(@biomejs/biome@1.9.4)
+        specifier: 2.1.3
+        version: 2.1.3(@biomejs/biome@1.9.4)
       '@rainstormy/presets-typescript':
         specifier: 1.1.0
         version: 1.1.0(typescript@5.8.3)
@@ -398,11 +398,10 @@ packages:
       preact: ^10.4.0
       vite: '>=2.0.0'
 
-  '@rainstormy/presets-biome@1.0.0':
-    resolution: {integrity: sha512-LbOMEIgB9fYNgbORYu+EmPp7vt4irCxqSFV4PR7jTbDDx+n0DS2SzDhatK/JOVnVKxL9kqgXi5bW3qrcERQoaA==}
-    engines: {node: '>=20.0.0'}
+  '@rainstormy/presets-biome@2.1.3':
+    resolution: {integrity: sha512-9XiM4tiPNc9bFwwt4h6AzesggLx2h3KApti0N39MjXC2sDzAvXo0nAToGZyRNLWQnpnk8lecanfDp/N5Ecmf6g==}
     peerDependencies:
-      '@biomejs/biome': '>=1.9.0 <1.10.0'
+      '@biomejs/biome': '>=2.2.0 <2.4.0'
 
   '@rainstormy/presets-typescript@1.1.0':
     resolution: {integrity: sha512-zoIdH83jWKt79OOI6ej9c4uM27AlVAQFlINECOUM5X7Li8Q9utkW3GFenKIUBLLDeUdn21etecZQaEIYO/QrCQ==}
@@ -1489,7 +1488,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@rainstormy/presets-biome@1.0.0(@biomejs/biome@1.9.4)':
+  '@rainstormy/presets-biome@2.1.3(@biomejs/biome@1.9.4)':
     dependencies:
       '@biomejs/biome': 1.9.4
 
