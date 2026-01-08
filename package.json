@@ -18,7 +18,7 @@
 	"files": ["dist/vitus-cli.js", "dist/explorer/"],
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@prefresh/vite": "2.4.8",
+		"@prefresh/vite": "2.4.11",
 		"@rainstormy/presets-biome": "1.0.0",
 		"@rainstormy/presets-typescript": "1.1.0",
 		"@tailwindcss/vite": "4.1.18",
