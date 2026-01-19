@@ -8,7 +8,7 @@ min_version = "2025.10.0"
 # https://mise.jdx.dev/ide-integration.html#sdk-selection-using-asdf-layout
 
 [tools]
-node = "20.19.1"
+node = "20.20.0"
 pnpm = "10.12.4"
 
 [tasks.build]
